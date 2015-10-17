@@ -1,0 +1,6 @@
+node_modules/
+*.swp
+newrelic*.log
+config/development.*
+.vimprj
+scripts

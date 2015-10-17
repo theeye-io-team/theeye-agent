@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+# root path
+path=`dirname $0`
+cd $path
+echo "root on $path && $(pwd)"
+
+
+# colored output
+echo -e "\e[32m"
+
+if [ ! -d $path/node_modules ]
+then
+  echo -e "\e[31m"
+  echo "Error agent require installation"
+  echo "run 'npm install' before continue"
+  echo -e "\e[39m"
+  exit
+fi
+
+# reading environment config
+config="/etc/theeye/theeye.conf"
+if [ -f $config ]
+then
+  echo "reading configuration from $config"
+  source $config
+fi
+
+# NODE_ENV validation
+if [ -z $NODE_ENV ]
+then
+  echo -e "\e[31m"
+  echo "Error env not set"
+  echo "please set 'NODE_ENV' with desired value (production/development)" 
+  echo -e "\e[39m"
+  exit
+else
+  if [ ! "$NODE_ENV" == "development" ] && [ ! "$NODE_ENV" == "production" ]
+  then
+    echo -e "\e[31m"
+    echo "Error invalid 'NODE_ENV' value '$NODE_ENV'"
+    echo "use production or development"
+    echo -e "\e[39m"
+    exit
+  fi
+fi
+
+
+echo "using NODE_ENV=$NODE_ENV"
+
+setDebug ()
+{
+  # debug/log level
+  if [ -z $THEEYE_AGENT_DEBUG ]
+  then
+    DEBUG='eye:*:error'
+    echo "default DEBUG level set"
+  else
+    DEBUG=$THEEYE_AGENT_DEBUG
+    echo 'DEBUG level set with $THEEYE_AGENT_DEBUG'
+  fi
+  
+  echo "log level set to '$DEBUG'"
+}
+
+
+# end colored output
+echo -e "\e[39m"
+
+NODE_CONFIG_STRICT_MODE=true
+
+if [ $NODE_ENV == 'production' ]
+then
+  require=$(which supervisor)
+  if [ -z $require ] || [ ! -f $require ]
+  then
+    echo "Error 'supervisor' is not present on this system"
+    echo "please install it by typing npm install -g supervisor" 
+    exit
+  fi
+  $require -i . $path/core/main.js
+else
+  setDebug
+  $path/node_modules/.bin/nodemon `pwd`/core/main.js
+fi

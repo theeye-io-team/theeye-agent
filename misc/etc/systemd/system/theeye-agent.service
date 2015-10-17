@@ -1,0 +1,22 @@
+[Unit]
+Description=Theeye Agent
+Documentation=man:foo(1)
+
+[Service]
+ExecStart=/opt/theeye/agent/run.sh
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+StandardOutput=root
+StandardError=root
+SyslogIdentifier=theeye-agent
+
+#It should be set as User:theeye-a and Group:theeye-a, cause a bug with permissions at the dstats package on centos we left this way:
+#It should be fixed.
+User=root
+Group=root
+Environment=statedir=/opt/theeye/agent/run.sh
+#Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
