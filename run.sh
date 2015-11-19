@@ -69,6 +69,8 @@ echo -e "\e[39m"
 
 NODE_CONFIG_STRICT_MODE=true
 
+setDebug
+
 if [ $NODE_ENV == 'production' ]
 then
   require=$(which supervisor)
@@ -80,6 +82,5 @@ then
   fi
   $require -i . $path/core/main.js
 else
-  setDebug
   $path/node_modules/.bin/nodemon `pwd`/core/main.js
 fi

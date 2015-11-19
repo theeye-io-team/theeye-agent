@@ -1,5 +1,5 @@
 var app = new (require('events').EventEmitter);
-var Connection = require("./connection") ;
+var TheEyeClient = require("theeye-client") ;
 var Worker = require("./worker");
 var ip = require('ip');
 var os = require('os');
@@ -14,22 +14,18 @@ var workers = [] ;
 
 app.connection = connection;
 app.workers = workers;
-app.initializeSupervisorCommunication = function (next)
-{
-  var config = require('config').get('supervisor');
 
-  connection = new Connection(config);
+function connectSupervisor (next) {
+  var config = require('config').get('supervisor');
+  config.hostname = hostname;
+
+  connection = new TheEyeClient(config);
   connection.refreshToken(function(error,token){
-    if( error )
-    {
+    if(error) {
       debug('unable to get an access token');
       debug(error);
-      process.exit(-1);
-    }
-    else
-    {
-      connection.token = token ;
-
+      next(error);
+    } else {
       // detect agent version
       detectVersion(function(error,version){
         debug('agent version %s', version);
@@ -45,21 +41,38 @@ app.initializeSupervisorCommunication = function (next)
             ip         : ip.address()
           }
         },function(error,response){
-          app.host_id = response.data.host_id;
-          app.host_resource_id = response.data.resource_id;
-          //app.setupKeepAliveWorker(response.data);
+          app.host_id = response.host_id;
+          app.host_resource_id = response.resource_id;
+          //app.setupKeepAliveWorker(response);
 
-          if( error ) {
+          if(error) {
             debug(error);
-            process.exit(-1);
+            next(error);
           } else {
             debug(response);
-            next();
+            next(null);
           }
         });
       });
     }
   });
+}
+
+var interval = 30 * 1000; // each 30 seconds retry
+var attempts = 0;
+function tryConnectSupervisor(nextFn){
+  attempts++;
+  connectSupervisor(function(error){
+    if(!error) return nextFn();
+    debug('connection failed. trying again in "%s" seconds', interval/1000);
+    var timeout = setTimeout(function(){
+      tryConnectSupervisor(nextFn);
+    }, interval);
+  });
+}
+
+app.initializeSupervisorCommunication = function (nextFn) {
+  tryConnectSupervisor(nextFn);
 }
 
 function checkWorkersConfiguration (doneFn){
@@ -89,6 +102,7 @@ function initListener () {
     'looptime': 15000
   }
   var worker = Worker.spawn(config, connection);
+  return worker ;
 }
 
 app.initializeAgentConfig = function(doneFn)
@@ -106,7 +120,8 @@ app.initializeAgentConfig = function(doneFn)
       }
 
       checkWorkersConfiguration(doneFn);
-      initListener();
+      var worker = initListener();
+      workers.push( worker );
 
       debug('agent started');
       app.emit('config:up-to-date',{msg:msg});

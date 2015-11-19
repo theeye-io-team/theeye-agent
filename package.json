@@ -1,6 +1,6 @@
 {
   "name": "TheEye-Agent",
-  "description": "TheEye-Agent dependencies",
+  "description": "The Eye agent dependencies",
   "author": "Facundo S. Siquot <facugon@interactar.com>",
   "dependencies": {
     "MD5": "^1.2.2",
@@ -13,6 +13,8 @@
     "node-stat": "^0.1.x",
     "ps-aux": "^0.2.1",
     "iar-ps": "interactar/ps",
+    "iar-node-stat": "interactar/node-stat",
+    "theeye-client": "interactar/theeye-client",
     "readable-stream": "1.0.33",
     "request": "^2.55.0",
     "restify": "^2.8.5",

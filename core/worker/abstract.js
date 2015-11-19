@@ -33,15 +33,7 @@ Worker.prototype = {
     self.getData(function(error,data) {
       if( ! error ) {
         data.agent_name = self.name ;
-        self.submitWork(data,function(error,response) {
-          if( ! error ) {
-            self.debug.log('supervisor connection success');
-            self.handleSupervisorResponse( response );
-          } else {
-            self.debug.error('unable to connect supervisor');
-            self.debug.error(error.message);
-          }
-        });
+        self.submitWork(data);
       } else {
         self.debug.error('worker execution failed.');
         self.submitWork({
@@ -57,8 +49,11 @@ Worker.prototype = {
   },
   submitWork : function(data,next) {
     var self = this;
-
-    self.connection.updateResource( self.config.resource_id, data, next);
+    self.connection.updateResource(
+      self.config.resource_id, 
+      data, 
+      next
+    );
   },
   run : function() {
     var self = this;
@@ -83,22 +78,6 @@ Worker.prototype = {
     self.timeout = setTimeout(function(){
       self.keepAlive()
     }, self.config.looptime);
-  },
-  handleSupervisorResponse : function(response) {
-    var self = this ;
-    self.debug.log("handling server response");
-    if(response.status)
-    {
-      switch(response.status)
-      {
-        case "success" :
-          self.debug.log("submit success");
-          break;
-        default :
-          self.debug.error("unhandled response status : %s", response.status);
-      }
-    }
-    else self.debug.error('request error : %s', response);
   },
   setConfig : function(config) {
     this.config = config;

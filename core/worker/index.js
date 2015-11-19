@@ -15,13 +15,11 @@ module.exports = {
    */
   spawn : function(config, connection)
   {
-    if( ! config.disabled )
-    {
-      if( typeof config.type == 'undefined' )
-      {
-        debug.error('worker configuration has missing property "type"');
+    if( ! config.disabled ) {
+      if( typeof config.type == 'undefined' ) {
+        debug.error('worker configuration has missing property "type". ignoring');
         debug.error(config);
-        process.exit(-1);
+        return null;
       }
 
       var Class = require( process.env.BASE_PATH + '/worker/' + config.type );

@@ -1,4 +1,4 @@
-var nodestat = require('node-stat');
+var nodestat = require('iar-node-stat');
 var Worker = require('../index').define('dstat');
 
 var FAILURE_STATE = 'failure';

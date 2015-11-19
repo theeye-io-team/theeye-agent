@@ -47,10 +47,7 @@ Worker.prototype.processJob = function(job, next)
 
   if( job.name == 'agent:config:update' ) {
     app.once('config:up-to-date',function(result){
-      worker.connection.submitJobResult(job.id, result, 
-        function(error,response) {
-          if(!error) worker.handleSupervisorResponse(response);
-        });
+      worker.connection.submitJobResult(job.id, result);
     });
     app.emit('config:need-update');
   } else {
@@ -58,9 +55,7 @@ Worker.prototype.processJob = function(job, next)
     function handleScriptPath (scriptPath) {
       var scriptArgs = job.script_arguments ;
       worker.runScript(scriptPath, scriptArgs, function(err,output) {
-        worker.connection.submitJobResult(job.id, output, function(error,response){
-          if(!error) worker.handleSupervisorResponse(response);
-        });
+        worker.connection.submitJobResult(job.id, output);
       });
     }
     worker.getScriptPath(job.script_id, job.script_md5, handleScriptPath);
@@ -90,6 +85,6 @@ Worker.prototype.keepAlive = function(next)
     }
   };
   worker.debug.log('querying jobs...');
-  worker.connection.getNextPendingJob(handleJobResponse);
+  worker.connection.getNextPendingJob({}, handleJobResponse);
   worker.sleep();
 };
