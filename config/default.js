@@ -1,6 +1,5 @@
 module.exports = {
   "core": {
-    "scriptsDownloadPath": "/tmp/scripts", // where to store downloaded scripts
     /**
      *
      * Core workers are required to obtain supervisor updates and to notify

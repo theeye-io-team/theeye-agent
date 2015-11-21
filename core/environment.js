@@ -9,6 +9,9 @@ function setenv(next)
 
   var config = require('config').get('core');
 
+  if(!process.env.THEEYE_AGENT_SCRIPT_PATH)
+    throw new Error('ERROR. env variable THEEYE_AGENT_SCRIPT_PATH undefined');
+
   var scriptsPath = process.env.THEEYE_AGENT_SCRIPT_PATH ;
   if( ! scriptsPath ) scriptsPath = '/tmp/theeye/' ;
 
