@@ -43,7 +43,6 @@ function connectSupervisor (next) {
         },function(error,response){
           app.host_id = response.host_id;
           app.host_resource_id = response.resource_id;
-          //app.setupKeepAliveWorker(response);
 
           if(error) {
             debug(error);
@@ -139,17 +138,6 @@ app.setupSingleWorker = function(type)
       var worker = Worker.spawn(config, connection);
     }
   });
-}
-
-app.setupKeepAliveWorker = function(input)
-{
-  var worker = Worker.spawn({
-    "resource_id": input.resource_id,
-    "type": input.type,
-    "looptime": input.looptime
-  },connection);
-
-  worker.config.resource_id = input.resource_id;
 }
 
 app.setupResourceWorkers = function(configs)

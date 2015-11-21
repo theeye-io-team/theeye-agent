@@ -86,5 +86,10 @@ Worker.prototype.keepAlive = function(next)
   };
   worker.debug.log('querying jobs...');
   worker.connection.getNextPendingJob({}, handleJobResponse);
+
+  // send keep alive
+  worker.debug.log('sending keep alive...');
+  worker.connection.sendAgentKeepAlive();
+
   worker.sleep();
 };
