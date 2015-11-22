@@ -167,14 +167,8 @@ function prepareDirectoriesAndGlobalRequires {
     echo "removing current source directory"
     rm -rf /opt/theeye-agent
   fi
-#temporal
-  if [ -d /opt/theeye/agent ]
-    then
-    echo "removing current source directory"
-    rm -rf /opt/theeye/agent
-  fi
 
-  mkdir -p /opt/theeye
+  mkdir -p /opt/theeye-agent
   mkdir /var/log/backend
   coloredEcho "prepare Directories And Global Requires done..." magenta
 }
@@ -226,8 +220,7 @@ fi
 function downloadAndSetupAgent {
   sudoerFile='/etc/sudoers.d/theeye-agent'
   service theeye-agent stop
-  rm -rf $destinationPath/generic-agent*
-  rm -rf $destinationPath/theeye
+  rm $destinationPath/generic-agent*
   destinationPath='/opt'
   cd $destinationPath
   coloredEcho "Downloading agent and installing it at $destinationPath ..." cyan
@@ -241,7 +234,7 @@ function downloadAndSetupAgent {
   echo "theeye-a ALL=(ALL) NOPASSWD: ALL" > $sudoerFile
   chmod 440 $sudoerFile
   coloredEcho "Changing ownerships for destinationPath ..." cyan
-  chown -R theeye-a $destinationPath/theeye
+  chown -R theeye-a $destinationPath/theeye-agent
   cd $destinationPath/theeye-agent/
   coloredEcho "Agent Setup done..." magenta
 }
