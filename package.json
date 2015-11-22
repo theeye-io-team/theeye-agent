@@ -16,7 +16,7 @@
     "iar-node-stat": "interactar/node-stat",
     "theeye-client": "interactar/theeye-client",
     "readable-stream": "1.0.33",
-    "request": "^2.55.0",
+    "request": "2.64.0",
     "restify": "^2.8.5",
     "supervisor": "^0.6.0",
     "underscore": "^1.6.0"
