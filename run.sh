@@ -50,16 +50,18 @@ echo "using NODE_ENV=$NODE_ENV"
 
 setDebug ()
 {
-  # debug/log level
-  if [ -z $THEEYE_AGENT_DEBUG ]
-  then
-    DEBUG='eye:*:error'
-    echo "default DEBUG level set"
-  else
-    DEBUG=$THEEYE_AGENT_DEBUG
-    echo 'DEBUG level set with $THEEYE_AGENT_DEBUG'
+  if [ -z ${DEBUG+x} ]; then
+    # debug/log level
+    if [ -z ${THEEYE_AGENT_DEBUG+x} ]
+    then
+      DEBUG='eye:*:error'
+      echo "default DEBUG level set"
+    else
+      DEBUG=$THEEYE_AGENT_DEBUG
+      echo 'DEBUG level set with $THEEYE_AGENT_DEBUG'
+    fi
   fi
-  
+
   echo "log level set to '$DEBUG'"
 }
 
