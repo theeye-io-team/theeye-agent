@@ -75,11 +75,11 @@ setDebug
 
 if [ $NODE_ENV == 'production' ]
 then
-  require=$(which supervisor)
+  require=$(which node)
+  #ride out of supervisor dependency for agents
   if [ -z $require ] || [ ! -f $require ]
   then
-    echo "Error 'supervisor' is not present on this system"
-    echo "please install it by typing npm install -g supervisor" 
+    echo "Error 'node' is not present on this system"
     exit
   fi
   $require -i . $path/core/main.js
