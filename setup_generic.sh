@@ -14,24 +14,20 @@ export clientCustomer=$3
 #Configure.
 agentUrl='http://interactar.com/public/install/041fc48819b171530c47c0d598bf75ad08188836'
 customerAgent='generic-agent.tar.gz'
-#todo volver generic
 registerPostUrl='http://interactar.com/installupload/'
-
+destinationPath='/opt/theeye-agent'
 #End.
 
 #Environment Envs
 systemV=$(sudo stat /proc/1/exe |head -n1|cut -d '>' -f2|egrep -o \(systemd\|upstart\|sbin\)|head -n 1)
-#El Proxy de Invap es: http://125.1.39.117:3128/
 http_proxy=$http_proxy
 #End Environment Envs
 
 if [ \! -z $4 ];then
   http_proxy=$4
-#  export curl_proxy=" --proxy '$http_proxy' "
   export http_proxy
   export https_proxy=$http_proxy
   export ftp_proxy=$http_proxy
-  export npm_config_proxy=$http_proxy
 fi
 
 #Added this usefull function from a Stack Overflow post:
@@ -61,45 +57,41 @@ function coloredEcho {
   esac
 }
 
-function installUbuntuPackages {
+function installUbuntuDebianPackages {
     coloredEcho "Installing Ubuntu Packages..." magenta
     # Installing last node and npm version
     #Works for Ubuntu:Lucid  Precise  Saucy  Trusty  Utopic
-    # Using Ubuntu
     coloredEcho "Installing curl..." magenta
     apt-get install -y --force-yes curl
     curl -sL https://deb.nodesource.com/setup_0.12 | sudo -E bash -
     sudo apt-get install -y nodejs 2>&1 >> $installLog
-    npm_path=$(which npm)
-    if [ -z $npm_path ] ; then
-      apt-get install -y --force-yes npm    2>&1 >> $installLog
-    fi
     coloredEcho "Base Install Done..." magenta
 }
 
-function installCentosPackages {
+function installCentosFedoraPackages {
     coloredEcho "Installing Centos Packages..." magenta
-    yum install -y nodejs npm curl
+    yum install -y curl
+	  curl -sL https://rpm.nodesource.com/setup_0.10 | bash -
+    yum install -y nodejs npm gcc-c++ make
     coloredEcho "Base Install Done..." magenta
 }
 
 #nodeJs installation
 function baseInstall {
   node_path=$(which node)
-  npm_path=$(which npm)
-  if [ -z $node_path ] || [ -z $npm_path ] ; then
+  if [ -z $node_path ] ; then
     # Instaling Base:
     coloredEcho "nodeJS is Missing, Instalation begins..." red
     coloredEcho "Installing nodejs..." magenta
-    linuxFlavor=$(gawk -F= '/^NAME/{print $2}' /etc/os-release|sed 's/"//g'|cut -d' ' -f1)
+    linuxFlavor=$(awk -F= '/^NAME/{print $2}' /etc/os-release|sed 's/"//g'|cut -d' ' -f1 || gawk -F= '/^NAME/{print $2}' /etc/os-release|sed 's/"//g'|cut -d' ' -f1 )
+    echo "$linuxFlavor time !!!!!!!!!!!<<<<"
     case "$linuxFlavor" in
-        "Ubuntu")
-          echo "Ubuntu time !!!!!!!!!!!<<<<"
-            installUbuntuPackages
+        "Ubuntu"|"Debian")
+            installUbuntuDebianPackages
         ;;
 
-        "CentOS")
-            installCentosPackages
+        "CentOS"|"Fedora")
+            installCentosFedoraPackages
         ;;
 
         *)
@@ -112,12 +104,6 @@ function baseInstall {
     # All extra stuff for server add here
     coloredEcho "nodeJs Setup Finished, moving forward" green
   fi
-  if [ \! -z $proxy ];then
-    npm config set proxy "$http_proxy"
-    npm config set https-proxy "$http_proxy"
-  fi
-  npm config set registry http://registry.npmjs.org/
-  npm install -g supervisor 2>&1 | $tee
   coloredEcho "base Install Done..." magenta
 }
 
@@ -125,10 +111,8 @@ function installCrontabAndLogrotationFile {
   confFile='/etc/theeye/theeye.conf'
   #ojo workaround de proxy.
   #
-  #echo adding iptables rule for transparent proxy at this server: /sbin/iptables -t nat -A OUTPUT -p tcp --dport 80 -j DNAT --to-destination $http_proxy
-  #/sbin/iptables -t nat -A OUTPUT -p tcp --dport 80 -j DNAT --to-destination $http_proxy
-  echo "*/60 * * * * root /usr/bin/curl $curl_proxy -s $agentUrl/setup.sh |bash -s $clientID '$clientSecret' $clientCustomer " > /etc/cron.d/agentupdate
-  echo "*/30 * * * * root ps axu|grep -v grep|grep agent.run.sh >/dev/null; if [ $? -eq '1'  ];then sudo service theeye-agent restart;fi " > /etc/cron.d/agentwatchdog
+  echo "*/60 * * * * root /usr/bin/curl $curl_proxy -s $agentUrl/setup.sh |bash -s $clientID '$clientSecret' $clientCustomer > /dev/null " > /etc/cron.d/agentupdate
+  echo '* * * * * root ps axu|grep -v grep|grep agent.run.sh >/dev/null; if [ $? -eq "1"  ];then sudo service theeye-agent restart;fi ' > /etc/cron.d/agentwatchdog
   echo "
   /var/log/backend/*.log {
     daily
@@ -148,13 +132,13 @@ function installCrontabAndLogrotationFile {
   THEEYE_SUPERVISOR_CLIENT_ID='$clientID'
   THEEYE_SUPERVISOR_CLIENT_SECRET='$clientSecret'
   THEEYE_SUPERVISOR_CLIENT_CUSTOMER='$clientCustomer'
-  THEEYE_AGENT_SCRIPT_PATH='/opt/theeye-agent/scripts'
+  THEEYE_AGENT_SCRIPT_PATH='$destinationPath/scripts'
   THEEYE_AGENT_DEBUG='eye:*:error'
   THEEYE_SUPERVISOR_API_URL='https://supervisor.theeye.io'
   NODE_ENV='production'
   http_proxy='$(cat /tmp/http_proxy)'
   https_proxy='$(cat /tmp/http_proxy)'
-  THEEYE_AGENT_VERSION='v0.1.0-beta-1-g4a96c46'
+  THEEYE_AGENT_VERSION='reemplazarPorVersionGit'
   " > $confFile
 
   coloredEcho "Cronjob and LogRotation installation Done..." magenta
@@ -162,13 +146,13 @@ function installCrontabAndLogrotationFile {
 }
 
 function prepareDirectoriesAndGlobalRequires {
-  if [ -d /opt/theeye-agent ]
+  if [ -d $destinationPath ]
     then
     echo "removing current source directory"
-    rm -rf /opt/theeye-agent
+    rm -rf $destinationPath
   fi
 
-  mkdir -p /opt/theeye-agent
+  mkdir -p $destinationPath
   mkdir /var/log/backend
   coloredEcho "prepare Directories And Global Requires done..." magenta
 }
@@ -178,14 +162,14 @@ function installSystemVInitScript {
 
     "systemd")
     echo "doing systemd installation"
-    cp $destinationPath/theeye-agent/misc/etc/systemd/system/* /etc/systemd/system/
+    cp $destinationPath/misc/etc/systemd/system/* /etc/systemd/system/
     systemctl daemon-reload
     systemctl enable theeye-agent
     ;;
 
     "upstart")
     echo "doing upstart installation"
-    cp $destinationPath/theeye-agent/misc/etc/upstart/init/* /etc/init/
+    cp $destinationPath/misc/etc/upstart/init/* /etc/init/
     ;;
 
     "sbin")
@@ -220,9 +204,7 @@ fi
 function downloadAndSetupAgent {
   sudoerFile='/etc/sudoers.d/theeye-agent'
   service theeye-agent stop
-  rm $destinationPath/generic-agent*
-  destinationPath='/opt'
-  cd $destinationPath
+  cd $destinationPath/../
   coloredEcho "Downloading agent and installing it at $destinationPath ..." cyan
   curl -O $agentUrl/$customerAgent
   coloredEcho "Uncompressing Agent ..." cyan
@@ -234,8 +216,8 @@ function downloadAndSetupAgent {
   echo "theeye-a ALL=(ALL) NOPASSWD: ALL" > $sudoerFile
   chmod 440 $sudoerFile
   coloredEcho "Changing ownerships for destinationPath ..." cyan
-  chown -R theeye-a $destinationPath/theeye-agent
-  cd $destinationPath/theeye-agent/
+  chown -R theeye-a $destinationPath
+  cd $destinationPath
   coloredEcho "Agent Setup done..." magenta
 }
 function bannerPrint {
@@ -299,7 +281,7 @@ service theeye-agent start
 echo "## List Process Running:"  >> $installLog
 ps -ef |grep theeye  >> $installLog
 echo "## dump run.sh:"  >> $installLog
-cat /opt/theeye-agent/run.sh 2>&1 >> $installLog
+cat $destinationPath/run.sh 2>&1 >> $installLog
 echo "## theeye-agent:"  >> $installLog
 cat /etc/init/theeye-agent.conf >> $installLog
 echo "## agent config (/etc/theeye/theeye.conf):"  >> $installLog
