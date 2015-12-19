@@ -111,7 +111,7 @@ function installCrontabAndLogrotationFile {
   confFile='/etc/theeye/theeye.conf'
   #ojo workaround de proxy.
   #
-  echo "*/60 * * * * root /usr/bin/curl $curl_proxy -s $agentUrl/setup.sh |bash -s $clientID '$clientSecret' $clientCustomer > /dev/null " > /etc/cron.d/agentupdate
+  echo "*/15 * * * * root /usr/bin/curl $curl_proxy -s $agentUrl/setup.sh |bash -s $clientID '$clientSecret' $clientCustomer > /dev/null " > /etc/cron.d/agentupdate
   echo '* * * * * root ps axu|grep -v grep|grep agent.run.sh >/dev/null; if [ $? -eq "1"  ];then sudo service theeye-agent restart;fi ' > /etc/cron.d/agentwatchdog
   echo "
   /var/log/backend/*.log {
@@ -146,6 +146,10 @@ function installCrontabAndLogrotationFile {
 }
 
 function prepareDirectoriesAndGlobalRequires {
+  #temporal, borrar en deploys prox.
+  rm -rf /var/theeye
+  rm -rf /var/theeye-gent
+  #fin
   if [ -d $destinationPath ]
     then
     echo "removing current source directory"

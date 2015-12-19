@@ -82,7 +82,7 @@ then
     echo "Error 'node' is not present on this system"
     exit
   fi
-  $require -i . $path/core/main.js
+  $require -i $path/core/main.js
 else
   $path/node_modules/.bin/nodemon `pwd`/core/main.js
 fi
