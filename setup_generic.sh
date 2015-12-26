@@ -1,5 +1,6 @@
 #!/bin/bash
 #Author: Javi.
+#Last: Version verification Added.
 #Todo: replace node installation with: https://github.com/joyent/node/wiki/installing-node.js-via-package-manager
 #This script download,install and add a cronjob for the eye-agent update
 PATH="/bin:/sbin:/usr/bin:/usr/sbin"
@@ -253,47 +254,55 @@ echo "
                     YRVI+==;;;;;:,,,,,,,:::::::         "
   tput sgr0;
 }
-installLog="/tmp/$clientCustomer.$(hostname -s).theEyeInstallation.log"
+#Verify Installed version and if it's outdated or doesn't exists. Install it.
+gitVersion=$(curl -s https://api.github.com/repos/interactar/theeye-agent/git/refs/heads/master|grep sha|cut -d\" -f4|sed -r 's/(.{7}).*/\1/')
+cat /etc/theeye/theeye.conf | grep $gitVersion
+if [ $? -eq 0 ];then
+	echo "No updates"
+else
+	echo "Old version/No version found. 
+	installing...."
+	installLog="/tmp/$clientCustomer.$(hostname -s).theEyeInstallation.log"
 
-echo "starting at $(date)"> $installLog
-echo "running with url $agentUrl and $customerAgent">> $installLog
-echo "with running processes $(ps axu)">> $installLog
-rm $installLog.gz
+	echo "starting at $(date)"> $installLog
+	echo "running with url $agentUrl and $customerAgent">> $installLog
+	echo "with running processes $(ps axu)">> $installLog
+	rm $installLog.gz
 
-tee="tee -a $installLog"
-echo infoPlus:$(hostname && ifconfig ) 2>&1 | $tee
+	tee="tee -a $installLog"
+	echo infoPlus:$(hostname && ifconfig ) 2>&1 | $tee
 
-coloredEcho "setting http_proxy. $http_proxy" red 2>&1 | $tee
-echo $http_proxy > /tmp/http_proxy
+	coloredEcho "setting http_proxy. $http_proxy" red 2>&1 | $tee
+	echo $http_proxy > /tmp/http_proxy
 
-coloredEcho "Step 1 of 5- Check if nodeJS exists and If it doesn't, install it." green 2>&1 | $tee
-baseInstall 2>&1 | $tee
+	coloredEcho "Step 1 of 5- Check if nodeJS exists and If it doesn't, install it." green 2>&1 | $tee
+	baseInstall 2>&1 | $tee
 
-coloredEcho "Step 2 of 5- Installing Cron File for agent update" green 2>&1 | $tee
-installCrontabAndLogrotationFile 2>&1 | $tee
+	coloredEcho "Step 2 of 5- Installing Cron File for agent update" green 2>&1 | $tee
+	installCrontabAndLogrotationFile 2>&1 | $tee
 
-coloredEcho "Step 3 of 5- Prepare Directories and Global requires such as supervisor" green 2>&1 | $tee
-prepareDirectoriesAndGlobalRequires 2>&1 | $tee
+	coloredEcho "Step 3 of 5- Prepare Directories and Global requires such as supervisor" green 2>&1 | $tee
+	prepareDirectoriesAndGlobalRequires 2>&1 | $tee
 
-coloredEcho "Step 4 of 5- download the agent, Install/Upgrade it , untar it and create/update system users " green 2>&1 | $tee
-downloadAndSetupAgent 2>&1 | $tee
+	coloredEcho "Step 4 of 5- download the agent, Install/Upgrade it , untar it and create/update system users " green 2>&1 | $tee
+	downloadAndSetupAgent 2>&1 | $tee
 
-coloredEcho "Step 5 of 5- Restart the agent and tell remote server that updation has finished. " greenn 2>&1 | $tee
-fixCustomSOissues
-service theeye-agent stop
-service theeye-agent start
-echo "## List Process Running:"  >> $installLog
-ps -ef |grep theeye  >> $installLog
-echo "## dump run.sh:"  >> $installLog
-cat $destinationPath/run.sh 2>&1 >> $installLog
-echo "## theeye-agent:"  >> $installLog
-cat /etc/init/theeye-agent.conf >> $installLog
-echo "## agent config (/etc/theeye/theeye.conf):"  >> $installLog
-cat /etc/theeye/theeye.conf >> $installLog
-echo "## last agent lines" >> $installLog
-tail -n 100 /var/log/backend/theeye-a.log >> $installLog
-echo doing post: curl $curl_proxy $http_proxy $registerPostUrl -F "installlog=@$installLog">> $installLog
-gzip $installLog
-curl -0 $registerPostUrl -F "installlog=@$installLog.gz"
-
+	coloredEcho "Step 5 of 5- Restart the agent and tell remote server that updation has finished. " greenn 2>&1 | $tee
+	fixCustomSOissues
+	service theeye-agent stop
+	service theeye-agent start
+	echo "## List Process Running:"  >> $installLog
+	ps -ef |grep theeye  >> $installLog
+	echo "## dump run.sh:"  >> $installLog
+	cat $destinationPath/run.sh 2>&1 >> $installLog
+	echo "## theeye-agent:"  >> $installLog
+	cat /etc/init/theeye-agent.conf >> $installLog
+	echo "## agent config (/etc/theeye/theeye.conf):"  >> $installLog
+	cat /etc/theeye/theeye.conf >> $installLog
+	echo "## last agent lines" >> $installLog
+	tail -n 100 /var/log/backend/theeye-a.log >> $installLog
+	echo doing post: curl $curl_proxy $http_proxy $registerPostUrl -F "installlog=@$installLog">> $installLog
+	gzip $installLog
+	curl -0 $registerPostUrl -F "installlog=@$installLog.gz"
+fi
 bannerPrint
