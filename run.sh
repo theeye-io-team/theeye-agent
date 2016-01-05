@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#Todo: add force installation
 
 # root path
 path=`dirname $0`
