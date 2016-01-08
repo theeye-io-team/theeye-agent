@@ -6,7 +6,8 @@
 PATH="/bin:/sbin:/usr/bin:/usr/sbin"
 
 if [[ -z $1 || -z $2 || -z $3 ]]; then
-  echo "Value missing, please run as follows: $0  THEEYE_SUPERVISOR_CLIENT_ID THEEYE_SUPERVISOR_CLIENT_SECRET THEEYE_SUPERVISOR_CLIENT_CUSTOMER Optional Proxy"
+  echo "Value missing, please run as follows: 
+  $0 THEEYE_SUPERVISOR_CLIENT_ID THEEYE_SUPERVISOR_CLIENT_SECRET THEEYE_SUPERVISOR_CLIENT_CUSTOMER Optional Proxy"
 fi
 export clientID=$1
 export clientSecret=$2
@@ -257,8 +258,9 @@ echo "
 #Verify Installed version and if it's outdated or doesn't exists. Install it.
 gitVersion=$(curl -s https://api.github.com/repos/interactar/theeye-agent/git/refs/heads/master|grep sha|cut -d\" -f4|sed -r 's/(.{7}).*/\1/')
 cat /etc/theeye/theeye.conf | grep $gitVersion
-if [ $? -eq 0 ];then
-	echo "No updates"
+if [ $? -eq 0 ] && [ "$set" != "force" ];then
+	echo "No updates, Want to force installation run it as follows:
+	set=force $0 $1 $2 $3 $4 $set"
 else
 	echo "Old version/No version found. 
 	installing...."
