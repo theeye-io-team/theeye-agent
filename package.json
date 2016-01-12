@@ -3,7 +3,7 @@
   "description": "The Eye agent dependencies",
   "author": "Facundo S. Siquot <facugon@interactar.com>",
   "dependencies": {
-    "MD5": "^1.2.2",
+    "md5": "^1.2.2",
     "config": "^1.13.0",
     "debug": "^1.0.4",
     "exec": "^0.2.0",
