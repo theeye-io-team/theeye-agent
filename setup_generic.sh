@@ -64,9 +64,9 @@ function installUbuntuDebianPackages {
     # Installing last node and npm version
     #Works for Ubuntu:Lucid  Precise  Saucy  Trusty  Utopic
     coloredEcho "Installing curl..." magenta
-    apt-get install -y --force-yes curl
-    curl -sL https://deb.nodesource.com/setup_0.12 | sudo -E bash -
-    sudo apt-get install -y nodejs 2>&1 >> $installLog
+    apt-get install -y --force-yes curl sudo
+    curl -sL https://deb.nodesource.com/setup_0.12 | bash -
+    apt-get install -y nodejs 2>&1 >> $installLog
     coloredEcho "Base Install Done..." magenta
 }
 
