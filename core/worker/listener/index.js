@@ -1,7 +1,7 @@
 var config = require('config').get('core');
 var fs = require('fs');
 var path = require('path');
-var md5 = require('MD5');
+var md5 = require('md5');
 var app = require('../../app');
 
 /**

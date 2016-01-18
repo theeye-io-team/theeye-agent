@@ -1,6 +1,7 @@
 var fs = require('fs');
 var join = require('path').join;
-var md5 = require('MD5');
+var md5 = require('md5');
+
 var execFile = require('child_process').execFile;
 
 var AGENT_FAILURE_STATE = 'agent_failure';
