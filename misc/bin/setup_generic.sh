@@ -169,8 +169,6 @@ function installSystemVInitScript {
     "systemd")
     echo "doing systemd installation"
     cp $destinationPath/misc/etc/systemd/system/* /etc/systemd/system/
-    # NO FUNCIONA EN RH cp $destinationPath/misc/etc/init.d/* /etc/init.d/
-    # NO FUNCIONA EN RH chmod +x /etc/init.d/theeye-agent
     systemctl daemon-reload
     systemctl enable theeye-agent
     ;;
@@ -192,7 +190,9 @@ function installSystemVInitScript {
     ;;
 
     *)
-    echo "unkown systemV initialization"
+    echo "unkown systemV initialization doing both upstart and systemd"
+     upstart
+     systemd
     ;;
 
   esac
@@ -314,6 +314,8 @@ if [ $? -eq "1" ];then
        echo "Dough!. Something went wrong,"
        echo "Please send us an email to support@theeye.io indicating:
              Operative System / Version and attaching your /tmp/*.theEyeInstallation.log.gz"
+       echo "starting manually...."
+       /opt/theeye-agent/run.sh
 else
   bannerPrint
 fi
