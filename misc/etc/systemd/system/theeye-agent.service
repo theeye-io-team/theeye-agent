@@ -1,9 +1,13 @@
 [Unit]
 Description=Theeye Agent
+After=syslog.target
 Documentation=man:foo(1)
 
 [Service]
-ExecStart=/opt/theeye/agent/run.sh
+PIDFile=/var/run/theeye-agent.pid
+# Note the -f: don't fail if there is no PID file
+ExecStartPre=/bin/rm -f /var/run/theeye-agent.pid
+ExecStart=/opt/theeye-agent/run.sh --daemon --pidfile /var/run/theeye-agent.pid
 Restart=always
 StandardOutput=syslog
 StandardError=syslog
@@ -13,10 +17,11 @@ SyslogIdentifier=theeye-agent
 
 #It should be set as User:theeye-a and Group:theeye-a, cause a bug with permissions at the dstats package on centos we left this way:
 #It should be fixed.
-User=root
-Group=root
-Environment=statedir=/opt/theeye/agent/run.sh
+User=theeye-a
+Group=theeye-a
+Environment=statedir=/opt/theeye-agent/run.sh
 #Environment=NODE_ENV=production
+Restart=on-abort
 
 [Install]
 WantedBy=multi-user.target
