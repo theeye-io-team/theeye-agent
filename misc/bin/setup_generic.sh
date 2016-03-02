@@ -70,10 +70,10 @@ function installUbuntuDebianPackages {
     coloredEcho "Base Install Done..." magenta
 }
 
-function installCentosFedoraPackages {
-    coloredEcho "Installing Centos Packages..." magenta
+function installRedhatCentosFedoraPackages {
+    coloredEcho "Installing Centos/RHEL/Fedora Packages..." magenta
     yum install -y curl
-	  curl -sL https://rpm.nodesource.com/setup_0.12 | bash -
+    curl -sL https://rpm.nodesource.com/setup_0.10 | bash -
     yum install -y nodejs npm gcc-c++ make
     coloredEcho "Base Install Done..." magenta
 }
@@ -92,8 +92,8 @@ function baseInstall {
             installUbuntuDebianPackages
         ;;
 
-        "CentOS"|"Fedora")
-            installCentosFedoraPackages
+        "CentOS"|"Fedora"|"Red")
+            installRedhatCentosFedoraPackages
         ;;
 
         *)

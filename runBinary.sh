@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#Todo: use misc/theeye.conf for development env.
+#Todo: add force installation
 
 # root path
 path=`dirname $0`
@@ -74,16 +74,4 @@ NODE_CONFIG_STRICT_MODE=true
 
 setDebug
 
-if [ $NODE_ENV == 'production' ]
-then
-  require=$(which node)
-  #ride out of supervisor dependency for agents
-  if [ -z $require ] || [ ! -f $require ]
-  then
-    echo "Error 'node' is not present on this system"
-    exit
-  fi
-  $require -i $path/core/main.js
-else
-  $path/node_modules/.bin/nodemon `pwd`/core/main.js
-fi
+$path/main

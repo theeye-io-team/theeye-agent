@@ -1,0 +1,21 @@
+FROM node:0.12
+MAINTAINER Javier Ailbirt <jailbirt@interactar.com>
+ENV destDir /src/theeye-agent
+# Create app directory
+RUN mkdir -p ${destDir}
+# Install Supervisor
+RUN npm install supervisor -g
+#Set working Directory
+WORKDIR ${destDir}
+# Bundle app source
+COPY . ${destDir}
+# Install app dependencies
+RUN cd ${destDir}; npm install
+#Fix Permissions.
+RUN mkdir ${destDir}/.tmp
+RUN chmod -R 1777 ${destDir}/.tmp
+# Bundle app source
+#No Port Exposition actually need it. EXPOSE 6080
+#Env variables.
+#By default run prod, If development is requiered This command would be override by docker-compose up
+CMD [ "/src/theeye-agent/node_modules/.bin/nodemon", "/src/theeye-agent/core/main.js" ]
