@@ -25,6 +25,14 @@ if [ -f $config ]
 then
   echo "reading configuration from $config"
   source $config
+else
+       export THEEYE_SUPERVISOR_CLIENT_ID=sauron
+       export THEEYE_SUPERVISOR_CLIENT_SECRET=sauron
+       export THEEYE_SUPERVISOR_CLIENT_CUSTOMER=demo
+       export THEEYE_AGENT_SCRIPT_PATH=/src/theeye-agent/scripts
+       export THEEYE_AGENT_DEBUG=eye:*:error
+       export THEEYE_SUPERVISOR_API_URL=http://supervisor-demo.theeye.io:60080
+       export NODE_ENV=production
 fi
 
 # NODE_ENV validation
