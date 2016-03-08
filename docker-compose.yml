@@ -8,6 +8,8 @@ services:
   theeye-agent:
     image: interactar/theeye-agent
     container_name: theeye-agent
+    hostname: agent
+    domainname: theeye.io
     volumes:
        - .:/src/theeye-agent
     #This volume force to use container node_modules instead yours.
