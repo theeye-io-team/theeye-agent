@@ -1,0 +1,34 @@
+version: '2'
+services:
+#About node_modules.
+#By default I override local node_modules directory.
+#This is intended for working without installing dependencies by using development images.
+  
+#AGENT
+  theeye-agent:
+    image: interactar/theeye-agent
+    container_name: theeye-agent
+    volumes:
+       - .:/src/theeye-agent
+    #This volume force to use container node_modules instead yours.
+       - /src/theeye-agent/node_modules
+    networks:
+      - theeye   
+    external_links:
+            - theeye-supervisor:theeye-supervisor
+    #This command override default initialization for development process, which is npm run start ;)
+    environment:
+       - THEEYE_SUPERVISOR_CLIENT_ID=sauron
+       - THEEYE_SUPERVISOR_CLIENT_SECRET=sauron
+       - THEEYE_SUPERVISOR_CLIENT_CUSTOMER=facugon
+       - THEEYE_AGENT_SCRIPT_PATH=/src/theeye-agent/scripts
+       - THEEYE_AGENT_DEBUG=eye:*
+       - THEEYE_SUPERVISOR_API_URL=http://theeye-supervisor:60080
+       - NODE_ENV=development
+  
+    command: npm run devel
+
+networks:
+   theeye:
+      external:
+         name: theeye_theeye
