@@ -25,6 +25,14 @@ if [ -f $config ]
 then
   echo "reading configuration from $config"
   source $config
+else
+  echo From docker-compose: $THEEYE_SUPERVISOR_CLIENT_ID
+  echo From docker-compose: $THEEYE_SUPERVISOR_CLIENT_SECRET
+  echo From docker-compose: $THEEYE_SUPERVISOR_CLIENT_CUSTOMER
+  echo From docker-compose: $THEEYE_AGENT_SCRIPT_PATH
+  echo From docker-compose: $THEEYE_AGENT_DEBUG
+  echo From docker-compose: $THEEYE_SUPERVISOR_API_URL
+  echo From docker-compose: $NODE_ENV
 fi
 
 # NODE_ENV validation

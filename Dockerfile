@@ -17,5 +17,5 @@ RUN chmod -R 1777 ${destDir}/.tmp
 # Bundle app source
 #No Port Exposition actually need it. EXPOSE 6080
 #Env variables.
-#By default run prod, If development is requiered This command would be override by docker-compose up
+#By default run prod, If development is requiered This command would be overriden by docker-compose up
 CMD [ "/src/theeye-agent/run.sh" ]
