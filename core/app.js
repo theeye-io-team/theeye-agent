@@ -147,7 +147,7 @@ app.setupResourceWorkers = function(configs)
     var worker = Worker.spawn(
       config, connection
     );
-    workers.push(worker);
+    if(worker) workers.push(worker);
   });
 }
 

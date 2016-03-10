@@ -4,3 +4,4 @@ newrelic*.log
 config/development.*
 .vimprj
 scripts
+libs

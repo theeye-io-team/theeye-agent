@@ -1,4 +1,4 @@
-var psaux = require('iar-ps')();
+var psaux = require('ps-aux')();
 
 var Worker = require('../index').define('psaux');
 

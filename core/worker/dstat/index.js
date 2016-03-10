@@ -1,4 +1,4 @@
-var nodestat = require('iar-node-stat');
+var NStat = require('iar-node-stat');
 var Worker = require('../index').define('dstat');
 
 var FAILURE_STATE = 'failure';
@@ -6,6 +6,14 @@ var NORMAL_STATE = 'normal';
 
 Worker.prototype.getData = function(next) {
   var self=this;
+
+  try {
+    var nodestat = new NStat();
+  } catch (e) {
+    self.debug.error('worker unsupported');
+    return next(new Error('worker unsupported'));
+  }
+
   nodestat.get('stat','mem','net','load','disk', function(error, data)
   {
     if(error) {
