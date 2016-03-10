@@ -20,7 +20,11 @@ then
 fi
 
 # reading environment config
-config="/etc/theeye/theeye.conf"
+if [ -z $1 ];then
+   config="/etc/theeye/theeye.conf"
+else
+   config=$1
+fi
 if [ -f $config ]
 then
   echo "reading configuration from $config"
@@ -33,6 +37,8 @@ else
   echo From docker-compose: $THEEYE_AGENT_DEBUG
   echo From docker-compose: $THEEYE_SUPERVISOR_API_URL
   echo From docker-compose: $NODE_ENV
+  echo Verifing all packages are installed
+  npm install
 fi
 
 # NODE_ENV validation
