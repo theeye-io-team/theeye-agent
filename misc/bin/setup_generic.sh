@@ -85,7 +85,14 @@ function baseInstall {
     # Instaling Base:
     coloredEcho "nodeJS is Missing, Instalation begins..." red
     coloredEcho "Installing nodejs..." magenta
-    linuxFlavor=$(awk -F= '/^NAME/{print $2}' /etc/os-release|sed 's/"//g'|cut -d' ' -f1 || gawk -F= '/^NAME/{print $2}' /etc/os-release|sed 's/"//g'|cut -d' ' -f1 )
+    linuxFlavor=$(awk -F= '/^NAME/{print $2}' /etc/os-release|sed 's/"//g'|cut -d' ' -f1)
+    if [ -z $linuxFlavor ];then
+      linuxFlavor=$(gawk -F= '/^NAME/{print $2}' /etc/os-release|sed 's/"//g'|cut -d' ' -f1)
+    fi
+    if [ -z $linuxFlavor ];then
+      linuxFlavor=`head -n1 /etc/issue |sed 's/"//g'|cut -d' ' -f1`
+    fi
+
     echo "$linuxFlavor time !!!!!!!!!!!<<<<"
     case "$linuxFlavor" in
         "Ubuntu"|"Debian")

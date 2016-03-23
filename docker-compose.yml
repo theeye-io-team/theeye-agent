@@ -6,7 +6,7 @@ services:
   
 #AGENT
   theeye-agent:
-    image: interactar/theeye-agent
+    image: interactar/theeye-agent:development
     container_name: theeye-agent
     hostname: agent
     domainname: theeye.io
