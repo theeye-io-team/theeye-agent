@@ -10,7 +10,7 @@ Worker.prototype.getData = function(next) {
   try {
     var nodestat = new NStat();
   } catch (e) {
-    self.debug.error('worker unsupported');
+    self.debug.error('worker unsupported.', e);
     return next(new Error('worker unsupported'));
   }
 
