@@ -21,9 +21,12 @@ destinationPath='/opt/theeye-agent'
 #End.
 
 #Environment Envs
-systemV=$(sudo stat /proc/1/exe |head -n1|cut -d '>' -f2|egrep -o \(systemd\|upstart\|sbin\)|head -n 1)
+systemV=$(stat /proc/1/exe |head -n1|cut -d '>' -f2|egrep -o \(systemd\|upstart\|sbin\)|head -n 1)
 http_proxy=$http_proxy
 #End Environment Envs
+
+#theeye user,Primary group, seconadaries groups, default shell
+userDetails=theeye-a -g theeye-a -s /dev/null 
 
 if [ \! -z $4 ];then
   http_proxy=$4
@@ -64,7 +67,7 @@ function installUbuntuDebianPackages {
     # Installing last node and npm version
     #Works for Ubuntu:Lucid  Precise  Saucy  Trusty  Utopic
     coloredEcho "Installing curl..." magenta
-    apt-get install -y --force-yes curl sudo
+    apt-get install -y --force-yes curl
     curl -sL https://deb.nodesource.com/setup_0.12 | bash -
     apt-get install -y nodejs 2>&1 >> $installLog
     coloredEcho "Base Install Done..." magenta
@@ -121,7 +124,7 @@ function installCrontabAndLogrotationFile {
   #ojo workaround de proxy.
   #
   echo "*/15 * * * * root /usr/bin/curl $curl_proxy -s $agentUrl/setup.sh |bash -s $clientID '$clientSecret' $clientCustomer &> /dev/null " > /etc/cron.d/agentupdate
-  echo '* * * * * root ps axu|grep -v grep|grep agent.run.sh &>/dev/null; if [ $? -eq "1"  ];then sudo service theeye-agent restart;fi ' > /etc/cron.d/agentwatchdog
+  echo '* * * * * root ps axu|grep -v grep|grep agent.run.sh &>/dev/null; if [ $? -eq "1"  ];then service theeye-agent restart;fi ' > /etc/cron.d/agentwatchdog
   echo "
   /var/log/backend/*.log {
     daily
@@ -187,7 +190,7 @@ function installSystemVInitScript {
 
     "sbin")
     echo "starring sbin file"
-    systemV=$(sudo stat /sbin/init |head -n1|cut -d '>' -f2|egrep -o \(systemd\|upstart\|sbin\)|head -n 1)
+    systemV=$( stat /sbin/init |head -n1|cut -d '>' -f2|egrep -o \(systemd\|upstart\|sbin\)|head -n 1)
     echo "ok new systemV reached $systemV"
     if [ $systemV == "sbin" ];then  #Instead of sbin recieved I guess upstart would work anyway I've to stop recursion so...
       echo  "I guess upstart would works, If it doesn't please contact theeye.io team"
@@ -208,7 +211,7 @@ function installSystemVInitScript {
 function fixCustomSOissues {
 #Fuse error redhat like S.O, not the best solution but this soft is intended for servers 
 #not gnome sessions on X.
-overrideGVFS=$(sudo su - theeye-a -c 'df;echo $?'|tail -n1)
+overrideGVFS=$( su - theeye-a -c 'df;echo $?'|tail -n1)
 if [ $overrideGVFS == "1" ];then 
   echo "#We really want to run df without any exception" >> /etc/fuse.conf
   echo "user_allow_other" >> /etc/fuse.conf
@@ -227,7 +230,7 @@ function downloadAndSetupAgent {
   coloredEcho "Configuring SystemV for theeye-agent service ..." cyan
   installSystemVInitScript
   coloredEcho "Adding user theeye-a and giving sudoer permission ..." cyan
-  useradd theeye-a || useradd theeye-a -g theeye-a
+  useradd $userDetails || usemod $userDetails
   echo "theeye-a ALL=(ALL) NOPASSWD: ALL" > $sudoerFile
   chmod 440 $sudoerFile
   coloredEcho "Changing ownerships for destinationPath ..." cyan
