@@ -25,6 +25,8 @@ Worker.prototype.getData = function(next)
 
   var parser = new Parser({ pattern : self.config.pattern });
 
+  options.timeout = Number(options.timeout) || 5000;
+
   request(options)
   .on('error',function(error){
     var errstr = error.name + '. ' + error.message ;
