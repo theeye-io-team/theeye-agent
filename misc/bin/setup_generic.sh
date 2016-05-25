@@ -7,7 +7,7 @@ PATH="/bin:/sbin:/usr/bin:/usr/sbin"
 
 if [[ -z $1 || -z $2 || -z $3 ]]; then
   echo "Value missing, please run as follows: 
-  $0 THEEYE_SUPERVISOR_CLIENT_ID THEEYE_SUPERVISOR_CLIENT_SECRET THEEYE_SUPERVISOR_CLIENT_CUSTOMER Optional Proxy"
+  $0 THEEYE_SUPERVISOR_CLIENT_ID THEEYE_SUPERVISOR_CLIENT_SECRET THEEYE_SUPERVISOR_CLIENT_CUSTOMER"
 fi
 export clientID=$1
 export clientSecret=$2
@@ -22,14 +22,9 @@ destinationPath='/opt/theeye-agent'
 
 #Environment Envs
 systemV=$(stat /proc/1/exe |head -n1|cut -d '>' -f2|egrep -o \(systemd\|upstart\|sbin\)|head -n 1)
-http_proxy=$http_proxy
 #End Environment Envs
 
-#theeye user,Primary group, seconadaries groups, default shell
-userDetails=theeye-a -g theeye-a -s /dev/null 
-
-if [ \! -z $4 ];then
-  http_proxy=$4
+if [ \! -z $http_proxy ];then
   export http_proxy
   export https_proxy=$http_proxy
   export ftp_proxy=$http_proxy
@@ -67,7 +62,7 @@ function installUbuntuDebianPackages {
     # Installing last node and npm version
     #Works for Ubuntu:Lucid  Precise  Saucy  Trusty  Utopic
     coloredEcho "Installing curl..." magenta
-    apt-get install -y --force-yes curl
+    apt-get install -y --force-yes curl sudo
     curl -sL https://deb.nodesource.com/setup_0.12 | bash -
     apt-get install -y nodejs 2>&1 >> $installLog
     coloredEcho "Base Install Done..." magenta
@@ -76,7 +71,7 @@ function installUbuntuDebianPackages {
 function installRedhatCentosFedoraPackages {
     coloredEcho "Installing Centos/RHEL/Fedora Packages..." magenta
     yum install -y curl
-    curl -sL https://rpm.nodesource.com/setup_0.10 | bash -
+	  curl -sL https://rpm.nodesource.com/setup_0.10 | bash -
     yum install -y nodejs npm gcc-c++ make
     coloredEcho "Base Install Done..." magenta
 }
@@ -123,7 +118,7 @@ function installCrontabAndLogrotationFile {
   confFile='/etc/theeye/theeye.conf'
   #ojo workaround de proxy.
   #
-  echo "*/15 * * * * root /usr/bin/curl $curl_proxy -s $agentUrl/setup.sh |bash -s $clientID '$clientSecret' $clientCustomer &> /dev/null " > /etc/cron.d/agentupdate
+  echo "*/15 * * * * root http_proxy=$http_proxy $agentUrl/setup.sh |bash -s $clientID '$clientSecret' $clientCustomer &> /dev/null " > /etc/cron.d/agentupdate
   echo '* * * * * root ps axu|grep -v grep|grep agent.run.sh &>/dev/null; if [ $? -eq "1"  ];then service theeye-agent restart;fi ' > /etc/cron.d/agentwatchdog
   echo "
   /var/log/backend/*.log {
@@ -150,7 +145,7 @@ function installCrontabAndLogrotationFile {
   NODE_ENV='production'
   http_proxy='$(cat /tmp/http_proxy)'
   https_proxy='$(cat /tmp/http_proxy)'
-  THEEYE_AGENT_VERSION='reemplazarPorVersionGit'
+  THEEYE_AGENT_VERSION='v0.5.1-beta-23-g637cd97'
   " > $confFile
 
   coloredEcho "Cronjob and LogRotation installation Done..." magenta
@@ -190,7 +185,7 @@ function installSystemVInitScript {
 
     "sbin")
     echo "starring sbin file"
-    systemV=$( stat /sbin/init |head -n1|cut -d '>' -f2|egrep -o \(systemd\|upstart\|sbin\)|head -n 1)
+    systemV=$(stat /sbin/init |head -n1|cut -d '>' -f2|egrep -o \(systemd\|upstart\|sbin\)|head -n 1)
     echo "ok new systemV reached $systemV"
     if [ $systemV == "sbin" ];then  #Instead of sbin recieved I guess upstart would work anyway I've to stop recursion so...
       echo  "I guess upstart would works, If it doesn't please contact theeye.io team"
@@ -211,7 +206,7 @@ function installSystemVInitScript {
 function fixCustomSOissues {
 #Fuse error redhat like S.O, not the best solution but this soft is intended for servers 
 #not gnome sessions on X.
-overrideGVFS=$( su - theeye-a -c 'df;echo $?'|tail -n1)
+overrideGVFS=$(su - theeye-a -c 'df;echo $?'|tail -n1)
 if [ $overrideGVFS == "1" ];then 
   echo "#We really want to run df without any exception" >> /etc/fuse.conf
   echo "user_allow_other" >> /etc/fuse.conf
@@ -230,7 +225,7 @@ function downloadAndSetupAgent {
   coloredEcho "Configuring SystemV for theeye-agent service ..." cyan
   installSystemVInitScript
   coloredEcho "Adding user theeye-a and giving sudoer permission ..." cyan
-  useradd $userDetails || usemod $userDetails
+  useradd theeye-a || useradd theeye-a -g theeye-a
   echo "theeye-a ALL=(ALL) NOPASSWD: ALL" > $sudoerFile
   chmod 440 $sudoerFile
   coloredEcho "Changing ownerships for destinationPath ..." cyan
@@ -271,10 +266,10 @@ echo "
 gitVersion=$(curl -s https://api.github.com/repos/interactar/theeye-agent/git/refs/heads/master|grep sha|cut -d\" -f4|sed -r 's/(.{7}).*/\1/')
 cat /etc/theeye/theeye.conf | grep $gitVersion
 if [ $? -eq 0 ] && [ "$set" != "force" ];then
-	echo "No updates, Want to force installation run it as follows:
-	set=force $0 $1 $2 $3 $4 $set"
+	echo "No updates, Want to force installation? run it as follows:
+	curl $agentUrl/setup.sh |sudo set=force bash -s $clientID $clientSecret $clientCustomer"
 else
-	echo "Old version/No version found. 
+	echo "Old version/No version found.
 	installing...."
 	installLog="/tmp/$clientCustomer.$(hostname -s).theEyeInstallation.log"
 
@@ -315,7 +310,7 @@ else
 	cat /etc/theeye/theeye.conf >> $installLog
 	echo "## last agent lines" >> $installLog
 	tail -n 100 /var/log/backend/theeye-a.log >> $installLog
-	echo doing post: curl $curl_proxy $http_proxy $registerPostUrl -F "installlog=@$installLog">> $installLog
+	echo doing post: $http_proxy curl $registerPostUrl -F "installlog=@$installLog">> $installLog
 	gzip $installLog
 	curl -0 $registerPostUrl -F "installlog=@$installLog.gz"
 fi
