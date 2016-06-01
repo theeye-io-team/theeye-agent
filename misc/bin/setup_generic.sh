@@ -206,7 +206,7 @@ function installSystemVInitScript {
 function fixCustomSOissues {
 #Fuse error redhat like S.O, not the best solution but this soft is intended for servers 
 #not gnome sessions on X.
-overrideGVFS=$(su - theeye-a -c 'df;echo $?'|tail -n1)
+overrideGVFS=$(df;echo $?|tail -n1)
 if [ $overrideGVFS == "1" ];then 
   echo "#We really want to run df without any exception" >> /etc/fuse.conf
   echo "user_allow_other" >> /etc/fuse.conf

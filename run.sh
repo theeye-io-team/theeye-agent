@@ -9,10 +9,9 @@ echo "root on $path && $(pwd)"
 # check if theeye-agent is running
 ps axu|grep -v grep|grep theeye-agent.run.sh > /dev/null
 if [ 0 -eq $? ]; then
-   echo "Falta error an agent is already running at this host" 
+   echo "Fatal error an agent is already running at this host" 
    exit
 fi
-
 
 # colored output
 echo -e "\e[32m"
