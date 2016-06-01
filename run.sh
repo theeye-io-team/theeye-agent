@@ -7,7 +7,7 @@ cd $path
 echo "root on $path && $(pwd)"
 
 # check if theeye-agent is running
-ps axu|grep -v grep|grep theeye-agent.run.sh > /dev/null
+ps axu|grep -v grep|grep theeye-a.*node > /dev/null
 if [ 0 -eq $? ]; then
    echo "Fatal error an agent is already running at this host" 
    exit
