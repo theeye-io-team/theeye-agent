@@ -145,7 +145,7 @@ function installCrontabAndLogrotationFile {
   NODE_ENV='production'
   http_proxy='$(cat /tmp/http_proxy)'
   https_proxy='$(cat /tmp/http_proxy)'
-  THEEYE_AGENT_VERSION='v0.5.1-beta-23-g637cd97'
+  THEEYE_AGENT_VERSION='reemplazarPorVersionGit'
   " > $confFile
 
   coloredEcho "Cronjob and LogRotation installation Done..." magenta
