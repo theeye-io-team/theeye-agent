@@ -71,7 +71,7 @@ function installUbuntuDebianPackages {
 function installRedhatCentosFedoraPackages {
     coloredEcho "Installing Centos/RHEL/Fedora Packages..." magenta
     yum install -y curl
-	  curl -sL https://rpm.nodesource.com/setup_0.10 | bash -
+	  curl -sL https://rpm.nodesource.com/setup_0.12 | bash -
     yum install -y nodejs npm gcc-c++ make
     coloredEcho "Base Install Done..." magenta
 }
@@ -79,6 +79,13 @@ function installRedhatCentosFedoraPackages {
 #nodeJs installation
 function baseInstall {
   node_path=$(which node)
+  #check node version > 0.12
+  if [ \! -z $node_path ] ; then
+    $node_path -v|grep 0.10
+    if [ $? -eq 0 ];then
+      node_path=''
+    fi
+  fi
   if [ -z $node_path ] ; then
     # Instaling Base:
     coloredEcho "nodeJS is Missing, Instalation begins..." red
