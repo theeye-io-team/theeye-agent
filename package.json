@@ -15,7 +15,7 @@
     "ps-aux": "^0.2.1",
     "readable-stream": "1.0.33",
     "request": "2.64.0",
-    "theeye-client": "git://github.com/interactar/theeye-client.git#b39e6e0d1f037eb01ad912e9a4aa1371d180b1c3",
+    "theeye-client": "git://github.com/interactar/theeye-client.git#v0.7.7",
     "underscore": "^1.6.0"
   },
   "scripts": {

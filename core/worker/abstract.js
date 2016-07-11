@@ -109,7 +109,7 @@ Worker.prototype = {
 
       if(download) {
         worker.debug.log('getting script %s', scriptId);
-        worker.connection.downloadScript(scriptId,scriptPath,function(error){
+        worker.connection.scriptDownloadStream(scriptId,scriptPath,function(error){
           if(!error) {
             worker.debug.log('script downloaded');
             next(scriptPath);
