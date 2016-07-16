@@ -71,7 +71,7 @@ function installUbuntuDebianPackages {
 function installRedhatCentosFedoraPackages {
     coloredEcho "Installing Centos/RHEL/Fedora Packages..." magenta
     yum install -y curl
-	  curl -sL https://rpm.nodesource.com/setup_0.12 | bash -
+	  curl -sL https://rpm.nodesource.com/setup_0.10 | bash -
     yum install -y nodejs npm gcc-c++ make
     coloredEcho "Base Install Done..." magenta
 }
@@ -79,13 +79,6 @@ function installRedhatCentosFedoraPackages {
 #nodeJs installation
 function baseInstall {
   node_path=$(which node)
-  #check node version > 0.12
-  if [ \! -z $node_path ] ; then
-    $node_path -v|grep 0.10
-    if [ $? -eq 0 ];then
-      node_path=''
-    fi
-  fi
   if [ -z $node_path ] ; then
     # Instaling Base:
     coloredEcho "nodeJS is Missing, Instalation begins..." red
@@ -125,7 +118,7 @@ function installCrontabAndLogrotationFile {
   confFile='/etc/theeye/theeye.conf'
   #ojo workaround de proxy.
   #
-  echo "*/15 * * * * root http_proxy=$http_proxy /usr/bin/curl $agentUrl/setup.sh |bash -s $clientID '$clientSecret' $clientCustomer &> /dev/null " > /etc/cron.d/agentupdate
+  echo "*/15 * * * * root http_proxy=$http_proxy /usr/bin/curl $agentUrl/setup.sh |bash -s $clientID '$clientSecret' $clientCustomer > /dev/null 2>&1 " > /etc/cron.d/agentupdate
   echo '* * * * * root ps axu|grep -v grep|grep agent.run.sh &>/dev/null; if [ $? -eq "1"  ];then service theeye-agent restart;fi ' > /etc/cron.d/agentwatchdog
   echo "
   /var/log/backend/*.log {
@@ -213,7 +206,7 @@ function installSystemVInitScript {
 function fixCustomSOissues {
 #Fuse error redhat like S.O, not the best solution but this soft is intended for servers 
 #not gnome sessions on X.
-overrideGVFS=$(df;echo $?|tail -n1)
+overrideGVFS=$(su - theeye-a -c 'df;echo $?'|tail -n1)
 if [ $overrideGVFS == "1" ];then 
   echo "#We really want to run df without any exception" >> /etc/fuse.conf
   echo "user_allow_other" >> /etc/fuse.conf
