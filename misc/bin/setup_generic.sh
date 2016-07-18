@@ -64,7 +64,7 @@ function installUbuntuDebianPackages {
     coloredEcho "Installing curl..." magenta
     apt-get install -y --force-yes curl sudo
     curl -sL https://deb.nodesource.com/setup_0.12 | bash -
-    apt-get install -y nodejs 2>&1 >> $installLog
+    apt-get install -y nodejs  >> $installLog 2>&1
     coloredEcho "Base Install Done..." magenta
 }
 
@@ -118,8 +118,8 @@ function installCrontabAndLogrotationFile {
   confFile='/etc/theeye/theeye.conf'
   #ojo workaround de proxy.
   #
-  echo "*/15 * * * * root http_proxy=$http_proxy /usr/bin/curl $agentUrl/setup.sh |bash -s $clientID '$clientSecret' $clientCustomer > /dev/null 2>&1 " > /etc/cron.d/agentupdate
-  echo '* * * * * root ps axu|grep -v grep|grep agent.run.sh &>/dev/null; if [ $? -eq "1"  ];then service theeye-agent restart;fi ' > /etc/cron.d/agentwatchdog
+  echo "*/15 * * * * root http_proxy=$http_proxy /usr/bin/curl -s $agentUrl/setup.sh |bash -s $clientID '$clientSecret' $clientCustomer > /dev/null 2>&1 " > /etc/cron.d/agentupdate
+  echo '* * * * * root ps axu|grep -v grep|grep agent.run.sh > /dev/null 2>&1; if [ $? -eq "1"  ];then service theeye-agent restart;fi ' > /etc/cron.d/agentwatchdog
   echo "
   /var/log/backend/*.log {
     daily
@@ -276,7 +276,7 @@ else
 	echo "starting at $(date)"> $installLog
 	echo "running with url $agentUrl and $customerAgent">> $installLog
 	echo "with running processes $(ps axu)">> $installLog
-	rm $installLog.gz
+	rm $installLog.gz 2>&1 | $tee
 
 	tee="tee -a $installLog"
 	echo infoPlus:$(hostname && ifconfig ) 2>&1 | $tee
@@ -303,9 +303,9 @@ else
 	echo "## List Process Running:"  >> $installLog
 	ps -ef |grep theeye  >> $installLog
 	echo "## dump run.sh:"  >> $installLog
-	cat $destinationPath/run.sh 2>&1 >> $installLog
+	cat $destinationPath/run.sh 2>&1 | $tee
 	echo "## theeye-agent:"  >> $installLog
-	cat /etc/init/theeye-agent.conf >> $installLog
+	cat /etc/init/theeye-agent.conf 2>&1 | $tee
 	echo "## agent config (/etc/theeye/theeye.conf):"  >> $installLog
 	cat /etc/theeye/theeye.conf >> $installLog
 	echo "## last agent lines" >> $installLog
