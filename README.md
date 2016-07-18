@@ -13,7 +13,7 @@ $ ./run.sh
 
 to use a custom hostname. this will be used register the agent and host in the supervisor. hostname-customer combination **MUST** be unique
 
-> AGENT_HOSTNAME='custom_hostname
+> THEEYE_CLIENT_HOSTNAME='custom_hostname
 
 
 > SINGLE_CORE_WORKER='worker_name'
