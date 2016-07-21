@@ -1,27 +1,27 @@
 {
-  "version":"v0.6.0-beta",
+  "version":"v0.6.2-beta",
   "name": "TheEye-Agent",
   "description": "The Eye agent dependencies",
   "author": "Facundo S. Siquot <facugon@interactar.com>",
   "dependencies": {
     "config": "1.20.1",
-    "debug": "^2.2.0",
-    "exec": "^0.2.0",
+    "debug": "2.2.0",
+    "exec": "0.2.1",
     "iar-node-stat": "git://github.com/interactar/node-stat.git#44f7886d3ce4982952ba454cb4a6378c2e433c26",
     "iar-ps": "git://github.com/interactar/ps.git#e7b3067e1d9be5d514f1e59864100f982f0ebc91",
-    "ip": "^0.3.3",
-    "md5": "^2.0.0",
-    "minimist": "^0.2.0",
-    "ps-aux": "^0.2.1",
+    "ip": "0.3.3",
+    "md5": "2.1.0",
+    "minimist": "0.2.0",
+    "ps-aux": "0.2.1",
     "readable-stream": "1.0.33",
     "request": "2.64.0",
-    "theeye-client": "interactar/theeye-client.git#v0.7.8",
-    "underscore": "^1.6.0"
+    "theeye-client": "interactar/theeye-client.git#v0.8.0",
+    "underscore": "1.8.3"
   },
   "scripts": {
-    "start": "/bin/bash ./run.sh",
-    "devel": "NODE_ENV=development /bin/bash ./run.sh",
-    "prod": "DEBUG=* NODE_ENV=local.production THEEYE_AGENT_SCRIPT_PATH=/tmp ./node_modules/.bin/nodemon `pwd`/core/main.js"
+    "start": "DEBUG=* THEEYE_AGENT_SCRIPT_PATH=./scripts node core/main",
+    "run": "/bin/bash ./run.sh",
+    "remote": "DEBUG=* NODE_ENV=remote THEEYE_AGENT_SCRIPT_PATH=./scripts ./node_modules/.bin/nodemon `pwd`/core/main.js"
   },
   "engine": "node >= 0.10.*",
   "devDependencies": {
