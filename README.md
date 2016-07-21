@@ -31,8 +31,8 @@ go to theeeye web > profile page (https://www.theeye.io/profile) , copy and run 
 ### Pre Requisites.
 
 > administrator permissions.   
-> node js https://nodejs.org/en/ ( v0.12 or higher. v4 recomended )
-> npm (part of the node toolkit)
+> node js https://nodejs.org/en/ ( v0.12 or higher. v4 recomended )    
+> npm (part of the node toolkit)    
 
 
 ### Step 1.
