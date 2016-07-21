@@ -20,7 +20,8 @@
   },
   "scripts": {
     "start": "/bin/bash ./run.sh",
-    "devel": "NODE_ENV=development /bin/bash ./run.sh"
+    "devel": "NODE_ENV=development /bin/bash ./run.sh",
+    "prod": "DEBUG=* NODE_ENV=local.production THEEYE_AGENT_SCRIPT_PATH=/tmp ./node_modules/.bin/nodemon `pwd`/core/main.js"
   },
   "engine": "node >= 0.10.*",
   "devDependencies": {

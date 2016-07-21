@@ -1,7 +1,8 @@
 node_modules/
 *.swp
 newrelic*.log
-config/development.*
+config/*
 .vimprj
 scripts
 libs
+npm-debug.log
