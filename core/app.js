@@ -1,3 +1,5 @@
+"use strict";
+
 var app = new (require('events').EventEmitter);
 var TheEyeClient = require("theeye-client") ;
 var Worker = require("./worker");

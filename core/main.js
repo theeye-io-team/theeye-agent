@@ -1,3 +1,6 @@
+var path = require('path');
+global.APP_ROOT = path.resolve(__dirname);
+
 require('./environment').setenv(function(){
   //require("newrelic");
   var main ='eye:agent:main';

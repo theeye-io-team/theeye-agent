@@ -1,8 +1,11 @@
+"use strict";
+
 var config = require('config').get('core');
 var fs = require('fs');
 var path = require('path');
 var md5 = require('md5');
-var app = require('../../app');
+var app = require(APP_ROOT + '/app');
+var Script = require(APP_ROOT + '/lib/script');
 
 /**
  *
@@ -37,55 +40,57 @@ Worker.prototype.getData = function(next) {
 /**
  * process the job received from the supervisor
  * @param Job data
- * @param Function next
  * @return null
  */
-Worker.prototype.processJob = function(job, next)
+Worker.prototype.processJob = function(job)
 {
-  var worker = this;
+  const worker = this;
   worker.debug.log(job);
 
   if( job.name == 'agent:config:update' ) {
     app.once('config:up-to-date',function(result){
-      worker.connection.submitJobResult(job.id, result);
+      worker.connection
+        .submitJobResult(job.id, result);
     });
     app.emit('config:need-update');
   } else {
-    // by now all custom jobs are scripts to run
-    function handleScriptPath (scriptPath) {
-      var scriptArgs = job.script_arguments ;
-      worker.runScript(scriptPath, scriptArgs, function(err,output) {
-        worker.connection.submitJobResult(job.id, output);
+    var path = process.env.THEEYE_AGENT_SCRIPT_PATH;
+    var script = new Script(job.script,{ path: path });
+
+    this.checkScript(script,error => {
+      // if(error) return done(error);
+      script.run()
+      .on('end',(result)=>{
+        worker.connection
+        .submitJobResult(job.id, result);
       });
-    }
-    worker.getScriptPath(job.script_id, job.script_md5, handleScriptPath);
+    });
   }
-  if(next) next();
-};
+}
 
 /**
  * the process to be performed once on each worker cicle.
  * @param Function next
  * @return null
  */
-Worker.prototype.keepAlive = function(next)
+Worker.prototype.keepAlive = function()
 {
   var worker = this;
   var resource = worker.supervisor_resource;
-  function handleJobResponse (error,job) {
-    if( error ) {
+
+  worker.debug.log('querying jobs...');
+  worker.connection.getNextPendingJob({}, function(error,job){
+    if(error) {
       worker.debug.error('supervisor response error');
       worker.debug.error(error);
     } else {
       if(job) {
         worker.debug.log('processing job');
-        worker.processJob(job, next);
+        worker.processJob(job);
       }
       else worker.debug.log('no job to process');
     }
-  };
-  worker.debug.log('querying jobs...');
-  worker.connection.getNextPendingJob({}, handleJobResponse);
+  });
 
   // send keep alive
   worker.debug.log('sending keep alive...');

@@ -49,7 +49,7 @@ Worker.prototype.getData = function(next)
   })
   .on('pattern_matched',function(){
     self.debug.log("service normal");
-    return next(null,{ 
+    return next(null,{
       state: NORMAL_STATE,
       data: "match ok"
     });

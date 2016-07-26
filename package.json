@@ -1,5 +1,5 @@
 {
-  "version":"0.6.3-beta",
+  "version": "0.6.3-beta",
   "name": "TheEye-Agent",
   "description": "The Eye agent dependencies",
   "author": "Facundo S. Siquot <facugon@interactar.com>",
@@ -16,14 +16,15 @@
     "readable-stream": "1.0.33",
     "request": "2.64.0",
     "theeye-client": "interactar/theeye-client.git#v0.8.0",
-    "underscore": "1.8.3"
+    "underscore": "1.8.3",
+    "wavy": "1.0.3"
   },
   "scripts": {
-    "start": "DEBUG=* THEEYE_AGENT_SCRIPT_PATH=./scripts node core/main",
+    "core": "DEBUG=* THEEYE_AGENT_SCRIPT_PATH=./scripts ./node_modules/.bin/nodemon --watch core `pwd`/core/main.js",
     "run": "/bin/bash ./run.sh",
     "remote": "DEBUG=* NODE_ENV=remote THEEYE_AGENT_SCRIPT_PATH=./scripts ./node_modules/.bin/nodemon `pwd`/core/main.js"
   },
-  "engine": "node >= 0.10.*",
+  "engine": "node >= 4.*",
   "devDependencies": {
     "nodemon": "1.9.2"
   }
