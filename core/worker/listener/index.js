@@ -45,7 +45,6 @@ Worker.prototype.getData = function(next) {
 Worker.prototype.processJob = function(job)
 {
   const worker = this;
-  worker.debug.log(job);
 
   if( job.name == 'agent:config:update' ) {
     app.once('config:up-to-date',function(result){
@@ -79,16 +78,13 @@ Worker.prototype.keepAlive = function()
   var resource = worker.supervisor_resource;
 
   worker.debug.log('querying jobs...');
-  worker.connection.getNextPendingJob({}, function(error,jobs){
+  worker.connection.getNextPendingJob({}, function(error,job){
     if(error) {
       worker.debug.error('supervisor response error');
       worker.debug.error(error);
     } else {
-      if(Array.isArray(jobs)&&jobs.length>0) {
-        var job = jobs[0];
-        worker.processJob(job);
-      }
-      else worker.debug.log('no jobs to process');
+      if(job) worker.processJob(job);
+      else worker.debug.log('no job to process');
     }
   });
 

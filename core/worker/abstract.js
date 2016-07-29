@@ -50,7 +50,6 @@ Worker.prototype = {
     this.sleep();
   },
   submitWork : function(data,next) {
-    this.debug.log('submiting work result "%j"', data);
     this.connection.updateResource(
       this.config.resource_id, data, next
     );
