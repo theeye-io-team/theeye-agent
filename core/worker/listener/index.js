@@ -79,16 +79,16 @@ Worker.prototype.keepAlive = function()
   var resource = worker.supervisor_resource;
 
   worker.debug.log('querying jobs...');
-  worker.connection.getNextPendingJob({}, function(error,job){
+  worker.connection.getNextPendingJob({}, function(error,jobs){
     if(error) {
       worker.debug.error('supervisor response error');
       worker.debug.error(error);
     } else {
-      if(job) {
-        worker.debug.log('processing job');
+      if(Array.isArray(jobs)&&jobs.length>0) {
+        var job = jobs[0];
         worker.processJob(job);
       }
-      else worker.debug.log('no job to process');
+      else worker.debug.log('no jobs to process');
     }
   });
 
