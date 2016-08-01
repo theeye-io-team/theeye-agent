@@ -1,8 +1,13 @@
 {
-  "version": "0.6.4-beta",
+  "version": "0.6.5-beta",
   "name": "TheEye-Agent",
   "description": "The Eye agent dependencies",
   "author": "Facundo S. Siquot <facugon@interactar.com>",
+  "license": "MIT",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/interactar/theeye-agent.git"
+  },
   "dependencies": {
     "config": "1.20.1",
     "debug": "2.2.0",
@@ -15,7 +20,7 @@
     "ps-aux": "0.2.1",
     "readable-stream": "1.0.33",
     "request": "2.64.0",
-    "theeye-client": "interactar/theeye-client.git#v0.8.2",
+    "theeye-client": "interactar/theeye-client.git#v0.8.3",
     "underscore": "1.8.3",
     "wavy": "1.0.3"
   },
