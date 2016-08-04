@@ -98,14 +98,14 @@ setDebug
 
 if [ $NODE_ENV == 'production' ]
 then
-  require=$(which node)
-  #ride out of supervisor dependency for agents
-  if [ -z $require ] || [ ! -f $require ]
-  then
-    echo "Error 'node' is not present on this system"
-    exit
-  fi
-  $require -i $path/core/main.js
+#windows issue  require=$(which node)
+#windows issue  #ride out of supervisor dependency for agents
+#windows issue  if [ -z $require ] || [ ! -f $require ]
+#windows issue  then
+#windows issue    echo "Error 'node' is not present on this system"
+#windows issue    exit
+#windows issue  fi
+  node -i $path/core/main.js
 else
   $path/node_modules/.bin/nodemon `pwd`/core/main.js
 fi
