@@ -3,6 +3,13 @@ var ps = require('iar-ps');
 /**
  * verify process status and informe server with statics data
  */
+//Extended for supporting windows using git-bash
+var os = require('os');
+var psArgs='aux';
+if ( "win32" === os.platform())
+ psArgs='W';
+ 
+
 var FAILURE_STATE = 'failure';
 var NORMAL_STATE = 'normal';
 
@@ -19,7 +26,7 @@ Worker.prototype.getData = function(next) {
 
   ps.lookup({
     command: self.config.ps.pattern,
-    psargs: 'aux'
+    psargs: psArgs
   },function(error, pslist){
     var event = { state: '', data: pslist };
 
