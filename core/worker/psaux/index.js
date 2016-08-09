@@ -1,6 +1,8 @@
 'use strict';
 
-var psaux = require('ps-aux')();
+var os=require('os');
+var psaux;
+
 var Worker = require('../index').define('psaux');
 
 module.exports = Worker;
@@ -8,6 +10,22 @@ module.exports = Worker;
 Worker.prototype.getData = function(next) {
   var self = this;
 
+if (os.platform() == "win32"){
+  psaux = require('ms-task');
+  task( '/scv', function( err, data ){
+    if (error) {
+      self.debug.error('unable to get data');
+      self.debug.error(error);
+      return next(new Error('unable to get data'));
+    } else {
+      return next(null,{
+        psaux: data,
+      });
+    }
+  });
+}
+else {
+  psaux = require('ps-aux')();
   psaux.parsed(function(error, data) {
     if (error) {
       self.debug.error('unable to get data');
@@ -19,6 +37,7 @@ Worker.prototype.getData = function(next) {
       });
     }
   });
+}
 
   psaux.clearInterval();
 };
