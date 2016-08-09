@@ -18,6 +18,7 @@ if (os.platform() == "win32"){
       self.debug.error(error);
       return next(new Error('unable to get data'));
     } else {
+	console.log("DEBUG WIN" + data);
       return next(null,{
         psaux: data,
       });
