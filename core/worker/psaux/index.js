@@ -12,7 +12,7 @@ Worker.prototype.getData = function(next) {
 
 if (os.platform() == "win32"){
   psaux = require('ms-task');
-  task( '/scv', function( err, data ){
+  task.list( '/scv', function( err, data ){
     if (error) {
       self.debug.error('unable to get data');
       self.debug.error(error);
