@@ -19,7 +19,7 @@ if (os.platform() == "win32"){
       return next(new Error('unable to get data'));
     } else {
       return next(null,{
-        psaux: data,
+        tasklist: data,
       });
     }
   });
