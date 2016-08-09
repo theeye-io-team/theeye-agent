@@ -37,9 +37,9 @@ else {
       });
     }
   });
+  psaux.clearInterval();
 }
 
-  psaux.clearInterval();
 };
 
 Worker.prototype.submitWork = function(data,next) {
