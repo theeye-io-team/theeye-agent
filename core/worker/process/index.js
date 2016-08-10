@@ -7,7 +7,7 @@ var ps = require('iar-ps');
 var os = require('os');
 var psArgs='aux';
 if ( "win32" === os.platform())
- psArgs='W';
+ psArgs='';
  
 
 var FAILURE_STATE = 'failure';
