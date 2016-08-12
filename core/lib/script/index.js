@@ -6,6 +6,7 @@ const exec = require('child_process').exec;
 const join = require('path').join;
 const EventEmitter = require('events').EventEmitter;
 const debug = require('debug')('eye:lib:script');
+const shellscape = require('shell-escape');
 
 const FILE_MISSING = 'file_missing';
 const FILE_OUTDATED = 'file_outdated';
@@ -14,8 +15,10 @@ const ScriptOutput = require('./output');
 
 class Script extends EventEmitter {
 
-	constructor (props, options) {
+	constructor (props) {
     super();
+
+    this._id = props.id ,
     this._md5 = props.md5 ,
     this._args = props.args ,
     this._filename = props.filename ,
@@ -27,6 +30,7 @@ class Script extends EventEmitter {
     this._output = null;
 	}
 
+  get id() { return this._id; }
   get filepath() { return this._filepath; }
   get md5() { return this._md5; }
   get filename() { return this._filename; }
@@ -66,13 +70,12 @@ class Script extends EventEmitter {
   }
 
   run(){
-    var args = (this.args||[]).join(' ');
-    var filepath = this.filepath;
-    var partial = (`${filepath} ${args}`).trim();
+    var cli = ([ this.filepath ]).concat( this.args );
+    var partial = shellscape( cli );
     var formatted;
 
     const runas = this.runas;
-    const regex = /%s/;
+    const regex = /%script%/;
 
     if( runas && regex.test(runas) === true ){
       formatted = runas.replace(regex, partial);
@@ -117,6 +120,10 @@ class Script extends EventEmitter {
     });
 
     return emitter;
+  }
+
+  end(next){
+    this.once('end',next);
   }
 }
 

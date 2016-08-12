@@ -55,6 +55,7 @@ Worker.prototype.processJob = function(job)
   } else {
     var path = process.env.THEEYE_AGENT_SCRIPT_PATH;
     var script = new Script({
+      id: job.script.id,
       args: job.task.script_arguments,
       runas: job.task.script_runas,
       filename: job.script.filename,
