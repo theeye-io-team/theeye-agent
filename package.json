@@ -13,7 +13,7 @@
     "md5": "2.1.0",
     "minimist": "0.2.0",
     "ms-task": "^1.1.0",
-    "ps-aux": "0.2.1",
+    "ps-aux": "git://github.com/interactar/ps-axu.git",
     "readable-stream": "1.0.33",
     "request": "2.64.0",
     "theeye-client": "interactar/theeye-client.git#v0.8.2",
