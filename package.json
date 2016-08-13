@@ -8,7 +8,7 @@
     "debug": "2.2.0",
     "exec": "0.2.1",
     "iar-node-stat": "git://github.com/interactar/node-stat.git",
-    "iar-ps": "git://github.com/interactar/ps.git#e7b3067e1d9be5d514f1e59864100f982f0ebc91",
+    "iar-ps": "git://github.com/interactar/ps.git",
     "ip": "0.3.3",
     "md5": "2.1.0",
     "minimist": "0.2.0",
