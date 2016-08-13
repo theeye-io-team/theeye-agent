@@ -10,21 +10,6 @@ module.exports = Worker;
 Worker.prototype.getData = function(next) {
   var self = this;
 
-if (os.platform() == "win32"){
-  psaux = require('ms-task');
-  psaux( '/SVC', function( error, data ){
-    if (error) {
-      self.debug.error('unable to get data');
-      self.debug.error(error);
-      return next(new Error('unable to get data'));
-    } else {
-      return next(null,{
-        tasklist: data,
-      });
-    }
-  });
-}
-else {
   psaux = require('ps-aux')();
   psaux.parsed(function(error, data) {
     if (error) {
@@ -38,8 +23,6 @@ else {
     }
   });
   psaux.clearInterval();
-}
-
 };
 
 Worker.prototype.submitWork = function(data,next) {
