@@ -4,10 +4,7 @@ var ps = require('iar-ps');
  * verify process status and informe server with statics data
  */
 //Extended for supporting windows using git-bash
-var os = require('os');
 var psArgs='aux';
-if ( "win32" === os.platform())
- psArgs='W';
  
 
 var FAILURE_STATE = 'failure';
