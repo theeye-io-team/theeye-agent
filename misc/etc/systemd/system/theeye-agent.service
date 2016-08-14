@@ -4,10 +4,8 @@ After=syslog.target
 Documentation=man:foo(1)
 
 [Service]
-PIDFile=/var/run/theeye-agent.pid
 # Note the -f: don't fail if there is no PID file
-ExecStartPre=/bin/rm -f /var/run/theeye-agent.pid
-ExecStart=/opt/theeye-agent/run.sh --daemon --pidfile /var/run/theeye-agent.pid
+ExecStart=/opt/theeye-agent/run.sh
 Restart=always
 StandardOutput=syslog
 StandardError=syslog

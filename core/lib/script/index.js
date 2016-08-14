@@ -6,6 +6,7 @@ const exec = require('child_process').exec;
 const join = require('path').join;
 const EventEmitter = require('events').EventEmitter;
 const debug = require('debug')('eye:lib:script');
+const shellscape = require('shell-escape');
 
 const FILE_MISSING = 'file_missing';
 const FILE_OUTDATED = 'file_outdated';
@@ -14,27 +15,27 @@ const ScriptOutput = require('./output');
 
 class Script extends EventEmitter {
 
-	constructor (props, options) {
+	constructor (props) {
     super();
+
     this._id = props.id ,
     this._md5 = props.md5 ,
-    this._args = props.arguments ,
+    this._args = props.args ,
     this._filename = props.filename ,
     this._path = props.path ,
-    this._runAs = props.runAs ;
+    this._runas = props.runas ;
 
-    if(!options.path) throw new Error('scripts path is required.');
-    this._path = options.path;
+    if(!props.path) throw new Error('scripts path is required.');
     this._filepath = join(this._path, this._filename);
     this._output = null;
 	}
 
-  get filepath() { return this._filepath; }
   get id() { return this._id; }
+  get filepath() { return this._filepath; }
   get md5() { return this._md5; }
   get filename() { return this._filename; }
-  get arguments() { return this._args; }
-  get runAs() { return this._runAs; }
+  get args() { return this._args; }
+  get runas() { return this._runas; }
   get path() { return this._path; }
   get output() { return this._output; }
 
@@ -69,16 +70,15 @@ class Script extends EventEmitter {
   }
 
   run(){
-    var args = (this.arguments||[]).join(' ');
-    var filepath = this.filepath;
-    var partial = (`${filepath} ${args}`).trim();
+    var cli = ([ this.filepath ]).concat( this.args );
+    var partial = shellscape( cli );
     var formatted;
 
-    const runAs = this.runAs;
-    const regex = /@s/;
+    const runas = this.runas;
+    const regex = /%script%/;
 
-    if( runAs && regex.test(runAs) === true ){
-      formatted = runAs.replace(regex, partial);
+    if( runas && regex.test(runas) === true ){
+      formatted = runas.replace(regex, partial);
     } else {
       formatted = partial;
     }
@@ -92,7 +92,7 @@ class Script extends EventEmitter {
 
     var partials = { stdout:'', stderr:'', log:'' };
 
-    debug('running script %s', script);
+    debug('running script "%s"', script);
 
     child.stdout.on('data',(data) => {
       partials.stdout += data;
@@ -120,6 +120,10 @@ class Script extends EventEmitter {
     });
 
     return emitter;
+  }
+
+  end(next){
+    this.once('end',next);
   }
 }
 

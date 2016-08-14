@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 0.6.5-beta - 2016-08-03
+
+> update package theeye-client version , release and license
+
 ### 0.6.4-beta - 2016-07-29
 
 > added CHANGELOG.md  

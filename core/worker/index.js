@@ -1,3 +1,5 @@
+"use strict";
+
 var util = require('util');
 var AbstractWorker = require('./abstract');
 var debug = require('debug');
