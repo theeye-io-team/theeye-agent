@@ -1,0 +1,102 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "ps-aux@git://github.com/interactar/ps-axu.git",
+        "scope": null,
+        "escapedName": "ps-aux",
+        "name": "ps-aux",
+        "rawSpec": "git://github.com/interactar/ps-axu.git",
+        "spec": "git://github.com/interactar/ps-axu.git",
+        "type": "hosted",
+        "hosted": {
+          "type": "github",
+          "ssh": "git@github.com:interactar/ps-axu.git",
+          "sshUrl": "git+ssh://git@github.com/interactar/ps-axu.git",
+          "httpsUrl": "git+https://github.com/interactar/ps-axu.git",
+          "gitUrl": "git://github.com/interactar/ps-axu.git",
+          "shortcut": "github:interactar/ps-axu",
+          "directUrl": "https://raw.githubusercontent.com/interactar/ps-axu/master/package.json"
+        }
+      },
+      "C:\\Users\\Administrator\\Downloads\\PortableGit\\theeye-agent"
+    ]
+  ],
+  "_from": "git://github.com/interactar/ps-axu.git",
+  "_id": "ps-aux@0.2.1",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/ps-aux",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "ps-aux@git://github.com/interactar/ps-axu.git",
+    "scope": null,
+    "escapedName": "ps-aux",
+    "name": "ps-aux",
+    "rawSpec": "git://github.com/interactar/ps-axu.git",
+    "spec": "git://github.com/interactar/ps-axu.git",
+    "type": "hosted",
+    "hosted": {
+      "type": "github",
+      "ssh": "git@github.com:interactar/ps-axu.git",
+      "sshUrl": "git+ssh://git@github.com/interactar/ps-axu.git",
+      "httpsUrl": "git+https://github.com/interactar/ps-axu.git",
+      "gitUrl": "git://github.com/interactar/ps-axu.git",
+      "shortcut": "github:interactar/ps-axu",
+      "directUrl": "https://raw.githubusercontent.com/interactar/ps-axu/master/package.json"
+    }
+  },
+  "_requiredBy": [
+    "/",
+    "/TheEye-Agent"
+  ],
+  "_resolved": "git://github.com/interactar/ps-axu.git#90eae9833a5a0529303496d9caf3ca51f02b6c53",
+  "_shasum": "09b0f4e9705f8f02c0b994246f18d6fbea4dcc40",
+  "_shrinkwrap": null,
+  "_spec": "ps-aux@git://github.com/interactar/ps-axu.git",
+  "_where": "C:\\Users\\Administrator\\Downloads\\PortableGit\\theeye-agent",
+  "author": {
+    "name": "Thorsten Lorenz",
+    "email": "thlorenz@gmx.de",
+    "url": "http://thlorenz.com"
+  },
+  "bugs": {
+    "url": "https://github.com/thlorenz/ps-aux/issues"
+  },
+  "dependencies": {
+    "1t": "~0.1.0",
+    "xtend": "~4.0.0",
+    "yawn": "~0.1.1"
+  },
+  "description": "Supplies process information via the ps aux command.",
+  "devDependencies": {
+    "tap": "~0.4.3"
+  },
+  "engine": {
+    "node": ">=0.8"
+  },
+  "gitHead": "90eae9833a5a0529303496d9caf3ca51f02b6c53",
+  "homepage": "https://github.com/thlorenz/ps-aux",
+  "keywords": [
+    "ps",
+    "process",
+    "top"
+  ],
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/thlorenz/ps-aux/blob/master/LICENSE"
+  },
+  "main": "index.js",
+  "name": "ps-aux",
+  "optionalDependencies": {},
+  "readme": "# ps-aux [![build status](https://secure.travis-ci.org/thlorenz/ps-aux.png)](http://travis-ci.org/thlorenz/ps-aux)\r\n\r\nSupplies process information via the `ps aux` command.\r\n\r\nTested on Linux and OSX.\r\n\r\n```js\r\nvar Psaux = require('psaux')\r\n  , psaux = Psaux();\r\n\r\npsaux.parsed(function (err, res) {\r\n  if (err) return console.error(err);\r\n  console.log(res);\r\n})\r\n```\r\n\r\n```js\r\n[ \r\n  { user: 'thlorenz',\r\n    pid: 1050,\r\n    '%cpu': 2.6,\r\n    '%mem': 1.3,\r\n    vsz: 4490356,\r\n    rss: 217636,\r\n    tty: '??',\r\n    state: 'S',\r\n    started: '5Aug14',\r\n    time: '123:03.05',\r\n    command: '/Applications/iTerm.app/Contents/MacOS/iTerm' },\r\n  { user: '_coreaudiod',\r\n    pid: 257,\r\n    '%cpu': 0.6,\r\n    '%mem': 0.2,\r\n    vsz: 2553344,\r\n    rss: 38572,\r\n    tty: '??',\r\n    state: 'Ss',\r\n    started: '5Aug14',\r\n    time: '32:23.58',\r\n    command: '/usr/sbin/coreaudiod' },\r\n    [...]\r\n]\r\n```\r\n\r\n<!-- START doctoc generated TOC please keep comment here to allow auto update -->\r\n<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->\r\n**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*\r\n\r\n- [Installation](#installation)\r\n- [API](#api)\r\n    - [Psaux](#psaux)\r\n    - [psaux::clearInterval()](#psauxclearinterval)\r\n    - [psaux::obtain(cb)](#psauxobtaincb)\r\n    - [psaux::parsed(cb)](#psauxparsedcb)\r\n    - [psaux::setInterval(opts)](#psauxsetintervalopts)\r\n    - [psaux::singleton() → {object}](#psauxsingleton-→-object)\r\n    - [Example](#example)\r\n- [License](#license)\r\n\r\n<!-- END doctoc generated TOC please keep comment here to allow auto update -->\r\n\r\n\r\n## Installation\r\n\r\n    npm install ps-aux\r\n\r\n## API\r\n\r\n<!-- START docme generated API please keep comment here to allow auto update -->\r\n<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN docme TO UPDATE -->\r\n\r\n<div>\r\n<div class=\"jsdoc-githubify\">\r\n<section>\r\n<article>\r\n<div class=\"container-overview\">\r\n<dl class=\"details\">\r\n</dl>\r\n</div>\r\n<dl>\r\n<dt>\r\n<h4 class=\"name\" id=\"Psaux\"><span class=\"type-signature\"></span>Psaux<span class=\"type-signature\"></span></h4>\r\n</dt>\r\n<dd>\r\n<div class=\"description\">\r\n<p>Creates a <code>psaux</code> object.</p>\r\n</div>\r\n<dl class=\"details\">\r\n<dt class=\"tag-source\">Source:</dt>\r\n<dd class=\"tag-source\"><ul class=\"dummy\">\r\n<li>\r\n<a href=\"https://github.com/thlorenz/ps-aux/blob/master/index.js\">index.js</a>\r\n<span>, </span>\r\n<a href=\"https://github.com/thlorenz/ps-aux/blob/master/index.js#L34\">lineno 34</a>\r\n</li>\r\n</ul></dd>\r\n</dl>\r\n</dd>\r\n</dl>\r\n<dl>\r\n<dt>\r\n<h4 class=\"name\" id=\"psaux::clearInterval\"><span class=\"type-signature\"></span>psaux::clearInterval<span class=\"signature\">()</span><span class=\"type-signature\"></span></h4>\r\n</dt>\r\n<dd>\r\n<div class=\"description\">\r\n<p>Clears any previously registered interval at which process information was obtained\r\nand emitted.</p>\r\n</div>\r\n<dl class=\"details\">\r\n<dt class=\"tag-source\">Source:</dt>\r\n<dd class=\"tag-source\"><ul class=\"dummy\">\r\n<li>\r\n<a href=\"https://github.com/thlorenz/ps-aux/blob/master/index.js\">index.js</a>\r\n<span>, </span>\r\n<a href=\"https://github.com/thlorenz/ps-aux/blob/master/index.js#L167\">lineno 167</a>\r\n</li>\r\n</ul></dd>\r\n<dt class=\"tag-see\">See:</dt>\r\n<dd class=\"tag-see\">\r\n<ul>\r\n<li><a href=\"global.html#psaux::setInterval\">psaux::setInterval</a></li>\r\n</ul>\r\n</dd>\r\n</dl>\r\n</dd>\r\n<dt>\r\n<h4 class=\"name\" id=\"psaux::obtain\"><span class=\"type-signature\"></span>psaux::obtain<span class=\"signature\">(cb)</span><span class=\"type-signature\"></span></h4>\r\n</dt>\r\n<dd>\r\n<div class=\"description\">\r\n<p>Obtains raw process information</p>\r\n</div>\r\n<h5>Parameters:</h5>\r\n<table class=\"params\">\r\n<thead>\r\n<tr>\r\n<th>Name</th>\r\n<th>Type</th>\r\n<th class=\"last\">Description</th>\r\n</tr>\r\n</thead>\r\n<tbody>\r\n<tr>\r\n<td class=\"name\"><code>cb</code></td>\r\n<td class=\"type\">\r\n<span class=\"param-type\">function</span>\r\n</td>\r\n<td class=\"description last\"><p>called back with an array of strings each containing information of a running process</p></td>\r\n</tr>\r\n</tbody>\r\n</table>\r\n<dl class=\"details\">\r\n<dt class=\"tag-source\">Source:</dt>\r\n<dd class=\"tag-source\"><ul class=\"dummy\">\r\n<li>\r\n<a href=\"https://github.com/thlorenz/ps-aux/blob/master/index.js\">index.js</a>\r\n<span>, </span>\r\n<a href=\"https://github.com/thlorenz/ps-aux/blob/master/index.js#L49\">lineno 49</a>\r\n</li>\r\n</ul></dd>\r\n</dl>\r\n</dd>\r\n<dt>\r\n<h4 class=\"name\" id=\"psaux::parsed\"><span class=\"type-signature\"></span>psaux::parsed<span class=\"signature\">(cb)</span><span class=\"type-signature\"></span></h4>\r\n</dt>\r\n<dd>\r\n<div class=\"description\">\r\n<p>Obtains process information and parses it.</p>\r\n<p>VSZ is the Virtual Memory Size. It includes all memory that the process can\r\naccess, including memory that is swapped out and memory that is from shared\r\nlibraries.</p>\r\n<p>RSS is the Resident Set Size and is used to show how much memory is\r\nallocated to that process and is in RAM. It does not include memory that is\r\nswapped out. It does include memory from shared libraries as long as the\r\npages from those libraries are actually in memory. It does include all stack\r\nand heap memory.</p>\r\n</div>\r\n<h5>Parameters:</h5>\r\n<table class=\"params\">\r\n<thead>\r\n<tr>\r\n<th>Name</th>\r\n<th>Type</th>\r\n<th class=\"last\">Description</th>\r\n</tr>\r\n</thead>\r\n<tbody>\r\n<tr>\r\n<td class=\"name\"><code>cb</code></td>\r\n<td class=\"type\">\r\n<span class=\"param-type\">function</span>\r\n</td>\r\n<td class=\"description last\"><p>called back with an array containing running process information</p>\r\n<p><strong>process info:</strong></p>\r\n<ul>\r\n<li><strong>user</strong>    : id of the user that owns the process</li>\r\n<li><strong>pid</strong>     : process id</li>\r\n<li><strong>%cpu</strong>    : percent of the CPU usage</li>\r\n<li><strong>%mem</strong>    : percent memory usage</li>\r\n<li><strong>vsz</strong>     : virtual memory size</li>\r\n<li><strong>rss</strong>     : resident set size</li>\r\n<li><strong>tty</strong>     : controlling terminal</li>\r\n<li><strong>state</strong>   : current state of the process (i.e. sleeping)</li>\r\n<li><strong>started</strong> : start time of process</li>\r\n<li><strong>time</strong>    : how long the process is running</li>\r\n<li><strong>command</strong> : command line used to start the process (including args)</li>\r\n</ul></td>\r\n</tr>\r\n</tbody>\r\n</table>\r\n<dl class=\"details\">\r\n<dt class=\"tag-source\">Source:</dt>\r\n<dd class=\"tag-source\"><ul class=\"dummy\">\r\n<li>\r\n<a href=\"https://github.com/thlorenz/ps-aux/blob/master/index.js\">index.js</a>\r\n<span>, </span>\r\n<a href=\"https://github.com/thlorenz/ps-aux/blob/master/index.js#L80\">lineno 80</a>\r\n</li>\r\n</ul></dd>\r\n</dl>\r\n</dd>\r\n<dt>\r\n<h4 class=\"name\" id=\"psaux::setInterval\"><span class=\"type-signature\"></span>psaux::setInterval<span class=\"signature\">(opts)</span><span class=\"type-signature\"></span></h4>\r\n</dt>\r\n<dd>\r\n<div class=\"description\">\r\n<p>Causes the psaux object to obtain process information at the given interval\r\nand emit an event for each.\r\nWhen invoked, previously set intervals are cancelled.</p>\r\n</div>\r\n<h5>Parameters:</h5>\r\n<table class=\"params\">\r\n<thead>\r\n<tr>\r\n<th>Name</th>\r\n<th>Type</th>\r\n<th class=\"last\">Description</th>\r\n</tr>\r\n</thead>\r\n<tbody>\r\n<tr>\r\n<td class=\"name\"><code>opts</code></td>\r\n<td class=\"type\">\r\n<span class=\"param-type\">Object</span>\r\n</td>\r\n<td class=\"description last\"><p>options</p>\r\n<h6>Properties</h6>\r\n<table class=\"params\">\r\n<thead>\r\n<tr>\r\n<th>Name</th>\r\n<th>Type</th>\r\n<th class=\"last\">Description</th>\r\n</tr>\r\n</thead>\r\n<tbody>\r\n<tr>\r\n<td class=\"name\"><code>parsed</code></td>\r\n<td class=\"type\">\r\n<span class=\"param-type\">boolean</span>\r\n</td>\r\n<td class=\"description last\"><p>if true, the process information is parsed before it is emitted (default: <code>true</code>)</p></td>\r\n</tr>\r\n<tr>\r\n<td class=\"name\"><code>interval</code></td>\r\n<td class=\"type\">\r\n<span class=\"param-type\">number</span>\r\n</td>\r\n<td class=\"description last\"><p>interval in milliseconds at which to emit process information (default: <code>20,000</code>)</p></td>\r\n</tr>\r\n</tbody>\r\n</table>\r\n</td>\r\n</tr>\r\n</tbody>\r\n</table>\r\n<dl class=\"details\">\r\n<dt class=\"tag-source\">Source:</dt>\r\n<dd class=\"tag-source\"><ul class=\"dummy\">\r\n<li>\r\n<a href=\"https://github.com/thlorenz/ps-aux/blob/master/index.js\">index.js</a>\r\n<span>, </span>\r\n<a href=\"https://github.com/thlorenz/ps-aux/blob/master/index.js#L145\">lineno 145</a>\r\n</li>\r\n</ul></dd>\r\n</dl>\r\n</dd>\r\n<dt>\r\n<h4 class=\"name\" id=\"psaux::singleton\"><span class=\"type-signature\"></span>psaux::singleton<span class=\"signature\">()</span><span class=\"type-signature\"> &rarr; {object}</span></h4>\r\n</dt>\r\n<dd>\r\n<div class=\"description\">\r\n<p>A singleton psaux instance.\r\nUse it in order to ensure that you only use one instance throughout your app.</p>\r\n<h4>Example</h4>\r\n<pre><code class=\"lang-js\">// foo.js\r\nvar psaux = require('ps-aux').singleton\r\npsaux.setInterval({ parsed: true, interval: 5000 });\r\n// bar.js\r\nvar psaux = require('ps-aux').singleton\r\npsaux.on('info', console.log);</code></pre>\r\n</div>\r\n<dl class=\"details\">\r\n<dt class=\"tag-source\">Source:</dt>\r\n<dd class=\"tag-source\"><ul class=\"dummy\">\r\n<li>\r\n<a href=\"https://github.com/thlorenz/ps-aux/blob/master/index.js\">index.js</a>\r\n<span>, </span>\r\n<a href=\"https://github.com/thlorenz/ps-aux/blob/master/index.js#L181\">lineno 181</a>\r\n</li>\r\n</ul></dd>\r\n</dl>\r\n<h5>Returns:</h5>\r\n<div class=\"param-desc\">\r\n<p>a constructed <code>psaux</code> object</p>\r\n</div>\r\n<dl>\r\n<dt>\r\nType\r\n</dt>\r\n<dd>\r\n<span class=\"param-type\">object</span>\r\n</dd>\r\n</dl>\r\n</dd>\r\n</dl>\r\n</article>\r\n</section>\r\n</div>\r\n\r\n*generated with [docme](https://github.com/thlorenz/docme)*\r\n</div>\r\n<!-- END docme generated API please keep comment here to allow auto update -->\r\n\r\n## License\r\n\r\nMIT\r\n",
+  "readmeFilename": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/thlorenz/ps-aux.git"
+  },
+  "scripts": {
+    "test": "tap test/*.js"
+  },
+  "version": "0.2.1"
+}
