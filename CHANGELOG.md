@@ -1,5 +1,17 @@
 # CHANGELOG
 
+### 0.7.0-beta - 2016-08-19
+
+> improve and fix installation script      
+
+> change to MIT license       
+
+> improve scripts execution. add run as capability     
+
+> escape shell command line scripts     
+
+> point theeye-client to npm 0.9.0
+
 ### 0.6.5-beta - 2016-08-03
 
 > update package theeye-client version , release and license

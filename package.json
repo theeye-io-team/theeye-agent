@@ -1,8 +1,8 @@
 {
-  "version": "0.6.5-beta",
+  "version": "0.7.0-beta",
   "name": "TheEye-Agent",
-  "description": "The Eye agent dependencies",
-  "author": "Facundo S. Siquot <facugon@interactar.com>",
+  "description": "TheEye Agent - TheEye Client",
+  "author": "Facugon <facugon@interactar.com>",
   "license": "MIT",
   "repository": {
     "type" : "git",
