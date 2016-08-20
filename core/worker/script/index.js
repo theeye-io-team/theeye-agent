@@ -1,7 +1,7 @@
 "use strict";
 
-const FAILURE_STATE = 'failure';
-const NORMAL_STATE = 'normal';
+var FAILURE_STATE = 'failure';
+var NORMAL_STATE = 'normal';
 
 var Worker = require('../index').define('script');
 var Script = require(APP_ROOT + '/lib/script');
@@ -22,9 +22,9 @@ Worker.prototype.initialize = function(){
 }
 
 Worker.prototype.getData = function(next) {
-  this.checkScript(this.script, error => {
+  this.checkScript(this.script,function(error){
     // if(error) return done(error);
-    this.script.run().end(result=>{
+    this.script.run().end(function(result){
     this.debug.log('result is %j',result);
       var lastline = result.lastline;
       var data = { 'data':result };

@@ -1,40 +1,68 @@
 "use strict";
 
-class ScriptOutput {
-  constructor (props) {
-    this._stdout = props.stdout||'',
-    this._stderr = props.stderr||'',
-    this._code = props.code||null,
-    this._log = props.log||'';
-    this._lastline = getLastline( this._log );
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ScriptOutput = function () {
+  function ScriptOutput(props) {
+    _classCallCheck(this, ScriptOutput);
+
+    this._stdout = props.stdout || '', this._stderr = props.stderr || '', this._code = props.code || null, this._log = props.log || '';
+    this._lastline = getLastline(this._log);
   }
 
-  toJSON(){
-    return {
-      stdout : this._stdout,
-      stderr : this._stderr,
-      code : this._code,
-      log : this._log,
-      lastline : this._lastline
+  _createClass(ScriptOutput, [{
+    key: 'toJSON',
+    value: function toJSON() {
+      return {
+        stdout: this._stdout,
+        stderr: this._stderr,
+        code: this._code,
+        log: this._log,
+        lastline: this._lastline
+      };
     }
-  }
+  }, {
+    key: 'toString',
+    value: function toString() {
+      return this._log;
+    }
+  }, {
+    key: 'stdout',
+    get: function get() {
+      return this._stdout;
+    }
+  }, {
+    key: 'stderr',
+    get: function get() {
+      return this._stderr;
+    }
+  }, {
+    key: 'code',
+    get: function get() {
+      return this._code;
+    }
+  }, {
+    key: 'log',
+    get: function get() {
+      return this._log;
+    }
+  }, {
+    key: 'lastline',
+    get: function get() {
+      return this._lastline;
+    }
+  }]);
 
-  toString(){
-    return this._log;
-  }
+  return ScriptOutput;
+}();
 
-  get stdout() { return this._stdout; }
-  get stderr() { return this._stderr; }
-  get code() { return this._code; }
-  get log() { return this._log; }
-  get lastline() { return this._lastline; }
-}
+module.exports = ScriptOutput;
 
-module.exports = ScriptOutput ;
-
-function getLastline(str){
+function getLastline(str) {
   var parsed;
-  var line = lastline( str );
+  var line = lastline(str);
   try {
     parsed = JSON.parse(line);
   } catch (e) {

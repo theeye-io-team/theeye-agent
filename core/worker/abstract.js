@@ -1,6 +1,6 @@
 "use strict";
 
-const AGENT_FAILURE_STATE = 'agent_failure';
+var AGENT_FAILURE_STATE = 'agent_failure';
 
 function Worker (connection,config) {
   if(this.constructor === Worker) {
@@ -25,7 +25,7 @@ Worker.prototype = {
     return null ;
   },
   keepAlive : function() {
-    const self = this;
+    var self = this;
     this.debug.log(
       'worker "%s" awake customer "%s"', 
       this.name,
@@ -71,8 +71,11 @@ Worker.prototype = {
       this.config.looptime/1000
     );
 
+    var self = this;
     this.timeout = setTimeout(
-      () => this.keepAlive(),
+      function(){
+        return self.keepAlive();
+      },
       this.config.looptime
     );
   },
@@ -89,26 +92,28 @@ Worker.prototype = {
     this.debug.log('worker stopped.');
   },
   downloadScript: function(script,done){
+    var self = this;
     this.debug.log('getting script %s', script.id);
     var stream = this.connection.scriptDownloadStream(script.id);
 
     this.debug.log('download stream');
-    script.save(stream,(error)=>{
+    script.save(stream,function(error){
       if(error){
-        this.debug.error(error);
+        self.debug.error(error);
         return done(error);
       }
-      this.debug.log('script downloaded');
+      self.debug.log('script downloaded');
       done();
     });
   },
   checkScript: function(script,next){
-    script.checkFile(success=>{
+    var self = this;
+    script.checkFile(function(success){
       if(!success){ // not present or outdated
-        this.debug.log('script need to be downloaded');
-        this.downloadScript(script, next);
+        self.debug.log('script need to be downloaded');
+        self.downloadScript(script, next);
       } else {
-        this.debug.log('script is ok');
+        self.debug.log('script is ok');
         next();
       }
     });
