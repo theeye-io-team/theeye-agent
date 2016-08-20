@@ -119,7 +119,8 @@ function installCrontabAndLogrotationFile {
   #ojo workaround de proxy.
   #
   echo "*/15 * * * * root http_proxy=$http_proxy /usr/bin/curl -s $agentUrl/setup.sh |bash -s $clientID '$clientSecret' $clientCustomer > /dev/null 2>&1 || true" > /etc/cron.d/agentupdate
-  echo '* * * * * root ps axu|grep -v grep|grep agent.run.sh > /dev/null 2>&1; if [ $? -eq "1"  ];then /usr/sbin/service theeye-agent restart;fi ||true ' > /etc/cron.d/agentwatchdog
+  echo 'PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin'> /etc/cron.d/agentwatchdog
+  echo '* * * * * root ps axu|grep -v grep|grep agent.run.sh > /dev/null 2>&1; if [ $? -eq "1"  ];then /usr/sbin/service theeye-agent restart;fi ||true ' >> /etc/cron.d/agentwatchdog
   echo "
   /var/log/backend/*.log {
     daily
