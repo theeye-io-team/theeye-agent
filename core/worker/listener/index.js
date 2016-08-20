@@ -44,7 +44,7 @@ Worker.prototype.getData = function(next) {
  */
 Worker.prototype.processJob = function(job)
 {
-  const worker = this;
+  var worker = this;
 
   if( job.name == 'agent:config:update' ) {
     app.once('config:up-to-date',function(result){
@@ -63,10 +63,10 @@ Worker.prototype.processJob = function(job)
       path: path,
     });
 
-    this.checkScript(script,error => {
+    this.checkScript(script,function(error){
       // if(error) return done(error);
       script.run()
-      .on('end',(result)=>{
+      .on('end',function(result){
         worker.connection
         .submitJobResult(job.id, result);
       });

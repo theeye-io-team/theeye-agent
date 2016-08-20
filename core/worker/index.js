@@ -44,8 +44,8 @@ module.exports = {
   define : function(type){
     function Worker (connection,config) {
       var name = config.name;
-      var part = type + (name?`:${name}`:'');
-      var log = `eye:agent:worker:${part}`;
+      var part = type + (name?':'+name:'');
+      var log = 'eye:agent:worker:' + part
       this.debug = {
         'log': debug(log),
         'error': debug(log + ':error')
