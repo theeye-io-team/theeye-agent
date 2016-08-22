@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### 0.7.1-beta - 2016-08-22
+
+> remove all ES6 code, for unsupported nodejs environments on servers     
+
+> fix to v0.12 support     
+
 ### 0.7.0-beta - 2016-08-19
 
 > improve and fix installation script      
