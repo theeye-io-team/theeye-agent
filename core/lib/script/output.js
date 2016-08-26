@@ -1,68 +1,54 @@
 "use strict";
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+function ScriptOutput(props){
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+  var _stdout = props.stdout||'';
+  var _stderr = props.stderr||'';
+  var _code = props.code||null;
+  var _log = props.log||'';
+  var _lastline = getLastline( _log );
 
-var ScriptOutput = function () {
-  function ScriptOutput(props) {
-    _classCallCheck(this, ScriptOutput);
-
-    this._stdout = props.stdout || '', this._stderr = props.stderr || '', this._code = props.code || null, this._log = props.log || '';
-    this._lastline = getLastline(this._log);
+  this.toJSON = function toJSON(){
+    return {
+      stdout : this.stdout,
+      stderr : this.stderr,
+      code : this.code,
+      log : this.log,
+      lastline : this.lastline
+    }
   }
 
-  _createClass(ScriptOutput, [{
-    key: 'toJSON',
-    value: function toJSON() {
-      return {
-        stdout: this._stdout,
-        stderr: this._stderr,
-        code: this._code,
-        log: this._log,
-        lastline: this._lastline
-      };
-    }
-  }, {
-    key: 'toString',
-    value: function toString() {
-      return this._log;
-    }
-  }, {
-    key: 'stdout',
-    get: function get() {
-      return this._stdout;
-    }
-  }, {
-    key: 'stderr',
-    get: function get() {
-      return this._stderr;
-    }
-  }, {
-    key: 'code',
-    get: function get() {
-      return this._code;
-    }
-  }, {
-    key: 'log',
-    get: function get() {
-      return this._log;
-    }
-  }, {
-    key: 'lastline',
-    get: function get() {
-      return this._lastline;
-    }
-  }]);
+  this.toString = function toString(){
+    return this.log;
+  }
 
-  return ScriptOutput;
-}();
+  Object.defineProperty(this,"stdout",{
+    get: function() { return _stdout; },
+    enumerable:true,
+  });
+  Object.defineProperty(this,"stderr",{
+    get: function() { return _stderr; },
+    enumerable:true,
+  });
+  Object.defineProperty(this,"code",{
+    get: function() { return _code; },
+    enumerable:true,
+  });
+  Object.defineProperty(this,"log",{
+    get: function() { return _log; },
+    enumerable:true,
+  });
+  Object.defineProperty(this,"lastline",{
+    get: function() { return _lastline; },
+    enumerable:true,
+  });
+}
 
-module.exports = ScriptOutput;
+module.exports = ScriptOutput ;
 
-function getLastline(str) {
+function getLastline(str){
   var parsed;
-  var line = lastline(str);
+  var line = lastline( str );
   try {
     parsed = JSON.parse(line);
   } catch (e) {

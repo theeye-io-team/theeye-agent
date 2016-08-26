@@ -9,17 +9,16 @@ function setenv(next)
 
   var config = require('config').get('core');
 
-  if(!process.env.THEEYE_AGENT_SCRIPT_PATH)
-    throw new Error('ERROR. env variable THEEYE_AGENT_SCRIPT_PATH undefined');
-
   var scriptsPath = process.env.THEEYE_AGENT_SCRIPT_PATH ;
-  if( ! scriptsPath ) scriptsPath = '/tmp/theeye/' ;
+  if( ! scriptsPath ) scriptsPath = __dirname + '/scripts' ;
+
+  process.env.THEEYE_AGENT_SCRIPT_PATH = scriptsPath;
 
   fs.exists(scriptsPath, function(exists){
     if( ! exists ) {
       fs.mkdirSync(scriptsPath, 0755);
     }
-    next();
+    next(scriptsPath);
   });
 }
 

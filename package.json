@@ -25,11 +25,11 @@
     "underscore": "1.8.3"
   },
   "scripts": {
-    "core": "DEBUG=* THEEYE_AGENT_SCRIPT_PATH=$PWD/scripts ./node_modules/.bin/nodemon --watch core `pwd`/core/main.js",
+    "core": "DEBUG=* ./node_modules/.bin/nodemon --watch core `pwd`/core/main.js",
     "start": "/bin/bash ./run.sh",
     "remote": "DEBUG=* NODE_ENV=remote THEEYE_AGENT_SCRIPT_PATH=$PWD/scripts ./node_modules/.bin/nodemon `pwd`/core/main.js"
   },
-  "engine": "node >= 4.*",
+  "engine": "node >= 0.12",
   "devDependencies": {
     "nodemon": "1.9.2"
   }
