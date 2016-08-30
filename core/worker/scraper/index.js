@@ -82,7 +82,7 @@ Worker.prototype.getData = function(next)
     }
 
     if( response.statusCode != response_options.status_code ){
-      return end(null,{
+      return end({
         state: FAILURE_STATE,
         event: 'scraper.status_code.error',
         data: {
@@ -97,10 +97,11 @@ Worker.prototype.getData = function(next)
     }
 
     if( response_options.parser == 'pattern' ){
+      self.debug.log('searching pattern %s',response_options.pattern);
       try{
-        var pattern = new RegExp(request_options.pattern);
+        var pattern = new RegExp(response_options.pattern);
       }catch(e){
-        end(null,{
+        end({
           state: FAILURE_STATE,
           event: 'scraper.pattern.error',
           data:{
@@ -118,7 +119,7 @@ Worker.prototype.getData = function(next)
       if( pattern.test( body ) === true ){
         end(null,{ state: NORMAL_STATE, event: 'scraper.pattern.match', });
       } else {
-        end(null,{ state: FAILURE_STATE, event: 'scraper.pattern.not_match', });
+        end({ state: FAILURE_STATE, event: 'scraper.pattern.not_match', });
       }
     } else {
       end(null,{state: NORMAL_STATE, data:{message:'request success', event: 'ok'}});
