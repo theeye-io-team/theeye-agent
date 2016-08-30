@@ -25,8 +25,8 @@ Worker.prototype.getData = function(next) {
   var self = this;
   this.checkScript(this.script,function(error){
     // if(error) return done(error);
-    self.script.run().end(function(result){
-    self.debug.log('result is %j',result);
+    self.script.run(function(result){
+      self.debug.log('result is %j',result);
       var lastline = result.lastline;
       var data = { 'data':result };
 

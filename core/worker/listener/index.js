@@ -65,8 +65,7 @@ Worker.prototype.processJob = function(job)
 
     this.checkScript(script,function(error){
       // if(error) return done(error);
-      script.run()
-      .on('end',function(result){
+      script.run(function(result){
         worker.connection
         .submitJobResult(job.id, result);
       });
