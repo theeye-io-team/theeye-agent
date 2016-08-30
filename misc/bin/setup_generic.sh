@@ -227,7 +227,9 @@ function downloadAndSetupAgent {
   installSystemVInitScript
   coloredEcho "Adding user theeye-a and giving sudoer permission ..." cyan
   useradd theeye-a || useradd theeye-a -g theeye-a
-  echo "theeye-a ALL=(ALL) NOPASSWD: ALL" > $sudoerFile
+  echo "#This is a very permisive way to execute scripts
+        #We encorauge you to set specific sudoer execution for each script you need to run as root" > $sudoerFile
+  echo "theeye-a ALL=(ALL) NOPASSWD: ALL" >> $sudoerFile
   chmod 440 $sudoerFile
   coloredEcho "Changing ownerships for destinationPath ..." cyan
   chown -R theeye-a $destinationPath
@@ -324,4 +326,5 @@ if [ $? -eq "1" ];then
        $destinationPath/run.sh
 else
   bannerPrint
+  echo "We added sudoer permission at $sudoerFile, you can move forward and customize It for matching your security criteria"
 fi
