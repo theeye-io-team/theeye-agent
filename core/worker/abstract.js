@@ -33,17 +33,18 @@ Worker.prototype = {
     );
 
     this.getData(function(error,data){
-      if(!error) {
-        data.agent_name = self.name ;
-        self.submitWork(data);
-      } else {
+      if( error ){
         self.debug.error('worker execution failed.');
+        self.debug.error(error);
         self.submitWork({
           state: AGENT_FAILURE_STATE,
           data: { error:error }
         });
         self.debug.log('stopping worker due to errors.');
         self.stop();
+      } else {
+        data.agent_name = self.name ;
+        self.submitWork(data);
       }
     });
 

@@ -49,12 +49,7 @@ module.exports = ScriptOutput ;
 function getLastline(str){
   var parsed;
   var line = lastline( str );
-  try {
-    parsed = JSON.parse(line);
-  } catch (e) {
-    parsed = line;
-  }
-  return parsed;
+  return line;
 }
 
 function lastline(str){

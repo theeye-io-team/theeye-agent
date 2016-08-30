@@ -1,10 +1,10 @@
 "use strict";
 
-var FAILURE_STATE = 'failure';
-var NORMAL_STATE = 'normal';
-
 var Worker = require('../index').define('script');
 var Script = require(APP_ROOT + '/lib/script');
+
+var FAILURE_STATE = 'failure';
+var SUCCESS_STATE = 'normal';
 
 module.exports = Worker;
 
@@ -28,21 +28,9 @@ Worker.prototype.getData = function(next) {
     self.script.run(function(result){
       self.debug.log('result is %j',result);
       var lastline = result.lastline;
-      var data = { 'data':result };
-
-      var isEvent = isEventObject(lastline);
-      if( isEvent ) {
-        data.state = lastline.event;
-        data.event = lastline;
-      } else {
-        data.state = lastline;
-      }
-
+      var data = { 'data': result };
+      data.state = lastline;
       return next(null,data);
     });
   });
-}
-
-function isEventObject(input){
-  return (input instanceof Object) && input.event ;
 }
