@@ -63,7 +63,7 @@ function installUbuntuDebianPackages {
     #Works for Ubuntu:Lucid  Precise  Saucy  Trusty  Utopic
     coloredEcho "Installing curl..." magenta
     apt-get install -y --force-yes curl sudo
-    curl -sL https://deb.nodesource.com/setup_0.12 | bash -
+    curl -sL https://deb.nodesource.com/setup_4.x | bash - || curl -sL https://deb.nodesource.com/setup_0.12 | bash - 
     apt-get install -y nodejs  >> $installLog 2>&1
     coloredEcho "Base Install Done..." magenta
 }
