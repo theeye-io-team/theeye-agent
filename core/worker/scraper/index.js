@@ -81,29 +81,50 @@ Worker.prototype.getData = function(next)
       });
     }
 
-    if( response.statusCode != response_options.status_code ){
-      return end({
-        state: FAILURE_STATE,
-        event: 'scraper.status_code.error',
-        data: {
-          message: 'status code ' + response.statusCode + ' expected to match ' + response_options.status_code,
-          expected: response_options.status_code,
-          response:{
-            status_code: response.statusCode,
-            body: body
+    if( response_options.status_code ){
+      try {
+        var statusCodeRegexp = new RegExp(response_options.status_code);
+      } catch (e) {
+        var eventName = 'scraper.status_code.invalid_regexp';
+        return end({
+          state: eventName,
+          event: eventName,
+          data: {
+            message: 'status code regexp ' + response_options.status_code + ' is not valid regular expression',
+            error: {
+              message: e.message,
+              stack: e.stack,
+              name: e.name
+            }
           }
-        }
-      });
+        });
+      }
+
+      if( statusCodeRegexp.test( response.statusCode ) === false  ){
+        return end({
+          state: FAILURE_STATE,
+          event: 'scraper.status_code.not_match',
+          data: {
+            message: 'status code ' + response.statusCode + ' expected to match ' + response_options.status_code,
+            expected: response_options.status_code,
+            response:{
+              status_code: response.statusCode,
+              body: body
+            }
+          }
+        });
+      }
     }
 
     if( response_options.parser == 'pattern' ){
       self.debug.log('searching pattern %s',response_options.pattern);
       try{
         var pattern = new RegExp(response_options.pattern);
-      }catch(e){
+      } catch(e) {
+        var eventName = 'scraper.pattern.invalid_regexp';
         end({
-          state: FAILURE_STATE,
-          event: 'scraper.pattern.error',
+          state: eventName,
+          event: eventName,
           data:{
             message:'pattern invalid: ' + e.message,
             error: {
