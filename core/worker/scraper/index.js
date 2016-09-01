@@ -32,19 +32,18 @@ function validateRequestURI(uri){
 }
 
 Worker.prototype.initialize = function() {
-  var timeout = parseInt(this.config.request_options.timeout);
-  this.config.request_options.timeout = timeout;
+  var timeout = parseInt(this.config.timeout);
+  this.config.timeout = timeout;
 
-  validateRequestURI(this.config.request_options.url);
+  validateRequestURI(this.config.url);
 
-  this.request = setupRequestObject(this.config.request_options);
+  this.request = setupRequestObject(this.config);
 }
 
 Worker.prototype.getData = function(next)
 {
   var self = this;
-  var request_options = this.config.request_options;
-  var response_options = this.config.response_options;
+  var config = this.config;
 
   function end(failure, success){
     if( success ){
@@ -61,36 +60,40 @@ Worker.prototype.getData = function(next)
         };
       }
 
-      self.debug.log("service failure");
+      self.debug.log("service failure", failure);
       return next(null,failure);
     }
   }
 
-  this.request(request_options, function(error, response, body){
+  this.request({
+    url: config.url,
+    method: config.method,
+    body: config.body,
+  }, function(error, response, body){
     if( error ) {
       self.debug.error(errstr);
       return end({
         state: FAILURE_STATE ,
-        event: 'scraper.request.error',
+        //event: 'scraper.request.error',
         data: {
           message: error.name + '. ' + error.message,
           result: response.statusCode,
-          expected: response_options.status_code,
+          expected: config.status_code,
           body: body
         }
       });
     }
 
-    if( response_options.status_code ){
+    if( config.status_code ){
       try {
-        var statusCodeRegexp = new RegExp(response_options.status_code);
+        var statusCodeRegexp = new RegExp(config.status_code);
       } catch (e) {
         var eventName = 'scraper.status_code.invalid_regexp';
         return end({
           state: eventName,
           event: eventName,
           data: {
-            message: 'status code regexp ' + response_options.status_code + ' is not valid regular expression',
+            message: 'status code regexp ' + config.status_code + ' is not valid regular expression',
             error: {
               message: e.message,
               stack: e.stack,
@@ -105,8 +108,8 @@ Worker.prototype.getData = function(next)
           state: FAILURE_STATE,
           event: 'scraper.status_code.not_match',
           data: {
-            message: 'status code ' + response.statusCode + ' expected to match ' + response_options.status_code,
-            expected: response_options.status_code,
+            message: 'status code ' + response.statusCode + ' expected to match ' + config.status_code,
+            expected: config.status_code,
             response:{
               status_code: response.statusCode,
               body: body
@@ -116,10 +119,10 @@ Worker.prototype.getData = function(next)
       }
     }
 
-    if( response_options.parser == 'pattern' ){
-      self.debug.log('searching pattern %s',response_options.pattern);
+    if( config.parser == 'pattern' ){
+      self.debug.log('searching pattern %s',config.pattern);
       try{
-        var pattern = new RegExp(response_options.pattern);
+        var pattern = new RegExp(config.pattern);
       } catch(e) {
         var eventName = 'scraper.pattern.invalid_regexp';
         end({
@@ -138,9 +141,9 @@ Worker.prototype.getData = function(next)
       }
 
       if( pattern.test( body ) === true ){
-        end(null,{ state: NORMAL_STATE, event: 'scraper.pattern.match', });
+        end(null,{ state: NORMAL_STATE });
       } else {
-        end({ state: FAILURE_STATE, event: 'scraper.pattern.not_match', });
+        end({ state: FAILURE_STATE, data:{message:'pattern does not match', code: 'scraper.pattern.not_match'} });
       }
     } else {
       end(null,{state: NORMAL_STATE, data:{message:'request success', event: 'ok'}});
