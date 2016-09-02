@@ -1,50 +1,75 @@
 "use strict";
 
-const fs = require('fs');
-const md5 = require('md5');
-const exec = require('child_process').exec;
-const join = require('path').join;
-const EventEmitter = require('events').EventEmitter;
-const debug = require('debug')('eye:lib:script');
-const shellscape = require('shell-escape');
+var fs = require('fs');
+var md5 = require('md5');
+var exec = require('child_process').exec;
+var join = require('path').join;
+var EventEmitter = require('events').EventEmitter;
+var debug = require('debug')('eye:lib:script');
+var shellscape = require('shell-escape');
 
-const FILE_MISSING = 'file_missing';
-const FILE_OUTDATED = 'file_outdated';
+var FILE_MISSING = 'file_missing';
+var FILE_OUTDATED = 'file_outdated';
 
-const ScriptOutput = require('./output');
+var ScriptOutput = require('./output');
 
-class Script extends EventEmitter {
+var util = require('util');
 
-	constructor (props) {
-    super();
+function Script(props){
 
-    this._id = props.id ,
-    this._md5 = props.md5 ,
-    this._args = props.args ,
-    this._filename = props.filename ,
-    this._path = props.path ,
-    this._runas = props.runas ;
+  EventEmitter.call(this);
 
-    if(!props.path) throw new Error('scripts path is required.');
-    this._filepath = join(this._path, this._filename);
-    this._output = null;
-	}
+  var _id = props.id ;
+  var _md5 = props.md5 ;
+  var _args = props.args ;
+  var _filename = props.filename ;
+  var _path = props.path ;
+  var _runas = props.runas ;
 
-  get id() { return this._id; }
-  get filepath() { return this._filepath; }
-  get md5() { return this._md5; }
-  get filename() { return this._filename; }
-  get args() { return this._args; }
-  get runas() { return this._runas; }
-  get path() { return this._path; }
-  get output() { return this._output; }
+  if( ! props.path ) throw new Error('scripts path is required.');
+  var _filepath = join(_path,_filename);
+  var _output = null;
 
-  checkFile(done){
-    fs.exists(this.filepath,(exists)=>{
+  Object.defineProperty(this,"id",{
+    get: function() { return _id; },
+    enumerable:true,
+  });
+  Object.defineProperty(this,"md5",{
+    get: function() { return _md5; },
+    enumerable:true,
+  });
+  Object.defineProperty(this,"filepath",{
+    get: function() { return _filepath; },
+    enumerable:true,
+  });
+  Object.defineProperty(this,"filename",{
+    get: function() { return _filename; },
+    enumerable:true,
+  });
+  Object.defineProperty(this,"args",{
+    get: function() { return _args; },
+    enumerable:true,
+  });
+  Object.defineProperty(this,"runas",{
+    get: function() { return _runas; },
+    enumerable:true,
+  });
+  Object.defineProperty(this,"path",{
+    get: function() { return _path; },
+    enumerable:true,
+  });
+  Object.defineProperty(this,"output",{
+    get: function() { return _output; },
+    enumerable:true,
+  });
+
+  this.checkFile = function(done){
+    var self = this;
+    fs.exists(this.filepath,function(exists){
       if(!exists) return done(false, FILE_MISSING);
       else {
-        var buf = fs.readFileSync(this.filepath);
-        if( md5(buf) != this.md5 ){
+        var buf = fs.readFileSync(self.filepath);
+        if( md5(buf) != self.md5 ){
           return done(false, FILE_OUTDATED);
         } else {
           return done(true);
@@ -53,29 +78,27 @@ class Script extends EventEmitter {
     });
   }
 
-  save(stream, done){
-    var writable = fs.createWriteStream(
-      this.filepath, { mode:'0755' } 
-    );
+  this.save = function(stream, done){
+    var writable = fs.createWriteStream(this.filepath, { mode:'0755' });
 
-    stream.on('error',(error)=>{
+    stream.on('error',function(error){
       if(done) done(error);
     })
     .pipe( writable )
-    .on('finish',()=>{
+    .on('finish',function(){
       if(done) done();
     });
 
     return this;
   }
 
-  run(){
-    var cli = ([ this.filepath ]).concat( this.args );
-    var partial = shellscape( cli );
+  this.run = function(end){
+    //var partial = this.filepath + ' ' + shellscape( this.args );
+    var partial = this.filepath + ' ' + this.args.join(' ');
     var formatted;
 
-    const runas = this.runas;
-    const regex = /%script%/;
+    var runas = this.runas;
+    var regex = /%script%/;
 
     if( runas && regex.test(runas) === true ){
       formatted = runas.replace(regex, partial);
@@ -83,48 +106,48 @@ class Script extends EventEmitter {
       formatted = partial;
     }
 
+    this.once('end',end);
+
     return this.execScript(formatted);
   }
 
-  execScript(script){
-    const child = exec(script);
-    const emitter = this;
-
+  this.execScript = function(script){
+    var self = this;
+    var child = exec(script);
     var partials = { stdout:'', stderr:'', log:'' };
 
     debug('running script "%s"', script);
 
-    child.stdout.on('data',(data) => {
+    child.stdout.on('data',function(data){
       partials.stdout += data;
       partials.log += data;
 
-      emitter.emit('stdout', data);
+      self.emit('stdout', data);
     });
 
-    child.stderr.on('data',(data) => {
+    child.stderr.on('data',function(data){
       partials.stderr += data;
       partials.log += data;
 
-      emitter.emit('stderr', data);
+      self.emit('stderr', data);
     });
 
-    child.on('close',(code) => {
-      this._output = new ScriptOutput({
+    child.on('close',function(code){
+      _output = new ScriptOutput({
         code: code,
         stdout: partials.stdout,
         stderr: partials.stderr,
         log: partials.log
       });
 
-      emitter.emit('end', this.output);
+      self.emit('end', _output);
     });
 
-    return emitter;
-  }
-
-  end(next){
-    this.once('end',next);
+    return self;
   }
 }
+
+util.inherits(Script, EventEmitter);
+
 
 module.exports = Script;

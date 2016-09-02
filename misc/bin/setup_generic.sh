@@ -63,7 +63,7 @@ function installUbuntuDebianPackages {
     #Works for Ubuntu:Lucid  Precise  Saucy  Trusty  Utopic
     coloredEcho "Installing curl..." magenta
     apt-get install -y --force-yes curl sudo
-    curl -sL https://deb.nodesource.com/setup_0.12 | bash -
+    curl -sL https://deb.nodesource.com/setup_4.x | bash - || curl -sL https://deb.nodesource.com/setup_0.12 | bash - 
     apt-get install -y nodejs  >> $installLog 2>&1
     coloredEcho "Base Install Done..." magenta
 }
@@ -119,7 +119,8 @@ function installCrontabAndLogrotationFile {
   #ojo workaround de proxy.
   #
   echo "*/15 * * * * root http_proxy=$http_proxy /usr/bin/curl -s $agentUrl/setup.sh |bash -s $clientID '$clientSecret' $clientCustomer > /dev/null 2>&1 || true" > /etc/cron.d/agentupdate
-  echo '* * * * * root ps axu|grep -v grep|grep agent.run.sh > /dev/null 2>&1; if [ $? -eq "1"  ];then service theeye-agent restart;fi ||true ' > /etc/cron.d/agentwatchdog
+  echo 'PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin'> /etc/cron.d/agentwatchdog
+  echo '* * * * * root ps axu|grep -v grep|grep agent.run.sh > /dev/null 2>&1; if [ $? -eq "1"  ];then /usr/sbin/service theeye-agent restart;fi ||true ' >> /etc/cron.d/agentwatchdog
   echo "
   /var/log/backend/*.log {
     daily
@@ -226,7 +227,9 @@ function downloadAndSetupAgent {
   installSystemVInitScript
   coloredEcho "Adding user theeye-a and giving sudoer permission ..." cyan
   useradd theeye-a || useradd theeye-a -g theeye-a
-  echo "theeye-a ALL=(ALL) NOPASSWD: ALL" > $sudoerFile
+  echo "#This is a very permisive way to execute scripts
+        #We encorauge you to set specific sudoer execution for each script you need to run as root" > $sudoerFile
+  echo "theeye-a ALL=(ALL) NOPASSWD: ALL" >> $sudoerFile
   chmod 440 $sudoerFile
   coloredEcho "Changing ownerships for destinationPath ..." cyan
   chown -R theeye-a $destinationPath
@@ -323,4 +326,5 @@ if [ $? -eq "1" ];then
        $destinationPath/run.sh
 else
   bannerPrint
+  echo "We added sudoer permission at $sudoerFile, you can move forward and customize It for matching your security criteria"
 fi

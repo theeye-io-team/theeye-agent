@@ -1,12 +1,12 @@
 {
-  "version": "0.6.5-beta",
+  "version": "0.7.1-beta",
   "name": "TheEye-Agent",
-  "description": "The Eye agent dependencies",
-  "author": "Facundo S. Siquot <facugon@interactar.com>",
+  "description": "TheEye Agent - TheEye Client",
+  "author": "Facugon <facugon@interactar.com>",
   "license": "MIT",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/interactar/theeye-agent.git"
+    "type": "git",
+    "url": "https://github.com/interactar/theeye-agent.git"
   },
   "dependencies": {
     "config": "1.20.1",
@@ -17,21 +17,21 @@
     "ip": "0.3.3",
     "md5": "2.1.0",
     "minimist": "0.2.0",
-    "ms-task": "^1.1.0",
     "ps-aux": "git://github.com/interactar/ps-axu.git",
-    "readable-stream": "1.0.33",
     "request": "2.64.0",
-    "theeye-client": "interactar/theeye-client.git#v0.8.3",
-    "underscore": "1.8.3",
-    "wavy": "1.0.3"
+    "shell-escape": "0.2.0",
+    "theeye-client": "0.9.5",
+    "underscore": "1.8.3"
   },
   "scripts": {
-    "core": "DEBUG=* THEEYE_AGENT_SCRIPT_PATH=$PWD/scripts ./node_modules/.bin/nodemon --watch core `pwd`/core/main.js",
+    "core": "DEBUG=* ./node_modules/.bin/nodemon --watch core `pwd`/core/main.js",
     "start": "/bin/bash ./run.sh",
     "remote": "DEBUG=* NODE_ENV=remote THEEYE_AGENT_SCRIPT_PATH=$PWD/scripts ./node_modules/.bin/nodemon `pwd`/core/main.js"
   },
-  "engine": "node >= 4.*",
+  "engine": "node >= 0.12",
   "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.0.2",
     "nodemon": "1.9.2"
   }
 }

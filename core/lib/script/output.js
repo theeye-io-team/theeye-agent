@@ -1,33 +1,47 @@
 "use strict";
 
-class ScriptOutput {
-  constructor (props) {
-    this._stdout = props.stdout||'',
-    this._stderr = props.stderr||'',
-    this._code = props.code||null,
-    this._log = props.log||'';
-    this._lastline = getLastline( this._log );
-  }
+function ScriptOutput(props){
 
-  toJSON(){
+  var _stdout = props.stdout||'';
+  var _stderr = props.stderr||'';
+  var _code = props.code||null;
+  var _log = props.log||'';
+  var _lastline = getLastline( _log );
+
+  this.toJSON = function toJSON(){
     return {
-      stdout : this._stdout,
-      stderr : this._stderr,
-      code : this._code,
-      log : this._log,
-      lastline : this._lastline
+      stdout : this.stdout,
+      stderr : this.stderr,
+      code : this.code,
+      log : this.log,
+      lastline : this.lastline
     }
   }
 
-  toString(){
-    return this._log;
+  this.toString = function toString(){
+    return this.log;
   }
 
-  get stdout() { return this._stdout; }
-  get stderr() { return this._stderr; }
-  get code() { return this._code; }
-  get log() { return this._log; }
-  get lastline() { return this._lastline; }
+  Object.defineProperty(this,"stdout",{
+    get: function() { return _stdout; },
+    enumerable:true,
+  });
+  Object.defineProperty(this,"stderr",{
+    get: function() { return _stderr; },
+    enumerable:true,
+  });
+  Object.defineProperty(this,"code",{
+    get: function() { return _code; },
+    enumerable:true,
+  });
+  Object.defineProperty(this,"log",{
+    get: function() { return _log; },
+    enumerable:true,
+  });
+  Object.defineProperty(this,"lastline",{
+    get: function() { return _lastline; },
+    enumerable:true,
+  });
 }
 
 module.exports = ScriptOutput ;
@@ -35,12 +49,7 @@ module.exports = ScriptOutput ;
 function getLastline(str){
   var parsed;
   var line = lastline( str );
-  try {
-    parsed = JSON.parse(line);
-  } catch (e) {
-    parsed = line;
-  }
-  return parsed;
+  return line;
 }
 
 function lastline(str){

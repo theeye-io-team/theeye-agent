@@ -1,4 +1,5 @@
 
+
 # TheEye Agent.
 
 
@@ -11,6 +12,12 @@ at the moments this are the supported distributions by the instalation script
 > centos   
 > redhat   
 > fedora   
+
+
+## Windows Installer.
+
+Please, go ahead and download the following agent.
+https://s3.amazonaws.com/theeye.agent/theEyeInstaller-x64.exe
 
 ### Prerequisites
 
