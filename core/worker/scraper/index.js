@@ -72,7 +72,7 @@ Worker.prototype.getData = function(next)
   // request no require options here, it is already configured
   this.request({},function(error, response, body){
     if( error ) {
-      self.debug.error(errstr);
+      self.debug.error(error);
       return end({
         state: FAILURE_STATE ,
         //event: 'scraper.request.error',
