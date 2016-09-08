@@ -8,6 +8,7 @@ var NORMAL_STATE = 'normal';
 var Worker = require('../index').define('scraper');
 
 function setupRequestObject(config){
+  var version = process.env.THEEYE_AGENT_VERSION;
   var wrapper = request.defaults({
     proxy: process.env.http_proxy,
     tunnel: false,
@@ -18,7 +19,7 @@ function setupRequestObject(config){
     method: config.method,
     body: config.body,
     headers: {
-      'User-Agent':'TheEyeAgent/' + process.env.THEEYE_AGENT_VERSION
+      'User-Agent':'TheEyeAgent/' + version.trim()
     }
   });
   return wrapper;
