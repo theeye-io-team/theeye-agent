@@ -8,17 +8,20 @@ var NORMAL_STATE = 'normal';
 var Worker = require('../index').define('scraper');
 
 function setupRequestObject(config){
-  request.defaults({
+  var wrapper = request.defaults({
     proxy: process.env.http_proxy,
     tunnel: false,
     timeout: parseInt(config.timeout),
     json: config.json||false,
     gzip: config.gzip||false,
+    url: config.url,
+    method: config.method,
+    body: config.body,
     headers: {
       'User-Agent':'TheEyeAgent/' + process.env.THEEYE_AGENT_VERSION
     }
   });
-  return request;
+  return wrapper;
 }
 
 function validateRequestURI(uri){
@@ -37,6 +40,7 @@ Worker.prototype.initialize = function() {
 
   validateRequestURI(this.config.url);
 
+  // on each cicle use the same pre-configured request object
   this.request = setupRequestObject(this.config);
 }
 
@@ -65,11 +69,8 @@ Worker.prototype.getData = function(next)
     }
   }
 
-  this.request({
-    url: config.url,
-    method: config.method,
-    body: config.body,
-  }, function(error, response, body){
+  // request no require options here, it is already configured
+  this.request({},function(error, response, body){
     if( error ) {
       self.debug.error(errstr);
       return end({
@@ -120,7 +121,6 @@ Worker.prototype.getData = function(next)
     }
 
     if( config.parser == 'pattern' ){
-      self.debug.log('searching pattern %s',config.pattern);
       try{
         var pattern = new RegExp(config.pattern);
       } catch(e) {
@@ -140,6 +140,7 @@ Worker.prototype.getData = function(next)
         });
       }
 
+      self.debug.log('testing pattern %s against %s',config.pattern, body);
       if( pattern.test( body ) === true ){
         end(null,{ state: NORMAL_STATE });
       } else {

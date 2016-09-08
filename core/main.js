@@ -25,14 +25,7 @@ require('./environment').setenv(function(){
   });
 
   var app = require('./app');
-  app.initializeSupervisorCommunication(
-    function(){
-      var worker ;
-      if( worker = process.env.SINGLE_CORE_WORKER ) {
-        app.setupSingleWorker(worker);
-      } else {
-        app.initializeAgentConfig();
-      }
-    }
-  );
+  app.initializeSupervisorCommunication(function(){
+    app.getConfiguration();
+  });
 });

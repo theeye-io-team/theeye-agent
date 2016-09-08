@@ -1,175 +1,180 @@
-"use strict";
+'use strict';
 
-var app = new (require('events').EventEmitter);
-var TheEyeClient = require("theeye-client") ;
-var Worker = require("./worker");
 var ip = require('ip');
 var os = require('os');
+var debug = require('debug')('eye:agent:app');
+var EventEmitter = require('events');
+var util = require('util');
+var TheEyeClient = require('theeye-client') ;
+var Worker = require('./worker');
 var hostname = require('./lib/hostname');
 var detectVersion = require('./lib/version');
 
-var name = 'eye:agent:app';
-var debug = require('debug')(name);
+function App () {
 
-var connection ;
-var workers = [] ;
+  EventEmitter.call(this);
 
-app.connection = connection;
-app.workers = workers;
+  var self = this;
 
-function connectSupervisor (next) {
-  var config = require('config').get('supervisor');
-  config.hostname = hostname;
+  var supervisor = require('config').get('supervisor');
+  supervisor.hostname = hostname;
 
-  connection = new TheEyeClient(config);
-  connection.refreshToken(function(error,token){
-    if(error) {
-      debug('unable to get an access token');
-      debug(error);
-      next(error);
-    } else {
-      // detect agent version
-      detectVersion(function(error,version){
-        debug('agent version %s', version);
-        connection.registerAgent({
-          version : error || !version ? 'unknown' : version,
-          info : {
-            platform   : os.platform(),
-            hostname   : hostname,
-            arch       : os.arch(),
-            os_name    : os.type(),
-            os_version : os.release(),
-            uptime     : os.uptime(),
-            ip         : ip.address()
-          }
-        },function(error,response){
-          app.host_id = response.host_id;
-          app.host_resource_id = response.resource_id;
+  var _host_id;
+  var _host_resource_id;
+  var _connection = new TheEyeClient(supervisor);
+  var _workers = [];
 
-          if(error) {
-            debug(error);
-            next(error);
-          } else {
-            debug(response);
-            next(null);
-          }
-        });
-      });
-    }
+  Object.defineProperty(this,'connection',{
+    get:function(){ return _connection; }
   });
-}
 
-var interval = 30 * 1000; // each 30 seconds retry
-var attempts = 0;
-function tryConnectSupervisor(nextFn){
-  attempts++;
-  connectSupervisor(function(error){
-    if(!error) return nextFn();
-    debug('connection failed. trying again in "%s" seconds', interval/1000);
-    var timeout = setTimeout(function(){
-      tryConnectSupervisor(nextFn);
-    }, interval);
+  Object.defineProperty(this,'workers',{
+    get:function(){ return _workers; }
   });
-}
 
-app.initializeSupervisorCommunication = function (nextFn) {
-  tryConnectSupervisor(nextFn);
-}
-
-function checkWorkersConfiguration (doneFn){
-  if(workers.length == 0){
-    debug('no workers configuration difined by supervisor');
-    debug('search workers configuration in files');
-
-    var workerscfg = require('config').get('core').workers;
-    if(!workerscfg || ! workerscfg instanceof Array || workerscfg.length == 0){
-      debug('no workers defined via config');
-    } else {
-      for(var index in workerscfg) {
-        var config = workerscfg[index];
-        config.resource_id = app.host_resource_id;
-        var worker = Worker.spawn(config, connection);
-      }
-    }
-  }
-
-  if(doneFn) doneFn(null, workers);
-}
-
-function initListener () {
-  var config = {
-    'resource_id': app.host_resource_id,
-    'type': 'listener',
-    'looptime': 15000
-  }
-  var worker = Worker.spawn(config, connection);
-  return worker ;
-}
-
-app.initializeAgentConfig = function(doneFn)
-{
-  debug('getting agent config');
-  connection.getAgentConfig(
-    hostname, 
-    function(error,config){
-      if( typeof config != 'undefined' && config != null ) {
-        app.setupResourceWorkers( config.workers );
-        var msg = 'agent monitor updated';
+  function connectSupervisor (next) {
+    _connection.refreshToken(function(error,token){
+      if(error) {
+        debug('unable to get an access token');
+        debug(error);
+        next(error);
       } else {
-        var msg = 'no agent configuration available';
-        debug(msg);
+        // detect agent version
+        detectVersion(function(error,version){
+          debug('agent version %s', version);
+          _connection.registerAgent({
+            version : error || !version ? 'unknown' : version,
+            info : {
+              platform   : os.platform(),
+              hostname   : hostname,
+              arch       : os.arch(),
+              os_name    : os.type(),
+              os_version : os.release(),
+              uptime     : os.uptime(),
+              ip         : ip.address()
+            }
+          },function(error,response){
+            _host_id = response.host_id;
+            _host_resource_id = response.resource_id;
+
+            if(error) {
+              debug(error);
+              next(error);
+            } else {
+              debug(response);
+              next(null);
+            }
+          });
+        });
       }
-
-      checkWorkersConfiguration(doneFn);
-      var worker = initListener();
-      workers.push( worker );
-
-      debug('agent started');
-      app.emit('config:up-to-date',{msg:msg});
     });
-}
+  }
 
-app.setupSingleWorker = function(type)
-{
-  debug('intializing single worker');
-  var workerscfg = require('config').get('core.workers');
+  // every 30 seconds retry;
+  var interval = 30 * 1000;
+  var attempts = 0;
+  function tryConnectSupervisor(nextFn){
+    attempts++;
+    connectSupervisor(function(error){
+      if(!error) return nextFn();
+      debug('connection failed. trying again in "%s" seconds', interval/1000);
+      var timeout = setTimeout(function(){
+        tryConnectSupervisor(nextFn);
+      }, interval);
+    });
+  }
 
-  workerscfg.forEach(function(config){
-    if(config.type == type){
-      config.resource_id = app.host_resource_id;
-      var worker = Worker.spawn(config, connection);
+  function searchConfigurationFiles (doneFn){
+    if( _workers.length == 0 ){
+      debug('no workers configuration difined by supervisor');
+      debug('searching workers configuration in files');
+
+      var workerscfg = require('config').get('core').workers;
+      if(!workerscfg || ! workerscfg instanceof Array || workerscfg.length == 0){
+        debug('no workers defined via config');
+      } else {
+        for(var index in workerscfg) {
+          var config = workerscfg[index];
+          config.resource_id = _host_resource_id;
+          var worker = Worker.spawn(config, _connection);
+          worker.run();
+        }
+      }
     }
-  });
-}
 
-app.setupResourceWorkers = function(configs)
-{
-  debug('intializing resource workers');
-  configs.forEach(function(config) {
-    var worker = Worker.spawn(
-      config, connection
+    if(doneFn) doneFn(null, _workers);
+  }
+
+  function initListener () {
+    var config = {
+      'resource_id': _host_resource_id,
+      'type': 'listener',
+      'looptime': 15000
+    }
+    var worker = Worker.spawn(config, _connection);
+    worker.run();
+    return worker;
+  }
+
+  function setupWorkers (configs) {
+    debug('intializing resource workers');
+    configs.forEach(function(config) {
+      var worker = Worker.spawn(config, _connection);
+      worker.run();
+      if(worker) _workers.push(worker);
+    });
+  }
+
+  function getConfiguration (doneFn) {
+    debug('getting agent config');
+    _connection.getAgentConfig(
+      hostname, 
+      function(error,config){
+        if(!config) {
+          var msg = 'no agent configuration available';
+          debug(msg);
+        } else {
+          setupWorkers( config.workers );
+          var msg = 'agent monitor updated';
+        }
+
+        searchConfigurationFiles(doneFn);
+        var worker = initListener();
+        _workers.push( worker );
+
+        debug('agent started');
+        self.emit('config:up-to-date',{msg:msg});
+      }
     );
-    if(worker) workers.push(worker);
+  }
+
+  this.getConfiguration = getConfiguration;
+
+  function updateWorkers () {
+    debug('stopping current resource workers');
+    _workers.forEach(function(worker,index){
+      worker.stop();
+      delete _workers[index];
+      _workers[index] = null;
+    });
+
+    _workers = []; // destroy workers.
+
+    debug('updating workers configuration');
+    getConfiguration();
+  }
+
+  this.on('config:need-update',function(){
+    updateWorkers();
   });
+
+  this.initializeSupervisorCommunication = function (nextFn) {
+    tryConnectSupervisor(nextFn);
+  }
+
+  return this;
 }
 
-app.updateResourceWorkers = function()
-{
-  debug('stopping current resource workers');
-  workers.forEach(function(worker,index){
-    worker.stop();
-    delete workers[index];
-    workers[index] = null;
-  });
+util.inherits(App,EventEmitter);
 
-  app.workers = workers = []; // destroy workers.
-
-  debug('updating workers configuration');
-  app.initializeAgentConfig();
-}
-
-app.on('config:need-update',function(){
-  app.updateResourceWorkers();
-});
-
-module.exports = app;
+module.exports = new App();
