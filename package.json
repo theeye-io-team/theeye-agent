@@ -11,7 +11,6 @@
   "dependencies": {
     "config": "~1.20.1",
     "debug": "~2.2.0",
-    "exec": "~0.2.1",
     "iar-node-stat": "git+https://github.com/interactar/node-stat.git",
     "iar-ps-list": "git+https://github.com/interactar/ps-axu.git",
     "ip": "~0.3.3",
