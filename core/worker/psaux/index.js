@@ -19,7 +19,6 @@ Worker.prototype.getData = function(next) {
       });
     }
   });
-
   psaux.clearInterval();
 };
 

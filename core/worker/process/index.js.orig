@@ -3,6 +3,10 @@ var ps = require('ps-node');
 /**
  * verify process status and informe server with statics data
  */
+//Extended for supporting windows using git-bash
+var psArgs='aux';
+ 
+
 var FAILURE_STATE = 'failure';
 var NORMAL_STATE = 'normal';
 
@@ -16,7 +20,16 @@ Worker.prototype.getData = function(next) {
   var self = this;
 
   ps.lookup({
-    grep: self.config.ps.pattern
+<<<<<<< HEAD
+    grep: self.config.ps.pattern,
+    psargs: 'aux'
+||||||| merged common ancestors
+    command: self.config.ps.pattern,
+    psargs: 'aux'
+=======
+    command: self.config.ps.pattern,
+    psargs: psArgs
+>>>>>>> windows
   },function(error, pslist){
     var event = { state: '', data: pslist };
 
