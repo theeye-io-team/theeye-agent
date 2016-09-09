@@ -4,15 +4,17 @@ var config = require('config').get('core');
 var fs = require('fs');
 var path = require('path');
 var md5 = require('md5');
-var app = require(APP_ROOT + '/app');
+var App = require(APP_ROOT + '/app');
 var Script = require(APP_ROOT + '/lib/script');
+var Worker = require('../index');
+var extend = require('util')._extend;
 
 /**
  *
- * just listen to supervisor orders
+ * this listen to orders and also send keep alive to the supervisor
  *
  */
-var Worker = module.exports = require('../index').define('listener');
+var Listener = module.exports = Worker.define('listener');
 
 /**
  * often the resource id is required. 
@@ -20,7 +22,7 @@ var Worker = module.exports = require('../index').define('listener');
  * @param Function (optional) next
  * @return String resource id
  */
-Worker.prototype.getId = function(next) {
+Listener.prototype.getId = function(next) {
   return this.config.resource_id ;
 };
 
@@ -29,7 +31,7 @@ Worker.prototype.getId = function(next) {
  * @param Function next
  * @return null
  */
-Worker.prototype.getData = function(next) {
+Listener.prototype.getData = function(next) {
   var self = this;
   var data = { 
     state : { message : "agent running" } 
@@ -42,35 +44,87 @@ Worker.prototype.getData = function(next) {
  * @param Job data
  * @return null
  */
-Worker.prototype.processJob = function(job)
-{
+Listener.prototype.processJob = function(job) {
   var worker = this;
-
-  if( job.name == 'agent:config:update' ) {
-    app.once('config:up-to-date',function(result){
-      worker.connection
-        .submitJobResult(job.id, result);
-    });
-    app.emit('config:need-update');
-  } else {
-    var path = process.env.THEEYE_AGENT_SCRIPT_PATH;
-    var script = new Script({
-      id: job.script.id,
-      args: job.task.script_arguments,
-      runas: job.task.script_runas,
-      filename: job.script.filename,
-      md5: job.script.md5,
-      path: path,
-    });
-
-    this.checkScript(script,function(error){
-      // if(error) return done(error);
-      script.run(function(result){
-        worker.connection
-        .submitJobResult(job.id, result);
-      });
-    });
+  /**
+  *
+  * job factory
+  *
+  */
+  function Job (attribs) {
+    // @TODO this should be a job type to add to the factory
+    if( attribs.name == 'agent:config:update' ) {
+      return new Job.AgentUpdateJob(attribs);
+    } else {
+      var name = attribs._type;
+      if(!name) throw new Error('invalid job. no type specified');
+      return new Job[name](attribs);
+    }
   }
+  /**
+  *
+  * agent config update job
+  *
+  */
+  Job.AgentUpdateJob = function(specs){
+    this.id = specs.id;
+    this.process = function(done){
+      App.once('config:up-to-date',done);
+      App.emit('config:need-update');
+    }
+    return this;
+  }
+  /**
+  *
+  * scraper job
+  *
+  */
+  Job.ScraperJob = function(specs) {
+    this.id = specs.id;
+    this.process = function(done){
+      var config = extend(specs.task,{ type: 'scraper' });
+      var scraper = Worker.spawn(config, App.connection);
+      scraper.getData(function(err,result){
+        return done(result);
+      });
+    }
+    return this;
+  }
+  /**
+  *
+  * script job
+  *
+  */
+  Job.ScriptJob = function(specs) {
+    this.id = specs.id;
+    this.process = function(done){
+      var path = process.env.THEEYE_AGENT_SCRIPT_PATH;
+      var script = new Script({
+        id       : specs.script.id,
+        args     : specs.task.script_arguments,
+        runas    : specs.task.script_runas,
+        filename : specs.script.filename,
+        md5      : specs.script.md5,
+        path     : path,
+      });
+      worker.checkScript(script,function(error){
+        script.run(function(result){
+          done(result);
+        });
+      });
+    }
+    return this;
+  }
+
+  /**
+  *
+  * parse job data
+  *
+  */
+  var job = new Job(job);
+  job.process(function(result){
+    worker.connection.submitJobResult(job.id, result);
+  });
 }
 
 /**
@@ -78,25 +132,23 @@ Worker.prototype.processJob = function(job)
  * @param Function next
  * @return null
  */
-Worker.prototype.keepAlive = function()
-{
-  var worker = this;
-  var resource = worker.supervisor_resource;
+Listener.prototype.keepAlive = function() {
+  var self = this;
+  var resource = this.supervisor_resource;
 
-  worker.debug.log('querying jobs...');
-  worker.connection.getNextPendingJob({}, function(error,job){
+  this.debug.log('querying jobs...');
+  this.connection.getNextPendingJob({}, function(error,job){
     if(error) {
-      worker.debug.error('supervisor response error');
-      worker.debug.error(error);
+      self.debug.error('supervisor response error');
+      self.debug.error(error);
     } else {
-      if(job) worker.processJob(job);
-      else worker.debug.log('no job to process');
+      if(job) self.processJob(job);
+      else self.debug.log('no job to process');
     }
   });
 
   // send keep alive
-  worker.debug.log('sending keep alive...');
-  worker.connection.sendAgentKeepAlive();
-
-  worker.sleep();
+  this.debug.log('sending keep alive...');
+  this.connection.sendAgentKeepAlive();
+  this.sleep();
 };

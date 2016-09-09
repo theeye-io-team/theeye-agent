@@ -11,7 +11,7 @@ var logger = {
 
 module.exports = {
   /**
-   * Create an instance of a worker and put to run
+   * Create and return an instance of worker
    * @param Object config
    * @param Connection connection
    * @return Worker instance
@@ -31,10 +31,7 @@ module.exports = {
     var Class = require(cname);
 
     logger.log('creating worker %s',config.type);
-    var instance = new Class(connection, config);
-    // put it to work
-    instance.run();
-    return instance;
+    return new Class(connection, config);
   },
   /**
    * Define a custom worker structure
