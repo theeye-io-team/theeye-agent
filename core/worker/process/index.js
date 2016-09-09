@@ -1,4 +1,4 @@
-var ps = require('iar-ps');
+var ps = require('ps-node');
 
 /**
  * verify process status and informe server with statics data
@@ -15,10 +15,8 @@ Worker.prototype.getId = function(next) {
 Worker.prototype.getData = function(next) {
   var self = this;
 
-  self.debug.log('process config %j', self.config);
-
   ps.lookup({
-    command: self.config.ps.pattern,
+    grep: self.config.ps.pattern,
     psargs: 'aux'
   },function(error, pslist){
     var event = { state: '', data: pslist };
@@ -32,6 +30,7 @@ Worker.prototype.getData = function(next) {
     }
     else
     {
+      self.debug.log("success");
       event.state = NORMAL_STATE;
       return next(null,event);
     }
