@@ -1,5 +1,5 @@
 {
-  "version": "0.8.0-beta",
+  "version": "0.9.0-beta",
   "name": "TheEye-Agent",
   "description": "TheEye Agent - TheEye Client",
   "author": "Facugon <facugon@interactar.com>",
@@ -33,5 +33,6 @@
     "chai": "^3.5.0",
     "mocha": "^3.0.2",
     "nodemon": "1.9.2"
-  }
+  },
+  "os" : [ "win32", "win64", "linux" ]
 }

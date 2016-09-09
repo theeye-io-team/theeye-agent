@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### 0.9.0-beta - 2016-09-09
+
+> merge windows branch into demo     
+
+> added full support for windows operating systemas. systems stats and process , grep process support , run scripts 
 
 ### 0.8.0-beta - 2016-09-08
 
