@@ -47,12 +47,6 @@ function ScriptOutput(props){
 module.exports = ScriptOutput ;
 
 function getLastline(str){
-  var parsed;
-  var line = lastline( str );
-  return line;
-}
-
-function lastline(str){
   var fromIndex ;
 
   if(!str) return str;
@@ -71,5 +65,6 @@ function lastline(str){
   } else {
     line = str.substring(idx).trim();
   }
+
   return line.replace(/(\n|\r)+$/, '').trim();
 }
