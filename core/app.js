@@ -3,7 +3,7 @@
 var ip = require('ip');
 var os = require('os');
 var debug = require('debug')('eye:agent:app');
-var EventEmitter = require('events');
+var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var TheEyeClient = require('theeye-client') ;
 var Worker = require('./worker');
@@ -175,6 +175,6 @@ function App () {
   return this;
 }
 
-util.inherits(App,EventEmitter);
+util.inherits(App, EventEmitter);
 
 module.exports = new App();

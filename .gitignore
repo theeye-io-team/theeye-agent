@@ -6,3 +6,4 @@ config/*
 scripts
 libs
 npm-debug.log
+*.js.orig
