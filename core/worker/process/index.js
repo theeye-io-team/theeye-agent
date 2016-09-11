@@ -16,7 +16,8 @@ Worker.prototype.getData = function(next) {
   var self = this;
 
   ps.lookup({
-    grep: self.config.ps.pattern
+    grep: self.config.ps.pattern,
+    psargs: 'aux'
   },function(error, pslist){
     var event = { state: '', data: pslist };
 
