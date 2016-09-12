@@ -16,7 +16,7 @@
     "ip": "~0.3.3",
     "md5": "~2.1.0",
     "minimist": "~0.2.0",
-    "ps-node": "git+https://github.com/theeye-io-team/ps.git",
+    "ps-node": "git+https://github.com/interactar/ps.git",
     "request": "~2.74.0",
     "shell-escape": "~0.2.0",
     "theeye-client": "~0.9.6",
@@ -33,5 +33,9 @@
     "mocha": "^3.0.2",
     "nodemon": "1.9.2"
   },
-  "os" : [ "win32", "win64", "linux" ]
+  "os": [
+    "win32",
+    "win64",
+    "linux"
+  ]
 }

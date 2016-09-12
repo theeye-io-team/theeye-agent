@@ -16,12 +16,15 @@ Worker.prototype.getData = function(next) {
   var self = this;
 
   ps.lookup({
-    grep: self.config.ps.pattern,
+    command: this.config.ps.pattern,
     psargs: 'aux'
   },function(error, pslist){
     var event = { state: '', data: pslist };
 
-    if(error) return next(error);
+    if(error) {
+      event.state = FAILURE_STATE;
+      return next(error);
+    }
     else if( pslist.length == 0 ) // process is not running
     {
       self.debug.log("process '%s' check failed. new state '%s' !!", self.config.name, FAILURE_STATE);
