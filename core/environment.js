@@ -4,8 +4,6 @@ function setenv(next)
 {
   var env = process.env.NODE_ENV ;
 
-  var config = require('config').get('core');
-
   var scriptsPath = process.env.THEEYE_AGENT_SCRIPT_PATH ;
   if( ! scriptsPath ) scriptsPath = __dirname + '/../scripts' ;
 

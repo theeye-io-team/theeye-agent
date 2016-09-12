@@ -16,7 +16,7 @@ function App () {
 
   var self = this;
 
-  var supervisor = require('config').get('supervisor');
+  var supervisor = require('config').supervisor||{};
   supervisor.hostname = hostname;
 
   var _host_id;
