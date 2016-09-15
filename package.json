@@ -19,7 +19,7 @@
     "ps-node": "git+https://github.com/interactar/ps.git",
     "request": "~2.74.0",
     "shell-escape": "~0.2.0",
-    "theeye-client": "~0.9.6",
+    "theeye-client": "0.9.7",
     "underscore": "~1.8.3"
   },
   "scripts": {
@@ -29,9 +29,9 @@
   },
   "engine": "node >= 0.12",
   "devDependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^3.0.2",
-    "nodemon": "1.9.2"
+    "chai": "~3.5.0",
+    "mocha": "~3.0.2",
+    "nodemon": "~1.9.2"
   },
   "os": [
     "win32",

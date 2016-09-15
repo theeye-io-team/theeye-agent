@@ -76,12 +76,15 @@ Worker.prototype.getData = function(next)
       self.debug.error(error);
       return end({
         state: FAILURE_STATE ,
-        //event: 'scraper.request.error',
+        event: 'scraper.request.error',
         data: {
           message: error.name + '. ' + error.message,
-          result: response.statusCode,
           expected: config.status_code,
-          body: body
+          response: {
+            status_code: response.statusCode,
+            body: body,
+            headers: response.headers
+          }
         }
       });
     }
@@ -112,9 +115,10 @@ Worker.prototype.getData = function(next)
           data: {
             message: 'status code ' + response.statusCode + ' expected to match ' + config.status_code,
             expected: config.status_code,
-            response:{
+            response: {
               status_code: response.statusCode,
-              body: body
+              body: body,
+              headers: response.headers
             }
           }
         });
@@ -143,12 +147,47 @@ Worker.prototype.getData = function(next)
 
       self.debug.log('testing pattern %s against %s',config.pattern, body);
       if( pattern.test( body ) === true ){
-        end(null,{ state: NORMAL_STATE });
+        end(null,{
+          state: NORMAL_STATE,
+          event: 'success',
+          data:{ 
+            message:'request success', 
+            event:'success', 
+            response: {
+              status_code: response.statusCode,
+              body: body,
+              headers: response.headers
+            }
+          } 
+        });
       } else {
-        end({ state: FAILURE_STATE, data:{message:'pattern does not match', code: 'scraper.pattern.not_match'} });
+        end({
+          state: FAILURE_STATE,
+          event: 'scraper.pattern.not_match',
+          data:{
+            message:'pattern does not match',
+            code: 'scraper.pattern.not_match',
+            response: {
+              status_code: response.statusCode,
+              body: body,
+              headers: response.headers
+            }
+          }
+        });
       }
     } else {
-      end(null,{state: NORMAL_STATE, data:{message:'request success', event: 'ok'}});
+      end(null,{
+        state: NORMAL_STATE,
+        event: 'success', 
+        data:{ 
+          message:'request success', 
+          response: {
+            status_code: response.statusCode,
+            body: body,
+            headers: response.headers
+          }
+        } 
+      });
     }
   });
 }
