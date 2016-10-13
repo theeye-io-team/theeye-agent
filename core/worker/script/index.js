@@ -3,9 +3,6 @@
 var Worker = require('../index').define('script');
 var Script = require(APP_ROOT + '/lib/script');
 
-var FAILURE_STATE = 'failure';
-var SUCCESS_STATE = 'normal';
-
 module.exports = Worker;
 
 Worker.prototype.initialize = function(){
@@ -26,11 +23,25 @@ Worker.prototype.getData = function(next) {
   this.checkScript(this.script,function(error){
     // if(error) return done(error);
     self.script.run(function(result){
-      self.debug.log('result is %j',result);
       var lastline = result.lastline;
-      var data = { 'data': result };
-      data.state = lastline;
-      return next(null,data);
+      var objOutput;
+      try {
+        objOutput = JSON.parse(lastline);
+      } catch (e) {
+        objOutput = null;
+      }
+
+      var payload = { 'script_result': result };
+      if( objOutput ){
+        payload.state = objOutput.state || undefined;
+        payload.data = objOutput.data || objOutput;
+      } else {
+        payload.state = lastline;
+        payload.data = undefined;
+      }
+
+      self.debug.log('execution result is %j', payload);
+      return next(null,payload);
     });
   });
 }

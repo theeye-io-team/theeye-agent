@@ -1,0 +1,42 @@
+{
+  "name": "theeye-client",
+  "author": {
+    "name": "Facundo",
+    "email": "facugon@interactar.com"
+  },
+  "license": "MIT",
+  "version": "0.9.6",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/interactar/theeye-client.git"
+  },
+  "description": "TheEye API Client",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "debug": "2.2.0",
+    "request": "2.55.0"
+  },
+  "bugs": {
+    "url": "https://github.com/interactar/theeye-client/issues"
+  },
+  "homepage": "https://github.com/interactar/theeye-client#readme",
+  "directories": {
+    "example": "example"
+  },
+  "devDependencies": {
+    "mocha": "2.3.4"
+  },
+  "keywords": [
+    "Theeye",
+    "Client"
+  ],
+  "readme": "# THEEYE-CLIENT\n\nThis client handle authentication steps required to connect the api(theeye-supervisor), so you do not have to worry about that.\n\n## PreRequisites\n\nRegister in theeye.io, get a customer and credentials to connect.    \nYou will be able to connect directly using your username and password.        \n\n## How to use.\n\nThe client main purpose is to stablish the connection with the supervisor. For that end it need the connection credentials.\n\nThere are two ways of passing connection credentials. One is with configuration options via constructor. \n\nFollowing parameters are required:\n\n> api_url     \n> client_customer       \n> client_id (username)       \n> client_secret (password)      \n\nthe `access_token` is optional. you can provide it if you have one.\n\n\n```javascript\n// initialize credentials\nvar options = {\n  api_url: https://api.theeye.io,\n  client_id: fulanito,\n  client_secret: mipassword,\n  client_customer: facugon,\n  access_token: null\n};\n\nvar client = new TheEye(options);\n// client is ready to make a call\n```\n\nThe other way is by defining connection credentials via shell environment.\n\n> THEEYE_SUPERVISOR_API_URL    \n> THEEYE_SUPERVISOR_CLIENT_ID    \n> THEEYE_SUPERVISOR_CLIENT_SECRET    \n> THEEYE_SUPERVISOR_CLIENT_CUSTOMER    \n\n```sh\nTHEEYE_SUPERVISOR_API_URL='https://api.theeye.io' node ./yourscript.js\n```\n\nthen in `yourscript.js` just `require` and then instantiate the client:\n\n`const client = new TheEye();`\n\nIf all the necesary data is set and correct, `client` will be ready to make requests to the API.\n\nSee the example script in `example` directory\n",
+  "readmeFilename": "README.md",
+  "gitHead": "f54e4ae03b2316ff03ead6a78941e82ad2bb6935",
+  "_id": "theeye-client@0.9.6",
+  "_shasum": "522303ca9b299357a682bcbc40df517853bda3c6",
+  "_from": "theeye-client@>=0.9.6 <0.10.0"
+}

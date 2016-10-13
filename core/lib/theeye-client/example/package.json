@@ -1,0 +1,20 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "description": "theeye client sample code",
+  "main": "index.js",
+  "scripts": {
+    "start":"node .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "theeye",
+    "client",
+    "sample"
+  ],
+  "author": "Facugon facugon@interactar.com",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "theeye-client": "git+https://github.com/interactar/theeye-client.git"
+  }
+}

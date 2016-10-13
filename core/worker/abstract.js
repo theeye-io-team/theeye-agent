@@ -43,7 +43,7 @@ Worker.prototype = {
         self.debug.log('stopping worker due to errors.');
         self.stop();
       } else {
-        data.agent_name = self.name ;
+        data.monitor_name = self.name ;
         self.submitWork(data);
       }
     });

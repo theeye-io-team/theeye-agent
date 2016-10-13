@@ -17,7 +17,7 @@ Worker.prototype.getData = function(next) {
 
   ps.lookup({
     command: this.config.ps.pattern,
-    psargs: 'aux'
+    psargs: 'axo pid,ppid,user,command'
   },function(error, pslist){
     var event = { state: '', data: pslist };
 
