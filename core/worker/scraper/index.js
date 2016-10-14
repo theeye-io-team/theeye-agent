@@ -130,7 +130,7 @@ Worker.prototype.getData = function(next)
         var pattern = new RegExp(config.pattern);
       } catch(e) {
         var eventName = 'scraper.pattern.invalid_regexp';
-        end({
+        return end({
           state: eventName,
           event: eventName,
           data:{
@@ -146,8 +146,8 @@ Worker.prototype.getData = function(next)
       }
 
       self.debug.log('testing pattern %s against %s',config.pattern, body);
-      if( pattern.test( body ) === true ){
-        end(null,{
+      if( new RegExp(config.pattern).test( body ) === true ){
+        return end(null,{
           state: NORMAL_STATE,
           event: 'success',
           data:{ 
@@ -161,7 +161,7 @@ Worker.prototype.getData = function(next)
           } 
         });
       } else {
-        end({
+        return end({
           state: FAILURE_STATE,
           event: 'scraper.pattern.not_match',
           data:{
@@ -176,7 +176,7 @@ Worker.prototype.getData = function(next)
         });
       }
     } else {
-      end(null,{
+      return end(null,{
         state: NORMAL_STATE,
         event: 'success', 
         data:{ 
