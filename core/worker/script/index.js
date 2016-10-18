@@ -10,7 +10,7 @@ Worker.prototype.initialize = function(){
   var config = this.config.script;
   this.script = new Script({
     id: config.id,
-    args: config.arguments,
+    args: config.arguments||[],
     runas: config.runas,
     filename: config.filename,
     md5: config.md5,

@@ -93,8 +93,15 @@ function Script(props){
   }
 
   this.run = function(end){
-    //var partial = this.filepath + ' ' + shellscape( this.args );
-    var partial = this.filepath + ' ' + this.args.join(' ');
+
+    var args;
+    if( this.args && Array.isArray(this.args) ){
+      args = ' ' + this.args.join(' ');
+    } else {
+      args = '';
+    }
+
+    var partial = this.filepath + args ;
     var formatted;
 
     var runas = this.runas;

@@ -30,7 +30,7 @@ module.exports = {
     var cname = [ APP_ROOT, 'worker', config.type ].join('/');
     var Class = require(cname);
 
-    logger.log('creating worker %s',config.type);
+    logger.log('creating worker %s', config.type);
     return new Class(connection, config);
   },
   /**

@@ -61,11 +61,9 @@ Listener.prototype.processJob = function(job) {
       return new Job[name](attribs);
     }
   }
-  /**
-  *
-  * agent config update job
-  *
-  */
+  //
+  // agent config update job
+  //
   Job.AgentUpdateJob = function(specs){
     this.id = specs.id;
     this.process = function(done){
@@ -74,15 +72,15 @@ Listener.prototype.processJob = function(job) {
     }
     return this;
   }
-  /**
-  *
-  * scraper job
-  *
-  */
+  //
+  // scraper job
+  //
   Job.ScraperJob = function(specs) {
     this.id = specs.id;
     this.process = function(done){
+      // prepare config
       var config = extend(specs.task,{ type: 'scraper' });
+      // invoke worker
       var scraper = Worker.spawn(config, App.connection);
       scraper.getData(function(err,result){
         return done(result);
@@ -90,27 +88,28 @@ Listener.prototype.processJob = function(job) {
     }
     return this;
   }
-  /**
-  *
-  * script job
-  *
-  */
+  //
+  // script job
+  //
   Job.ScriptJob = function(specs) {
     this.id = specs.id;
     this.process = function(done){
-      var path = process.env.THEEYE_AGENT_SCRIPT_PATH;
-      var script = new Script({
-        id       : specs.script.id,
-        args     : specs.task.script_arguments,
-        runas    : specs.task.script_runas,
-        filename : specs.script.filename,
-        md5      : specs.script.md5,
-        path     : path,
-      });
-      worker.checkScript(script,function(error){
-        script.run(function(result){
-          done(result);
-        });
+      // prepare config
+      var config = {
+        disabled: false,
+        type: 'script',
+        script: {
+          id: specs.script.id,
+          args: specs.task.script_arguments,
+          runas: specs.task.script_runas,
+          filename: specs.script.filename,
+          md5: specs.script.md5,
+        }
+      };
+      // invoke worker
+      var script = Worker.spawn(config, App.connection);
+      script.getData(function(err,result){
+        return done(result);
       });
     }
     return this;
