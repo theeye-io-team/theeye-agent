@@ -100,7 +100,7 @@ Listener.prototype.processJob = function(job) {
         type: 'script',
         script: {
           id: specs.script.id,
-          args: specs.task.script_arguments,
+          arguments: specs.task.script_arguments,
           runas: specs.task.script_runas,
           filename: specs.script.filename,
           md5: specs.script.md5,
