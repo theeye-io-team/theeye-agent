@@ -1,5 +1,17 @@
 # CHANGELOG
 
+### 0.9.1-beta - 2016-09-24
+
+> include theeye client into source . no more npm dependency      
+
+> call script worker when arrive a script job      
+
+> validate scraper patter before use and break worker is error found        
+
+> new version of ps-list package released           
+
+> added default ps-node arguments         
+
 ### 0.9.0-beta - 2016-09-09
 
 > merge windows branch into demo     
