@@ -66,7 +66,7 @@ TheEyeClient.prototype = {
     connection.request = request.defaults({
       proxy: process.env.http_proxy,
       tunnel: false,
-      timeout: 5000,
+      timeout: (options.timeout||5000),
       json: true,
       gzip: true,
       headers: {
