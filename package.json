@@ -17,6 +17,7 @@
     "md5": "~2.1.0",
     "ps-node": "git+https://github.com/interactar/ps.git",
     "request": "~2.74.0",
+    "shell-escape": "~0.2.0",
     "underscore": "~1.8.3"
   },
   "scripts": {
@@ -28,7 +29,8 @@
   "devDependencies": {
     "chai": "~3.5.0",
     "mocha": "~3.0.2",
-    "nodemon": "~1.9.2"
+    "nodemon": "~1.9.2",
+    "npm3": "~1.1.0"
   },
   "os": [
     "win32",
