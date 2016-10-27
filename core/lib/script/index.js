@@ -6,7 +6,7 @@ var exec = require('child_process').exec;
 var join = require('path').join;
 var EventEmitter = require('events').EventEmitter;
 var debug = require('debug')('eye:lib:script');
-var shellscape = require('shell-escape');
+//var shellscape = require('shell-escape');
 
 var FILE_MISSING = 'file_missing';
 var FILE_OUTDATED = 'file_outdated';
@@ -99,9 +99,10 @@ function Script(props){
     var args;
     if( this.args && Array.isArray(this.args) ){
       if(platform=='linux'){
-      	args = shellscape( this.args );
-      }else if( /win/.test(platform) ){
-      	args = ( this.args.map(function(arg){ return '"' + arg + '"'; }) ).join(' ');
+        //args = shellscape( this.args );
+        args = this.args.join(' ');
+      } else if( /win/.test(platform) ) {
+        args = ( this.args.map(function(arg){ return '"' + arg + '"'; }) ).join(' ');
       }
     } else {
       args = '';
