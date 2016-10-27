@@ -21,12 +21,40 @@ function Script(props){
 
   EventEmitter.call(this);
 
+  this.prepareArguments = function(args){
+    var parsed;
+    if( args && Array.isArray(args) ){
+
+      /*
+      if(platform=='linux'){
+        //args = shellscape( this.args );
+
+        parsed = args.join(' '); // no shell scape, yet. anything allowed
+
+      } else if( /win/.test(platform) ) {
+
+        parsed = ( args.map(function(arg){ return '"' + arg + '"'; }) ).join(' ');
+
+      }
+      */
+
+      // escape spaces both for linux and windows
+      parsed = args.map(function(arg){
+        return ( /\s/.test(arg) ) ? ('"' + arg + '"') : arg ; 
+      }).join(' ');
+
+    } else {
+      parsed = '';
+    }
+    return parsed;
+  }
+
   var _id = props.id ;
   var _md5 = props.md5 ;
-  var _args = props.args ;
   var _filename = props.filename ;
   var _path = props.path ;
   var _runas = props.runas ;
+  var _args = this.prepareArguments(props.args);
 
   if( ! props.path ) throw new Error('scripts path is required.');
   var _filepath = join(_path,_filename);
@@ -50,6 +78,10 @@ function Script(props){
   });
   Object.defineProperty(this,"args",{
     get: function() { return _args; },
+    set: function(args) {
+      _args = this.prepareArguments(args);
+      return this;
+    },
     enumerable:true,
   });
   Object.defineProperty(this,"runas",{
@@ -96,19 +128,7 @@ function Script(props){
 
   this.run = function(end){
 
-    var args;
-    if( this.args && Array.isArray(this.args) ){
-      if(platform=='linux'){
-        //args = shellscape( this.args );
-        args = this.args.join(' ');
-      } else if( /win/.test(platform) ) {
-        args = ( this.args.map(function(arg){ return '"' + arg + '"'; }) ).join(' ');
-      }
-    } else {
-      args = '';
-    }
-
-    var partial = this.filepath + ' ' + args ;
+    var partial = this.filepath + ' ' + this.args ;
     var formatted;
 
     var runas = this.runas;
@@ -159,9 +179,9 @@ function Script(props){
 
     return self;
   }
+
 }
 
 util.inherits(Script, EventEmitter);
-
 
 module.exports = Script;
