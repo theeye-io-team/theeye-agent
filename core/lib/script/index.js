@@ -11,6 +11,8 @@ var shellscape = require('shell-escape');
 var FILE_MISSING = 'file_missing';
 var FILE_OUTDATED = 'file_outdated';
 
+var platform = require('os').platform();
+
 var ScriptOutput = require('./output');
 
 var util = require('util');
@@ -96,12 +98,16 @@ function Script(props){
 
     var args;
     if( this.args && Array.isArray(this.args) ){
-      args = ' ' + this.args.join(' ');
+      if(platform=='linux'){
+      	args = shellscape( this.args );
+      }else if( /win/.test(platform) ){
+      	args = ( this.args.map(function(arg){ return '"' + arg + '"'; }) ).join(' ');
+      }
     } else {
       args = '';
     }
 
-    var partial = this.filepath + args ;
+    var partial = this.filepath + ' ' + args ;
     var formatted;
 
     var runas = this.runas;
