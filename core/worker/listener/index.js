@@ -174,7 +174,7 @@ Listener.prototype.getJob = function (done) {
     },
     success:function(body){
       if( Array.isArray(body.jobs) && body.jobs.length > 0 ){
-        done(null, body.jobs);
+        done(null, body.jobs[0]);
       } else {
         done();
       }
