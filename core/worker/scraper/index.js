@@ -146,7 +146,8 @@ Worker.prototype.getData = function(next)
       }
 
       self.debug.log('testing pattern %s against %s',config.pattern, body);
-      if( new RegExp(config.pattern).test( body ) === true ){
+      var bodystr = JSON.stringify(body);
+      if( new RegExp(config.pattern).test( bodystr ) === true ){
         return end(null,{
           state: NORMAL_STATE,
           event: 'success',

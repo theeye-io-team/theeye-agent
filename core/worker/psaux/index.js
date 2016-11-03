@@ -19,9 +19,15 @@ Worker.prototype.getData = function(next) {
       });
     }
   });
+
   psaux.clearInterval();
 };
 
 Worker.prototype.submitWork = function(data,next) {
-  this.connection.submitPsaux(data, next);
+  this.connection.create({
+    route: '/:customer/psaux/:hostname',
+    body: data,
+    failure:function(err){ next&&next(err); },
+    success:function(body){ next&&next(null,body); }
+  });
 };

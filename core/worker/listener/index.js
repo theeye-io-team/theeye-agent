@@ -4,17 +4,17 @@ var config = require('config').get('core');
 var fs = require('fs');
 var path = require('path');
 var md5 = require('md5');
-var App = require(APP_ROOT + '/app');
-var Script = require(APP_ROOT + '/lib/script');
-var Worker = require('../index');
 var extend = require('util')._extend;
+var App = require(global.APP_ROOT + '/app');
+var Script = require(global.APP_ROOT + '/lib/script');
+var Worker = require('../index');
 
 /**
  *
  * this listen to orders and also send keep alive to the supervisor
  *
  */
-var Listener = module.exports = Worker.define('listener');
+var Listener = Worker.define('listener');
 
 /**
  * often the resource id is required. 
@@ -32,11 +32,10 @@ Listener.prototype.getId = function(next) {
  * @return null
  */
 Listener.prototype.getData = function(next) {
-  var self = this;
-  var data = { 
-    state : { message : "agent running" } 
-  };
-  return next(null,data);
+  return next(null,{
+    state: 'success',
+    data: { message : "agent running" }
+  });
 };
 
 /**
@@ -131,12 +130,12 @@ Listener.prototype.processJob = function(job) {
  * @param Function next
  * @return null
  */
-Listener.prototype.keepAlive = function() {
+Listener.prototype.keepAlive = function () {
   var self = this;
   var resource = this.supervisor_resource;
 
   this.debug.log('querying jobs...');
-  this.connection.getNextPendingJob({}, function(error,job){
+  this.getJob(function(error,job){
     if(error) {
       self.debug.error('supervisor response error');
       self.debug.error(error);
@@ -148,6 +147,39 @@ Listener.prototype.keepAlive = function() {
 
   // send keep alive
   this.debug.log('sending keep alive...');
-  this.connection.sendAgentKeepAlive();
+  this.sendKeepAlive();
   this.sleep();
 };
+
+Listener.prototype.sendKeepAlive = function () {
+  var self = this;
+  this.connection.update({
+    route:'/:customer/agent/:hostname',
+    failure:function(err){
+      self.debug.error(err);
+    },
+    success:function(body){}
+  });
+}
+
+Listener.prototype.getJob = function (done) {
+  this.connection.fetch({
+    route:'/:customer/job',
+    query: {
+      process_next: 1,
+      hostname: this.connection.hostname
+    },
+    failure:function(err){
+      done(err);
+    },
+    success:function(body){
+      if( Array.isArray(body.jobs) && body.jobs.length > 0 ){
+        done(null, body.jobs);
+      } else {
+        done();
+      }
+    }
+  });
+},
+
+module.exports = Listener;

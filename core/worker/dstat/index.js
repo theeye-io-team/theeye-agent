@@ -1,3 +1,5 @@
+"use strict";
+
 var NStat = require('iar-node-stat');
 var Worker = require('../index').define('dstat');
 
@@ -5,44 +7,50 @@ var FAILURE_STATE = 'failure';
 var NORMAL_STATE = 'normal';
 
 Worker.prototype.getData = function(next) {
-  var self=this;
+  var self = this;
 
   try {
     var nodestat = new NStat();
   } catch (e) {
-    self.debug.error('worker unsupported.', e);
-    return next(new Error('worker unsupported'));
+    self.debug.error('worker failure.', e);
+    return next( new Error('worker failure') );
   }
 
-  nodestat.get('stat','mem','net','load','disk', function(error, data)
-  {
-    if(error) {
-      self.debug.error('unable to get data');
-      self.debug.error(error);
-      return next(new Error('unable to get data'));
-    } else {
-      var loadArray = data.load;
-      var dataFiltered = {
-        "cpu_user": data.stat.cpu.total.user,  
-        "cpu_system": data.stat.cpu.total.system, 
-        "cpu_idle": data.stat.cpu.total.idle,
-        "load_1_minute": loadArray[0],   
-        "load_5_minute": loadArray[1],   
-        "load_15_minute": loadArray[2],   
-        "mem_used": data.mem.used,
-        "mem_free": data.mem.free,
-        "mem_total": data.mem.total,
-        "cacheTotal": data.mem.swaptotal,
-        "cacheFree": data.mem.swapfree,
-        "net": data.net,
-        "disk": data.disk
-      };
+  nodestat.get('stat','mem','net','load','disk',
+    function(error, data) {
+      if(error) {
+        self.debug.error('unable to get data');
+        self.debug.error(error);
+        return next(new Error('unable to get data'));
+      } else {
+        var loadArray = data.load;
+        var stats = {
+          cpu_user: data.stat.cpu.total.user,  
+          cpu_system: data.stat.cpu.total.system, 
+          cpu_idle: data.stat.cpu.total.idle,
+          load_1_minute: loadArray[0],   
+          load_5_minute: loadArray[1],   
+          load_15_minute: loadArray[2],   
+          mem_used: data.mem.used,
+          mem_free: data.mem.free,
+          mem_total: data.mem.total,
+          cacheTotal: data.mem.swaptotal,
+          cacheFree: data.mem.swapfree,
+          net: data.net,
+          disk: data.disk
+        }
 
-      self.connection.submitDstat({ dstat: dataFiltered });
+        self.connection.create({
+          route: '/:customer/dstat/:hostname',
+          body: stats,
+          success:function(body){},
+          failure:function(err){}
+        });
 
-      self.checkSystemLoad(data,next);
+        self.checkSystemLoad(data,next);
+      }
     }
-  });
+  );
 };
 
 Worker.prototype.checkSystemLoad = function(data, next) {
