@@ -89,7 +89,7 @@ function App () {
       debug('no workers configuration difined by supervisor');
       debug('searching workers configuration in files');
 
-      var workerscfg = require('config').get('core').workers;
+      var workerscfg = require('config').workers;
       if(!workerscfg || ! workerscfg instanceof Array || workerscfg.length == 0){
         debug('no workers defined via config');
       } else {

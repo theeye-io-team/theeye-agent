@@ -31,14 +31,22 @@ Worker.prototype.getData = function(next) {
         objOutput = null;
       }
 
-      var payload = { 'script_result': result };
-      if( objOutput ){
-        payload.state = objOutput.state || undefined;
-        payload.data = objOutput.data || objOutput;
-      } else {
-        payload.state = lastline;
-        payload.data = undefined;
+      var state,payload={'script_result':result};
+
+      if (result.signal) {
+        if (result.signal=='SIGKILL') {
+          state='failure';
+        } else {
+          if (objOutput) {
+            state = objOutput.state||undefined;
+          } else {
+            state = lastline;
+          }
+        }
       }
+
+      payload.state = state;
+      payload.data = objOutput?(objOutput.data||objOutput):undefined;
 
       self.debug.log('execution result is %j', payload);
       return next(null,payload);

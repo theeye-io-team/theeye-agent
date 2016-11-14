@@ -1,6 +1,6 @@
 "use strict";
 
-var config = require('config').get('core');
+//var config = require('config');
 var fs = require('fs');
 var path = require('path');
 var md5 = require('md5');
