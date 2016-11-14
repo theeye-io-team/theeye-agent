@@ -28,6 +28,7 @@ module.exports = {
       }
     ]
     */
+  version: undefined,
   scripts: {
     path: (__dirname + '/../scripts'),
     //execution_timeout: 10 * 60 * 1000 // 10 minutes in milliseconds
