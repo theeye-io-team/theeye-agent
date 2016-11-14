@@ -14,6 +14,7 @@ var kill = require('tree-kill');
 
 var FILE_MISSING = 'file_missing';
 var FILE_OUTDATED = 'file_outdated';
+var DEFAULT_EXECUTION_TIMEOUT = 10*60*1000;
 
 var ScriptOutput = require('./output');
 
@@ -151,7 +152,8 @@ function Script(props){
   this.execScript = function(script,options){
     options||(options={});
     if (!options.timeout) {
-      options.timeout = config.scripts.execution_timeout;
+      var timeout = (config.scripts&&config.scripts.execution_timeout)||undefined;
+      options.timeout = timeout||DEFAULT_EXECUTION_TIMEOUT;
     }
 
     var self = this;
