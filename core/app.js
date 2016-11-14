@@ -2,13 +2,13 @@
 
 var ip = require('ip');
 var os = require('os');
+var util = require('util');
 var debug = require('debug')('eye:agent:app');
 var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var TheEyeClient = require('./lib/theeye-client') ;
-var Worker = require('./worker');
+var TheEyeClient = require('./lib/theeye-client');
 var hostname = require('./lib/hostname');
 var detectVersion = require('./lib/version');
+var Worker = require('./worker');
 
 function App () {
 
@@ -33,8 +33,8 @@ function App () {
   });
 
   function connectSupervisor (next) {
-    _connection.refreshToken(function(error,token){
-      if(error) {
+    _connection.refreshToken(function (error,token) {
+      if (error) {
         debug('unable to get an access token');
         debug(error);
         next(error);
@@ -42,27 +42,30 @@ function App () {
         // detect agent version
         detectVersion(function(error,version){
           debug('agent version %s', version);
-          _connection.registerAgent({
-            version : error || !version ? 'unknown' : version,
-            info : {
-              platform   : os.platform(),
-              hostname   : hostname,
-              arch       : os.arch(),
-              os_name    : os.type(),
-              os_version : os.release(),
-              uptime     : os.uptime(),
-              ip         : ip.address()
-            }
-          },function(error,response){
-            _host_id = response.host_id;
-            _host_resource_id = response.resource_id;
 
-            if(error) {
-              debug(error);
-              next(error);
-            } else {
+          _connection.create({
+            route: _connection.HOST + '/:hostname',
+            body: {
+              version: (error||!version)?'unknown':version,
+              info: {
+                platform: os.platform(),
+                hostname: hostname,
+                arch: os.arch(),
+                os_name: os.type(),
+                os_version: os.release(),
+                uptime: os.uptime(),
+                ip: ip.address()
+              }
+            },
+            success: function (response) {
+              _host_id = response.host_id;
+              _host_resource_id = response.resource_id;
               debug(response);
               next(null);
+            },
+            failure: function (err) {
+              debug(error);
+              next(error);
             }
           });
         });

@@ -1,9 +1,11 @@
-"use strict";
+'use strict';
 
+var util = require('util');
+var debug = require('debug');
 var AGENT_FAILURE_STATE = 'agent_failure';
 
-function Worker (connection,config) {
-  if(this.constructor === Worker) {
+function AbstractWorker (connection,config) {
+  if(this.constructor === AbstractWorker) {
     throw new Error("Can't instantiate abstract class!");
   }
 
@@ -16,9 +18,9 @@ function Worker (connection,config) {
   return this;
 }
 
-module.exports = Worker;
+module.exports = AbstractWorker;
 
-Worker.prototype = {
+AbstractWorker.prototype = {
   initialize: function() {
   },
   getId : function() {
@@ -119,4 +121,24 @@ Worker.prototype = {
       }
     });
   },
+};
+
+/**
+ * Define/extend a custom worker structure
+ * @param String type
+ * @return Worker definition
+ */
+AbstractWorker.define = function (type) {
+  function Worker (connection,config) {
+    var name = config.name;
+    var part = type + (name?':'+name:'');
+    var log = 'eye:agent:worker:' + part
+    this.debug = {
+      'log': debug(log),
+      'error': debug(log + ':error')
+    }
+    AbstractWorker.apply(this,arguments);
+  }
+  util.inherits(Worker, AbstractWorker);
+  return Worker;
 }

@@ -1,7 +1,7 @@
 'use strict';
 
 var psaux = require('iar-ps-list')();
-var Worker = require('../index').define('psaux');
+var Worker = require('../abstract').define('psaux');
 
 module.exports = Worker;
 

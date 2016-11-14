@@ -5,7 +5,7 @@ var format = require('util').format;
 var FAILURE_STATE = 'failure';
 var NORMAL_STATE = 'normal';
 
-var Worker = require('../index').define('scraper');
+var Worker = require('../abstract').define('scraper');
 
 function setupRequestObject(config){
   var version = process.env.THEEYE_AGENT_VERSION;

@@ -6,7 +6,7 @@ var ps = require('ps-node');
 var FAILURE_STATE = 'failure';
 var NORMAL_STATE = 'normal';
 
-var Worker = require('../index').define('process');
+var Worker = require('../abstract').define('process');
 
 Worker.prototype.getId = function(next) {
   return this.config.resource_id ;

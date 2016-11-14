@@ -37,6 +37,7 @@ function TheEyeClient (options)
  *
  */
 TheEyeClient.prototype = {
+  HOST:'/:customer/host',
   /**
    *
    * @author Facundo
@@ -382,21 +383,6 @@ TheEyeClient.prototype = {
         if(next) next(null,response);
       }
     });
-  },
-  /**
-   *
-   *
-   */
-  /**
-   *
-   *
-   */
-  registerAgent : function(data,next) {
-    this.performRequest({
-      url:'/host/:hostname',
-      body:data,
-      method:'post'
-    }, next);
   },
   /**
    *

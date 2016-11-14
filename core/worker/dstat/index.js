@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
 var NStat = require('iar-node-stat');
-var Worker = require('../index').define('dstat');
+var Worker = require('../abstract').define('dstat');
 
 var FAILURE_STATE = 'failure';
 var NORMAL_STATE = 'normal';

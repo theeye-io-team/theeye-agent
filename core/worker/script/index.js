@@ -1,7 +1,7 @@
 "use strict";
 
-var Worker = require('../index').define('script');
-var Script = require(APP_ROOT + '/lib/script');
+var Worker = require('../abstract').define('script');
+var Script = require('../../lib/script');
 
 module.exports = Worker;
 

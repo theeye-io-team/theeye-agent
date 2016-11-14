@@ -5,16 +5,16 @@ var fs = require('fs');
 var path = require('path');
 var md5 = require('md5');
 var extend = require('util')._extend;
-var App = require(global.APP_ROOT + '/app');
-var Script = require(global.APP_ROOT + '/lib/script');
-var Worker = require('../index');
+var Script = require('../../lib/script');
+var AbstractWorker = require('../abstract');
+var App = require('../../app');
 
 /**
  *
  * this listen to orders and also send keep alive to the supervisor
  *
  */
-var Listener = Worker.define('listener');
+var Listener = AbstractWorker.define('listener');
 
 /**
  * often the resource id is required. 
@@ -80,7 +80,7 @@ Listener.prototype.processJob = function(job) {
       // prepare config
       var config = extend(specs.task,{ type: 'scraper' });
       // invoke worker
-      var scraper = Worker.spawn(config, App.connection);
+      var scraper = require('../index').spawn(config, worker.connection);
       scraper.getData(function(err,result){
         return done(result);
       });
@@ -106,7 +106,7 @@ Listener.prototype.processJob = function(job) {
         }
       };
       // invoke worker
-      var script = Worker.spawn(config, App.connection);
+      var script = require('../index').spawn(config, worker.connection);
       script.getData(function(err,result){
         return done(result);
       });
