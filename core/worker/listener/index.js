@@ -136,12 +136,15 @@ Listener.prototype.keepAlive = function () {
 
   this.debug.log('querying jobs...');
   this.getJob(function(error,job){
-    if(error) {
+    if (error) {
       self.debug.error('supervisor response error');
       self.debug.error(error);
     } else {
-      if(job) self.processJob(job);
-      else self.debug.log('no job to process');
+      if (job) {
+        self.processJob(job);
+      } else {
+        self.debug.log('no job to process');
+      }
     }
   });
 
@@ -173,8 +176,8 @@ Listener.prototype.getJob = function (done) {
       done(err);
     },
     success:function(body){
-      if( Array.isArray(body.jobs) && body.jobs.length > 0 ){
-        done(null, body.jobs);
+      if (Array.isArray(body.jobs) && body.jobs.length > 0) {
+        done(null, body.jobs[0]);
       } else {
         done();
       }
