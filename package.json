@@ -18,6 +18,7 @@
     "ps-node": "git+https://github.com/interactar/ps.git",
     "request": "~2.74.0",
     "shell-escape": "~0.2.0",
+    "tree-kill": "~1.1.0",
     "underscore": "~1.8.3"
   },
   "scripts": {
