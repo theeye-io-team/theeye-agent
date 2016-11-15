@@ -42,9 +42,9 @@ Worker.prototype.getData = function(next) {
 
         self.connection.create({
           route: '/:customer/dstat/:hostname',
-          body: stats,
-          success:function(body){},
-          failure:function(err){}
+          body: {dstat:stats},
+          success: function(body){ },
+          failure: function(err){ self.debug.error(err) }
         });
 
         self.checkSystemLoad(data,next);

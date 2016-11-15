@@ -8,7 +8,7 @@ function ScriptOutput(props){
   var _log = props.log||'';
   var _lastline = getLastline( _log );
 
-  this.toJSON = function toJSON(){
+  this.toJSON = function (){
     return {
       stdout : this.stdout,
       stderr : this.stderr,
@@ -16,6 +16,10 @@ function ScriptOutput(props){
       log : this.log,
       lastline : this.lastline
     }
+  }
+
+  this.toObject = function () {
+    return this.toJSON();
   }
 
   this.toString = function toString(){

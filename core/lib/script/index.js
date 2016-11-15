@@ -1,21 +1,23 @@
 "use strict";
 
+var util = require('util');
 var fs = require('fs');
 var md5 = require('md5');
 var exec = require('child_process').exec;
 var join = require('path').join;
 var EventEmitter = require('events').EventEmitter;
+var platform = require('os').platform();
 var debug = require('debug')('eye:lib:script');
+var config = require('config');
 //var shellscape = require('shell-escape');
+var kill = require('tree-kill');
 
 var FILE_MISSING = 'file_missing';
 var FILE_OUTDATED = 'file_outdated';
-
-var platform = require('os').platform();
+var DEFAULT_EXECUTION_TIMEOUT = 10*60*1000;
 
 var ScriptOutput = require('./output');
 
-var util = require('util');
 
 function Script(props){
 
@@ -25,7 +27,10 @@ function Script(props){
     var parsed;
     if( args && Array.isArray(args) ){
 
-      /*
+      /**
+       * @author facugon
+       * this was a test
+       *
       if(platform=='linux'){
         //args = shellscape( this.args );
 
@@ -34,7 +39,6 @@ function Script(props){
       } else if( /win/.test(platform) ) {
 
         parsed = ( args.map(function(arg){ return '"' + arg + '"'; }) ).join(' ');
-
       }
       */
 
@@ -145,28 +149,58 @@ function Script(props){
     return this.execScript(formatted);
   }
 
-  this.execScript = function(script){
+  this.execScript = function(script,options){
+    options||(options={});
+    if (!options.timeout) {
+      var timeout = (config.scripts&&config.scripts.execution_timeout)||undefined;
+      options.timeout = timeout||DEFAULT_EXECUTION_TIMEOUT;
+    }
+
     var self = this;
     var child = exec(script);
-    var partials = { stdout:'', stderr:'', log:'' };
+    var partials = {stdout:'',stderr:'',log:''};
+
+    var exec_timeout = parseInt(options.timeout);
+    var exec_start = process.hrtime();
+
+    var timeout = setTimeout(function(){
+      debug('killing child script ("%s")', script);
+      kill(child.pid,'SIGKILL',function(err){
+        if (err) debug(err);
+        else debug('kill send');
+      });
+    },exec_timeout);
+
+    this.once('end',function(){
+      clearTimeout(timeout);
+    });
 
     debug('running script "%s"', script);
 
     child.stdout.on('data',function(data){
       partials.stdout += data;
       partials.log += data;
-
       self.emit('stdout', data);
     });
 
     child.stderr.on('data',function(data){
       partials.stderr += data;
       partials.log += data;
-
       self.emit('stderr', data);
     });
 
-    child.on('close',function(code){
+    child.on('close',function(code,signal){
+      debug('child emit close with %j',arguments);
+
+      var exec_diff = process.hrtime(exec_start);
+      debug('times %j.',exec_diff);
+
+      if (exec_diff[0]===0){
+        debug('script end after %s msecs.',exec_diff[1]/1e6);
+      } else {
+        debug('script end after %s secs',exec_diff[0]);
+      }
+
       _output = new ScriptOutput({
         code: code,
         stdout: partials.stdout,
@@ -174,7 +208,27 @@ function Script(props){
         log: partials.log
       });
 
-      self.emit('end', _output);
+      self.emit('end',util._extend(
+        _output.toObject(),{
+          signal:signal,
+          times:{
+            seconds:exec_diff[0],
+            nanoseconds:exec_diff[1],
+          }
+        }
+      ));
+    });
+
+    child.on('error',function(err){
+      debug('child emit error with %j',err);
+    });
+
+    child.on('disconnect',function(){
+      debug('script emit disconnect');
+    });
+
+    child.on('message',function(){
+      debug('child emit message with %j',arguments);
     });
 
     return self;

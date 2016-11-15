@@ -1,3 +1,15 @@
+# SAMPLE CONFIGURATION FILE
+
+by default not configuration is provided.
+
+configuration is taken from the END or could be provided via config file.
+
+just drop a file in `theeye-agent-root/config/default.js` or `theeye-agent-root/config/default.json`
+
+if you want to use a config file use this sample.
+
+```
+
 module.exports = {
   /**
    *
@@ -28,9 +40,7 @@ module.exports = {
       }
     ]
     */
-  version: undefined,
   scripts: {
-    path: (__dirname + '/../scripts'),
     //execution_timeout: 10 * 60 * 1000 // 10 minutes in milliseconds
     execution_timeout: 10 * 60 * 1000
   },
@@ -53,3 +63,6 @@ module.exports = {
   supervisor:{
   }
 }
+
+
+```

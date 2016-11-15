@@ -8,7 +8,6 @@ var util = require('util');
 var TheEyeClient = require('./lib/theeye-client') ;
 var Worker = require('./worker');
 var hostname = require('./lib/hostname');
-var detectVersion = require('./lib/version');
 
 function App () {
 
@@ -39,32 +38,28 @@ function App () {
         debug(error);
         next(error);
       } else {
-        // detect agent version
-        detectVersion(function(error,version){
-          debug('agent version %s', version);
-          _connection.registerAgent({
-            version : error || !version ? 'unknown' : version,
-            info : {
-              platform   : os.platform(),
-              hostname   : hostname,
-              arch       : os.arch(),
-              os_name    : os.type(),
-              os_version : os.release(),
-              uptime     : os.uptime(),
-              ip         : ip.address()
-            }
-          },function(error,response){
-            _host_id = response.host_id;
-            _host_resource_id = response.resource_id;
+        _connection.registerAgent({
+          version: process.env.THEEYE_AGENT_VERSION,
+          info:{
+            platform: os.platform(),
+            hostname: hostname,
+            arch: os.arch(),
+            os_name: os.type(),
+            os_version: os.release(),
+            uptime: os.uptime(),
+            ip: ip.address()
+          }
+        },function(error,response){
+          _host_id = response.host_id;
+          _host_resource_id = response.resource_id;
 
-            if(error) {
-              debug(error);
-              next(error);
-            } else {
-              debug(response);
-              next(null);
-            }
-          });
+          if(error) {
+            debug(error);
+            next(error);
+          } else {
+            debug(response);
+            next(null);
+          }
         });
       }
     });
@@ -89,7 +84,7 @@ function App () {
       debug('no workers configuration difined by supervisor');
       debug('searching workers configuration in files');
 
-      var workerscfg = require('config').get('core').workers;
+      var workerscfg = require('config').workers;
       if(!workerscfg || ! workerscfg instanceof Array || workerscfg.length == 0){
         debug('no workers defined via config');
       } else {

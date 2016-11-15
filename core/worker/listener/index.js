@@ -1,6 +1,6 @@
 "use strict";
 
-var config = require('config').get('core');
+//var config = require('config');
 var fs = require('fs');
 var path = require('path');
 var md5 = require('md5');
@@ -176,7 +176,7 @@ Listener.prototype.getJob = function (done) {
       done(err);
     },
     success:function(body){
-      if (Array.isArray(body.jobs) && body.jobs.length > 0) {
+      if( Array.isArray(body.jobs) && body.jobs.length > 0 ){
         done(null, body.jobs[0]);
       } else {
         done();
