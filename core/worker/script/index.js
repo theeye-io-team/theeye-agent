@@ -18,35 +18,46 @@ Worker.prototype.initialize = function(){
   });
 }
 
+function detectEvent (data) {
+  if (data.killed) return 'killed';
+  return undefined;
+}
+
+function isObject (value) {
+  return Object.prototype.toString.call(value) == '[object Object]';
+}
+
 Worker.prototype.getData = function(next) {
   var self = this;
+
   this.checkScript(this.script,function(error){
     // if(error) return done(error);
     self.script.run(function(result){
-      var lastline = result.lastline;
-      var objOutput;
+      var json, state, payload, lastline = result.lastline;
+
       try {
-        objOutput = JSON.parse(lastline);
+        // try to convert JSON
+        json = JSON.parse(lastline);
       } catch (e) {
-        objOutput = null;
+        // it is not JSON
+        self.debug.error('cannot convert output to valid JSON');
+        self.debug.error(e);
+        json = null;
       }
 
-      var state,payload={'script_result':result};
-
-      if (result.signal) {
-        if (result.signal=='SIGKILL') {
-          state='failure';
-        } else {
-          if (objOutput) {
-            state = objOutput.state||undefined;
-          } else {
-            state = lastline;
-          }
-        }
+      if (json) {
+        state = isObject(json) ? json.state : json; // if object ? object.state : object as is .
+      } else {
+        state = lastline; // ok , just asume the last line is the result state
       }
 
-      payload.state = state;
-      payload.data = objOutput?(objOutput.data||objOutput):undefined;
+      payload = {
+        script_result: result,
+        state: state,
+        event: detectEvent(result)||state,
+        // data is available only when the script returns it
+        data: json?(json.data||json):undefined
+      };
 
       self.debug.log('execution result is %j', payload);
       return next(null,payload);

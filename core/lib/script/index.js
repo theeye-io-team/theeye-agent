@@ -156,15 +156,16 @@ function Script(props){
       options.timeout = timeout||DEFAULT_EXECUTION_TIMEOUT;
     }
 
-    var self = this;
-    var child = exec(script);
-    var partials = {stdout:'',stderr:'',log:''};
-
-    var exec_timeout = parseInt(options.timeout);
-    var exec_start = process.hrtime();
+    var self = this,
+      killed = false,
+      child = exec(script),
+      partials = {stdout:'',stderr:'',log:''},
+      exec_timeout = parseInt(options.timeout),
+      exec_start = process.hrtime();
 
     var timeout = setTimeout(function(){
       debug('killing child script ("%s")', script);
+      killed = true;
       kill(child.pid,'SIGKILL',function(err){
         if (err) debug(err);
         else debug('kill send');
@@ -189,7 +190,7 @@ function Script(props){
       self.emit('stderr', data);
     });
 
-    child.on('close',function(code,signal){
+    child.on('close',function (code,signal) {
       debug('child emit close with %j',arguments);
 
       var exec_diff = process.hrtime(exec_start);
@@ -210,10 +211,11 @@ function Script(props){
 
       self.emit('end',util._extend(
         _output.toObject(),{
-          signal:signal,
-          times:{
-            seconds:exec_diff[0],
-            nanoseconds:exec_diff[1],
+          signal: signal,
+          killed: Boolean(killed),
+          times: {
+            seconds: exec_diff[0],
+            nanoseconds: exec_diff[1],
           }
         }
       ));

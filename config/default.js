@@ -28,6 +28,7 @@ module.exports = {
       }
     ]
     */
+  proxy: (process.env.https_proxy||process.env.https_proxy),
   version: undefined,
   scripts: {
     path: (__dirname + '/../scripts'),
