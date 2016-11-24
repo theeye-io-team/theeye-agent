@@ -10,7 +10,7 @@ module.exports = {
     }
   },
   // proxy information for api requests
-  proxy: (process.env.https_proxy||process.env.https_proxy),
+  proxy: (process.env.https_proxy||process.env.http_proxy),
   version: undefined,
   scripts: {
     path: (__dirname + '/../scripts'),
