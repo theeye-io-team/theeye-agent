@@ -28,7 +28,5 @@ setEnv(function(){
   });
 
   var app = require('./app');
-  app.initializeSupervisorCommunication(function(){
-    app.getConfiguration();
-  });
+  app.start({},function(){ });
 });

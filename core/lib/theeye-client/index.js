@@ -50,7 +50,9 @@ TheEyeClient.prototype = {
 
     logger.debug('theeye api client version %s/%s', CLIENT_NAME, CLIENT_VERSION);
 
-    for(var prop in options) connection[prop] = options[prop];
+    for (var prop in options) {
+      connection[prop] = options[prop];
+    }
 
     connection.api_url = options.api_url||process.env.THEEYE_SUPERVISOR_API_URL ;
     connection.client_id = options.client_id||process.env.THEEYE_SUPERVISOR_CLIENT_ID ;
@@ -59,12 +61,12 @@ TheEyeClient.prototype = {
     connection.access_token = options.access_token||null ;
 
     logger.debug('connection properties => %o', connection);
-    if( ! connection.api_url ) {
-      return logger.error('ERROR. supervisor API URL required');
+    if (!connection.api_url) {
+      return logger.error('ERROR. Supervisor API URL required');
     }
 
     connection.request = request.defaults({
-      proxy: process.env.http_proxy,
+      proxy: options.proxy||process.env.http_proxy,
       tunnel: false,
       timeout: 5000,
       json: true,

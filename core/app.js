@@ -17,6 +17,7 @@ function App () {
 
   var supervisor = require('config').supervisor||{};
   supervisor.hostname = hostname;
+  supervisor.proxy = require('config').proxy||undefined;
 
   var _host_id;
   var _host_resource_id;
@@ -79,16 +80,21 @@ function App () {
     });
   }
 
+  /**
+   *
+   * DEPRECATED
+   *
   function searchConfigurationFiles (doneFn){
-    if( _workers.length == 0 ){
+    if (_workers.length == 0) {
       debug('no workers configuration difined by supervisor');
       debug('searching workers configuration in files');
 
       var workerscfg = require('config').workers;
-      if(!workerscfg || ! workerscfg instanceof Array || workerscfg.length == 0){
+      if (!Array.isArray(workerscfg)||workerscfg.length==0) {
         debug('no workers defined via config');
       } else {
-        for(var index in workerscfg) {
+        debug('starting workers defined via config');
+        for (var index in workerscfg) {
           var config = workerscfg[index];
           config.resource_id = _host_resource_id;
           var worker = Worker.spawn(config, _connection);
@@ -99,12 +105,13 @@ function App () {
 
     if(doneFn) doneFn(null, _workers);
   }
+  */
 
   function initListener () {
     var config = {
-      'resource_id': _host_resource_id,
-      'type': 'listener',
-      'looptime': 15000
+      resource_id: _host_resource_id,
+      type: 'listener',
+      looptime: require('config').workers.listener.looptime||15000
     }
     var worker = Worker.spawn(config, _connection);
     worker.run();
@@ -120,30 +127,38 @@ function App () {
     });
   }
 
-  function getConfiguration (doneFn) {
+  function getRemoteConfig (next) {
     debug('getting agent config');
     _connection.getAgentConfig(
       hostname, 
       function(error,config){
-        if(!config) {
-          var msg = 'no agent configuration available';
+        var result = {
+          data:{
+            message: null,
+          },
+          state: ''
+        };
+
+        if (!config) {
           debug(msg);
+          result.data.message = 'no agent configuration available';
+          result.state = 'failure';
         } else {
           setupWorkers( config.workers );
-          var msg = 'agent monitor updated';
+          result.data.message = 'agent monitors updated';
+          result.state = 'success';
         }
 
-        searchConfigurationFiles(doneFn);
-        var worker = initListener();
-        _workers.push( worker );
+        //searchConfigurationFiles(doneFn);
+        var listener = initListener();
+        _workers.push(listener);
 
         debug('agent started');
-        self.emit('config:up-to-date',{msg:msg});
+        self.emit('config:up-to-date',result);
+        if(next) next();
       }
     );
   }
-
-  this.getConfiguration = getConfiguration;
 
   function updateWorkers () {
     debug('stopping current resource workers');
@@ -156,15 +171,17 @@ function App () {
     _workers = []; // destroy workers.
 
     debug('updating workers configuration');
-    getConfiguration();
+    getRemoteConfig();
   }
 
   this.on('config:need-update',function(){
     updateWorkers();
   });
 
-  this.initializeSupervisorCommunication = function (nextFn) {
-    tryConnectSupervisor(nextFn);
+  this.start = function(specs,next) {
+    tryConnectSupervisor(function(){
+      getRemoteConfig(next);
+    });
   }
 
   return this;
