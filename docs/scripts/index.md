@@ -5,11 +5,11 @@ The agent will parse the last line of the scripts looking for a string which rep
 
 A `state` could be any state or event linked to the task or monitor of this script. Default build-in events are `success` and `failure`.
 
-So if your scripts ended ok, in bash you have to `echo `ok`` as the last output of your script. 
+So if your scripts ended ok, in bash you have to `echo "ok"` as the last output of your script. 
 
-> `success``, `normal` and `ok` are valid `success` states.    
+> `success`, `normal` and `ok` are valid `success` states.    
 
-> `failure``, `fail` and `error` are valid `failure` states.    
+> `failure`, `fail` and `error` are valid `failure` states.    
 
 
 ## Some code
@@ -82,7 +82,8 @@ POOL='pool'
 members=1
 
 # this is valid json when send to stdout
-echo {\"state\":\"$state\",\"data\":{\"members\":$members}}
+echo { \"state\" : \"$state\" , \"data\" : { \"members\" : $members } }
+# this will echo { "state": "normal" , "data" : { "members": 1 } }
 
 ```
 
