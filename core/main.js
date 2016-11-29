@@ -1,3 +1,5 @@
+'use strict';
+
 var path = require('path');
 var setEnv = require('./environment');
 
@@ -25,7 +27,5 @@ setEnv(function(){
   });
 
   var app = require('./app');
-  app.initializeSupervisorCommunication(function(){
-    app.getConfiguration();
-  });
+  app.start({},function(){ });
 });

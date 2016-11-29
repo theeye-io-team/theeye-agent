@@ -24,7 +24,7 @@ module.exports = {
    * @return Worker instance
    */
   spawn: function(config,connection) {
-    if (config.disabled) {
+    if (config.disabled===true) {
       logger.log('worker disabled');
       return null;
     }
