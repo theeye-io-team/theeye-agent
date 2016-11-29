@@ -7,4 +7,3 @@ scripts
 libs
 npm-debug.log
 *.js.orig
-core/bin
