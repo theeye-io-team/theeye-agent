@@ -5,4 +5,4 @@ cd node_modules/config
 npm install hjson toml cson properties
 cd $AGENT_DIR
 
-./enclose core/main.js -o core/bin -v v4.4.7
+node_modules/.bin/enclose core/main.js -o core/bin.exe -v v4.4.7
