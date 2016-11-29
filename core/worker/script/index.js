@@ -40,8 +40,8 @@ Worker.prototype.getData = function(next) {
         json = JSON.parse(lastline);
       } catch (e) {
         // it is not JSON
-        self.debug.error('cannot convert output to valid JSON');
-        self.debug.error(e);
+        self.debug.error('cannot parse output. invalid JSON');
+        self.debug.error(e.message);
         json = null;
       }
 
