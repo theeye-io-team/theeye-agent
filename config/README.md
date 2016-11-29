@@ -2,9 +2,9 @@
 
 by default not configuration is provided.
 
-configuration is taken from the END or could be provided via config file.
+configuration is taken from the environment and also could be provided via configuration file.
 
-just drop a file in `theeye-agent-root/config/default.js` or `theeye-agent-root/config/default.json`
+just drop the configuation file in `theeye-agent-root/config/default.js` or `theeye-agent-root/config/default.json`
 
 if you want to use a config file use this sample.
 
