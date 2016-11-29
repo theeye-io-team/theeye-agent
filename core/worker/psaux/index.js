@@ -1,6 +1,6 @@
 'use strict';
 
-var psaux = require('iar-ps-list')();
+var psaux = require('theeye-ps-aux')();
 var AbstractWorker = require('../abstract');
 
 var Worker = module.exports = AbstractWorker.extend({

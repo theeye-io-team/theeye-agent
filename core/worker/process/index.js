@@ -1,6 +1,6 @@
 'use strict';
 
-var ps = require('ps-node');
+var ps = require('theeye-ps-node');
 var AbstractWorker = require('../abstract');
 
 /**

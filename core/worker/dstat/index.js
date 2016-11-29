@@ -1,6 +1,6 @@
 'use strict';
 
-var NStat = require('iar-node-stat');
+var NStat = require('theeye-node-stat');
 var AbstractWorker = require('../abstract');
 
 var FAILURE_STATE = 'failure';
