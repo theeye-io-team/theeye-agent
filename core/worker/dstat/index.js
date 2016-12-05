@@ -27,12 +27,13 @@ var Worker = module.exports = AbstractWorker.extend({
         } else {
           var loadArray = data.load;
           var stats = {
-            cpu_user: data.stat.cpu.total.user,  
-            cpu_system: data.stat.cpu.total.system, 
+            cpu_used: (100 - data.stat.cpu.total.idle),
+            cpu_user: data.stat.cpu.total.user,
+            cpu_system: data.stat.cpu.total.system,
             cpu_idle: data.stat.cpu.total.idle,
-            load_1_minute: loadArray[0],   
-            load_5_minute: loadArray[1],   
-            load_15_minute: loadArray[2],   
+            load_1_minute: loadArray[0],
+            load_5_minute: loadArray[1],
+            load_15_minute: loadArray[2],
             mem_used: data.mem.used,
             mem_free: data.mem.free,
             mem_total: data.mem.total,
