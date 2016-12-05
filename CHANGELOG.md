@@ -1,5 +1,35 @@
 # CHANGELOG
 
+### 0.9.2-beta - 2016-12-05
+
+> added sample code, docs and examples for scripts creation      
+
+
+> set network proxy using configuration file     
+
+> remove unused code    
+
+> improve configuration     
+
+> child process are killed when take too much time to finish     
+
+> set environment when no configuration is provided     
+
+> improve code and correct references to work with enclose, allowing to compile source into binary
+
+> change path how to include files from disk paths.     
+
+> remove dinamic linking of files      
+
+> workers are now defined using a mixing pattern     
+
+> remove unused code      
+
+> fixes scraper worker     
+
+> escape arguments when include spaces (allow shell parameters expansion on parameters)    
+
+
 ### 0.9.1-beta - 2016-09-24
 
 > include theeye client into source . no more npm dependency      

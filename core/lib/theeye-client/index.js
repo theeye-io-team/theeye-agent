@@ -1,13 +1,14 @@
 'use strict';
 
-var CLIENT_VERSION = 'v0.9.3' ;
+var CLIENT_VERSION = 'v0.9.8' ;
 var CLIENT_NAME = 'Golum' ;
+var CLIENT_USER_AGENT = CLIENT_NAME + '/' + CLIENT_VERSION ;
 
 var os = require('os');
 var fs = require('fs');
 var path = require('path');
-var request = require('request');
 var util = require('util');
+var request = require('request');
 var debug = require('debug');
 
 var logger = {
@@ -15,7 +16,6 @@ var logger = {
   'error': debug('eye:client:error')
 };
 
-var EventEmitter = require('events').EventEmitter;
 
 module.exports = TheEyeClient;
 
@@ -37,6 +37,7 @@ function TheEyeClient (options)
  *
  */
 TheEyeClient.prototype = {
+  HOST:'/:customer/host',
   /**
    *
    * @author Facundo
@@ -50,7 +51,9 @@ TheEyeClient.prototype = {
 
     logger.debug('theeye api client version %s/%s', CLIENT_NAME, CLIENT_VERSION);
 
-    for(var prop in options) connection[prop] = options[prop];
+    for (var prop in options) {
+      connection[prop] = options[prop];
+    }
 
     connection.api_url = options.api_url||process.env.THEEYE_SUPERVISOR_API_URL ;
     connection.client_id = options.client_id||process.env.THEEYE_SUPERVISOR_CLIENT_ID ;
@@ -59,18 +62,18 @@ TheEyeClient.prototype = {
     connection.access_token = options.access_token||null ;
 
     logger.debug('connection properties => %o', connection);
-    if( ! connection.api_url ) {
-      return logger.error('ERROR. supervisor API URL required');
+    if (!connection.api_url) {
+      return logger.error('ERROR. Supervisor API URL required');
     }
 
     connection.request = request.defaults({
-      proxy: process.env.http_proxy,
+      proxy: options.proxy||process.env.http_proxy,
       tunnel: false,
       timeout: (options.timeout||5000),
       json: true,
       gzip: true,
       headers: {
-        'User-Agent': CLIENT_NAME + '/' + CLIENT_VERSION
+        'User-Agent': CLIENT_USER_AGENT
       },
       baseUrl: connection.api_url
     });
@@ -134,64 +137,52 @@ TheEyeClient.prototype = {
     var callNext = function(error, body){
       if(next) next(error, body, httpResponse);
     }
-    if( ! error && /20./.test( httpResponse.statusCode ) ) {
-      logger.debug('%s %s request success', request.method, request.url);
-      callNext(null,body);
-    }
-    else // error condition detected
-    {
-      logger.error('error detected on %s %s', request.method, request.url);
-      logger.error(request);
-      if(error)
-      {
-        // could not send data to server
-        logger.error('request failed : %s', JSON.stringify(request) );
-        logger.error(error.message);
-        error.statusCode = httpResponse ? httpResponse.statusCode : null;
-        logger.error(body);
-        callNext(error, body);
-      }
-      else if( httpResponse.statusCode == 401 )
-      {
-        // unauthorized
-        logger.error('access denied');
+
+    if( !error && /20./.test(httpResponse.statusCode) ) {
+      return callNext(null,body);
+    } else if( error ){
+      return callNext(error);
+    } else if( httpResponse ) {
+      if( httpResponse.statusCode == 401 ) {
+
+        // AuthError Unauthorized
+        var msg = 'request authentication error. access denied.';
+        var err = new Error(msg);
+        logger.error(err);
+
         connection.refreshToken(function(error, token) {
-          if(error) {
-            logger.error('client could not be authenticated');
-            logger.error(error.message);
-            error.statusCode = httpResponse.statusCode;
-            //throw new Error('agent could not be authenticated');
-          }
+          if(error) logger.error(error.message);
           callNext(error, body);
         });
 
-      }
-      else if(
-        (body && body.status == 'error')
-        || /40./.test( httpResponse.statusCode )
-      ) {
-        body = body || {};
-        logger.error( JSON.stringify(body) );
-        var error = new Error(body.message || 'client error');
-        error.data = body || {};
-        error.statusCode = httpResponse.statusCode ;
-        callNext(error,body);
-      }
-      else
-      {
-        logger.error('>>>>>>>>>>>> unhandled error! <<<<<<<<<<<<');
-        logger.error('request %s' , JSON.stringify(request) );
-        logger.error('status  %s' , httpResponse.statusCode );
-        logger.error('error   %s' , error && error.message  );
-        logger.error('body    %s' , JSON.stringify(body)    );
-        logger.error('>>>>>>>>>>>>>>>>>>>> * <<<<<<<<<<<<<<<<<<<');
+      } else {
+        var message ;
 
-        if(!error) {
-          error = new Error(JSON.stringify(body));
-          error.statusCode = httpResponse.statusCode;
+        if( /40./.test(httpResponse.statusCode) ) {
+
+          message='client error';
+
+        } else if( /50./.test(httpResponse.statusCode) ){
+
+          message='server error';
+
+        } else {
+
+          message='unknown request error';
+
+          logger.error('############ UNKNOWN ERROR ############');
+          logger.error('REQUEST > %s' , JSON.stringify(request) );
+          logger.error('STATUS  > %s' , httpResponse.statusCode );
+          logger.error('ERROR   > %j' , error );
+          logger.error('BODY    > %j' , JSON.stringify(body) );
+          logger.error('#######################################');
+
         }
 
-        callNext(error, body);
+        var error = new Error(!body?message:(body.message||body));
+        error.body = body;
+        error.statusCode = httpResponse.statusCode||504;
+        return callNext(error, body);
       }
     }
   },
@@ -272,7 +263,7 @@ TheEyeClient.prototype = {
     var request = this.performRequest({
       method: 'GET',
       url: url,
-      qs: options.query || null
+      qs: (options.query||undefined)
     },function(error, body){
       if(error) options.failure(error,request);
       else options.success(body,request);
@@ -289,7 +280,7 @@ TheEyeClient.prototype = {
     var request = this.performRequest({
       method: 'GET',
       url: url,
-      qs: options.query || null
+      qs: (options.query||undefined)
     },function(error, body){
       if(error) options.failure(error,request);
       else options.success(body,request);
@@ -309,7 +300,7 @@ TheEyeClient.prototype = {
     var request = this.performRequest({
       method: 'DELETE',
       url: url,
-      qs: options.query || null
+      qs: (options.query||undefined)
     }, function(error, body){
       if(error) options.failure(error, request);
       else options.success(body, request);
@@ -320,12 +311,13 @@ TheEyeClient.prototype = {
    * @author Facundo
    * @return Request connection.request
    */
-  create : function(options) {
+  create: function(options) {
     var request = this.performRequest({
       method: 'POST',
       url: options.route,
-      body: options.body||null,
-      qs: options.query||null
+      formData: (options.formData||undefined),
+      body: (options.body||undefined),
+      qs: (options.query||undefined)
     },function(error, body){
       if(error) options.failure(error,request);
       else options.success(body,request);
@@ -338,11 +330,16 @@ TheEyeClient.prototype = {
    * @return Request connection.request
    */
   update : function(options) {
+    var url = options.route;
+    if( options.id ) url += '/' + options.id;
+    if( options.child ) url += '/' + options.child;
+
     var request = this.performRequest({
       method: 'PUT',
-      url: options.route + '/' + options.id,
-      body: options.body||null,
-      qs: options.query||null
+      url: url,
+      formData: (options.formData||undefined),
+      body: (options.body||undefined),
+      qs: (options.query||undefined)
     },function(error, body){
       if(error) options.failure(error,request);
       else options.success(body,request);
@@ -362,61 +359,13 @@ TheEyeClient.prototype = {
     var request = this.performRequest({
       method: 'PATCH',
       url: url,
-      body: options.body || null,
-      qs: options.query || null
+      body: (options.body||undefined),
+      qs: (options.query||undefined)
     },function(error, body){
       if(error) options.failure(error,request);
       else options.success(body,request);
     });
     return request;
-  },
-  /**
-   *
-   *
-   *
-   * agent methods
-   *
-   *
-   *
-   */
-  getNextPendingJob : function(options,doneFn) {
-
-    var hostname = (options && options.hostname) ? options.hostname : this.hostname;
-
-    this.performRequest({
-      method: 'GET',
-      url: '/:customer/job',
-      qs: {
-        process_next: 1,
-        hostname: hostname
-      }
-    }, function(error,body){
-      if( ! error ) {
-        if(body&&body.jobs) {
-          if(Array.isArray(body.jobs)&&body.jobs.length>0){
-            doneFn(null, body.jobs[0]);
-          }
-          else doneFn();
-        } else {
-          var error = new Error('api response with empty content.');
-          logger.error(error);
-          doneFn(error);
-        }
-      } else {
-        logger.error('api request error %s.',error);
-        logger.error(error);
-      }
-    });
-  },
-  /**
-   *
-   *
-   */
-  sendAgentKeepAlive : function() {
-    this.performRequest({
-      method:'put',
-      url: '/:customer/agent/:hostname'
-    });
   },
   /**
    *
@@ -436,39 +385,6 @@ TheEyeClient.prototype = {
         if(next) next(null,response);
       }
     });
-  },
-  /**
-   *
-   *
-   */
-  submitDstat : function(dstat,next) {
-    this.performRequest({
-      url: '/:customer/dstat/:hostname',
-      method: 'post',
-      body: dstat
-    }, next);
-  },
-  /**
-   *
-   *
-   */
-  submitPsaux : function(psaux,next) {
-    this.performRequest({
-      method: 'post',
-      body: psaux,
-      url: '/psaux/:hostname'
-    }, next);
-  },
-  /**
-   *
-   *
-   */
-  registerAgent : function(data,next) {
-    this.performRequest({
-      url:'/host/:hostname',
-      body:data,
-      method:'post'
-    }, next);
   },
   /**
    *

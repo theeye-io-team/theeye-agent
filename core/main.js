@@ -1,5 +1,6 @@
+'use strict';
+
 var path = require('path');
-global.APP_ROOT = path.resolve(__dirname);
 var setEnv = require('./environment');
 
 setEnv(function(){
@@ -26,7 +27,5 @@ setEnv(function(){
   });
 
   var app = require('./app');
-  app.initializeSupervisorCommunication(function(){
-    app.getConfiguration();
-  });
+  app.start({},function(){ });
 });
