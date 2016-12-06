@@ -16,15 +16,6 @@ fi
 # colored output
 echo -e "\e[32m"
 
-if [ ! -d $path/node_modules ]
-then
-  echo -e "\e[31m"
-  echo "Error agent require installation"
-  echo "run 'npm install' before continue"
-  echo -e "\e[39m"
-  exit
-fi
-
 # reading environment config
 if [ -z $1 ];then
    config="/etc/theeye/theeye.conf"
