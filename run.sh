@@ -96,7 +96,8 @@ then
 #windows issue    echo "Error 'node' is not present on this system"
 #windows issue    exit
 #windows issue  fi
-  $path/core/linux
+  #$path/core/linux
+  node -i $path/core/main.js
 else
   $path/node_modules/.bin/nodemon `pwd`/core/main.js
 fi
