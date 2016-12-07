@@ -66,8 +66,7 @@ TheEyeClient.prototype = {
       return logger.error('ERROR. Supervisor API URL required');
     }
 
-    connection.request = request.defaults({
-      proxy: options.proxy||process.env.http_proxy,
+    var defaults = {
       tunnel: false,
       timeout: (options.timeout||5000),
       json: true,
@@ -76,7 +75,16 @@ TheEyeClient.prototype = {
         'User-Agent': CLIENT_USER_AGENT
       },
       baseUrl: connection.api_url
-    });
+    };
+
+
+    var proxy = options.proxy||process.env.https_proxy||process.env.http_proxy;
+    if (proxy) {
+      logger.debug('using proxy %s', proxy);
+      defaults.proxy = proxy;
+    }
+
+    connection.request = request.defaults(defaults);
   },
   /**
    *

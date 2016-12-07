@@ -15,7 +15,7 @@
     "md5": "~2.1.0",
     "request": "~2.74.0",
     "shell-escape": "~0.2.0",
-    "theeye-node-stat": "git+https://github.com/theeye-io-team/node-stat.git",
+    "theeye-node-stat": "~0.2.3",
     "theeye-ps-aux": "~0.3.0",
     "theeye-ps-node": "~0.1.1",
     "tree-kill": "~1.1.0",
