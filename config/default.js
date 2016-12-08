@@ -10,7 +10,6 @@ module.exports = {
     }
   },
   // proxy information for api requests
-  proxy: (process.env.https_proxy||process.env.https_proxy),
   version: undefined,
   scripts: {
     path: (__dirname + '/../scripts'),
@@ -35,5 +34,12 @@ module.exports = {
    * THEEYE_SUPERVISOR_CLIENT_CUSTOMER
    */
   supervisor:{
+  },
+  request: {
+    proxy: (process.env.https_proxy||process.env.https_proxy),
+    tunnel: true,
+    json: true,
+    gzip: true,
+    timeout: 15000
   }
 }

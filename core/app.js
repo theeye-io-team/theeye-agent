@@ -13,13 +13,14 @@ function App () {
 
   var self = this;
 
-  var supervisor = require('config').supervisor||{};
-  supervisor.hostname = hostname;
-  supervisor.proxy = require('config').proxy||undefined;
+  var config = require('config');
+  var connection = config.supervisor||{};
+  connection.hostname = hostname;
+  connection.request = config.request;
 
   var _host_id;
   var _host_resource_id;
-  var _connection = new TheEyeClient(supervisor);
+  var _connection = new TheEyeClient(connection);
   var _workers = [];
 
   Object.defineProperty(this,'connection',{
@@ -112,9 +113,9 @@ function App () {
         };
 
         if (!config) {
-          debug(msg);
           result.data.message = 'no agent configuration available';
           result.state = 'failure';
+          debug(result);
         } else {
           setupWorkers( config.workers );
           result.data.message = 'agent monitors updated';

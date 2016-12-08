@@ -10,6 +10,7 @@ var path = require('path');
 var util = require('util');
 var request = require('request');
 var debug = require('debug');
+var _ = require('underscore');
 
 var logger = {
   'debug': debug('eye:client:debug'),
@@ -23,12 +24,9 @@ module.exports = TheEyeClient;
  *
  *
  */
-function TheEyeClient (options)
-{
+function TheEyeClient (options) {
   this.access_token = '';
-
   this.configure(options);
-
   return this;
 }
 
@@ -45,8 +43,7 @@ TheEyeClient.prototype = {
    * @param Object options
    *
    */
-  configure: function(options)
-  {
+  configure: function(options) {
     var connection = this;
 
     logger.debug('theeye api client version %s/%s', CLIENT_NAME, CLIENT_VERSION);
@@ -55,34 +52,30 @@ TheEyeClient.prototype = {
       connection[prop] = options[prop];
     }
 
-    connection.api_url = options.api_url||process.env.THEEYE_SUPERVISOR_API_URL ;
-    connection.client_id = options.client_id||process.env.THEEYE_SUPERVISOR_CLIENT_ID ;
-    connection.client_secret = options.client_secret||process.env.THEEYE_SUPERVISOR_CLIENT_SECRET ;
-    connection.client_customer = options.client_customer||process.env.THEEYE_SUPERVISOR_CLIENT_CUSTOMER ;
-    connection.access_token = options.access_token||null ;
+    connection.api_url = options.api_url||process.env.THEEYE_SUPERVISOR_API_URL;
+    connection.client_id = options.client_id||process.env.THEEYE_SUPERVISOR_CLIENT_ID;
+    connection.client_secret = options.client_secret||process.env.THEEYE_SUPERVISOR_CLIENT_SECRET;
+    connection.client_customer = options.client_customer||process.env.THEEYE_SUPERVISOR_CLIENT_CUSTOMER;
+    connection.access_token = options.access_token||null;
 
-    logger.debug('connection properties => %o', connection);
+    logger.debug('connection properties => %o',connection);
     if (!connection.api_url) {
       return logger.error('ERROR. Supervisor API URL required');
     }
 
-    var defaults = {
+    options.request||(options.request={});
+
+    var defaults = _.extend({},{
       tunnel: false,
-      timeout: (options.timeout||5000),
+      timeout: 5000,
       json: true,
       gzip: true,
-      headers: {
-        'User-Agent': CLIENT_USER_AGENT
-      },
       baseUrl: connection.api_url
-    };
+    },options.request);
 
+    defaults.headers = _.extend({ 'User-Agent': CLIENT_USER_AGENT },options.request.headers),
 
-    var proxy = options.proxy||process.env.https_proxy||process.env.http_proxy;
-    if (proxy) {
-      logger.debug('using proxy %s', proxy);
-      defaults.proxy = proxy;
-    }
+    logger.debug('request options set to %j', defaults);
 
     connection.request = request.defaults(defaults);
   },
