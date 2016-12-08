@@ -1,9 +1,16 @@
 # CHANGELOG
 
+### 0.9.3-beta - 2016-12-08
+
+> allow to pass options directly to request setup from the config file. default common options set in config/default.js 
+
+> removed enclose from package.json
+
+> update version of node-stat to lastest. this version includes an own fixed version of diskusage with fixed packages versions inside
+
 ### 0.9.2-beta - 2016-12-05
 
 > added sample code, docs and examples for scripts creation      
-
 
 > set network proxy using configuration file     
 
