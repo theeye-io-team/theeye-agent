@@ -37,7 +37,7 @@ module.exports = {
   },
   request: {
     proxy: (process.env.https_proxy||process.env.https_proxy),
-    tunnel: true,
+    tunnel: false,
     json: true,
     gzip: true,
     timeout: 15000
