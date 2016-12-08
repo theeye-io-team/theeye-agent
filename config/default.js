@@ -36,7 +36,7 @@ module.exports = {
   supervisor:{
   },
   request: {
-    proxy: (process.env.https_proxy||process.env.https_proxy),
+    proxy: (process.env.https_proxy||process.env.http_proxy),
     tunnel: false,
     json: true,
     gzip: true,
