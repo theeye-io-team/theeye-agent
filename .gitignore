@@ -3,7 +3,7 @@ node_modules/
 newrelic*.log
 config/*
 .vimprj
-scripts
+downloads
 libs
 npm-debug.log
 *.js.orig

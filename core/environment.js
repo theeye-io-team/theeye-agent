@@ -7,7 +7,7 @@ var detectVersion = require('./lib/version');
 
 module.exports = function (next) {
   var env = process.env.NODE_ENV ;
-  var scriptsPath = process.env.THEEYE_AGENT_SCRIPT_PATH ;
+  var scriptsPath = process.env.THEEYE_AGENT_SCRIPT_PATH || config.scripts.path ;
 
   if (!scriptsPath) {
     scriptsPath = process.cwd() + '/../scripts' ;

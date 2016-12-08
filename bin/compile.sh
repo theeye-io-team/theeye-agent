@@ -1,4 +1,8 @@
 #!/bin/bash
+
+npm install npm3
+./node_modules/.bin/npm3 install
+
 AGENT_DIR=`pwd`
 #npm install
 cd node_modules/config

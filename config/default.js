@@ -12,7 +12,7 @@ module.exports = {
   // proxy information for api requests
   version: undefined,
   scripts: {
-    path: (__dirname + '/../scripts'),
+    path: ( __dirname + '/../downloads' ),
     execution_timeout: 10 * 60 * 1000 // 10 minutes in milliseconds
   },
   /**
