@@ -1,5 +1,5 @@
 {
-  "version": "0.9.1-beta",
+  "version": "0.9.3-beta",
   "name": "TheEye-Agent",
   "description": "TheEye Agent - TheEye Client",
   "author": "Facugon <facugon@interactar.com>",
@@ -9,17 +9,17 @@
     "url": "https://github.com/interactar/theeye-agent.git"
   },
   "dependencies": {
-    "config": "~1.20.1",
-    "debug": "~2.3.2",
-    "iar-node-stat": "git+https://github.com/interactar/node-stat.git",
-    "iar-ps-list": "git+https://github.com/interactar/ps-axu.git",
-    "ip": "~0.3.3",
-    "md5": "~2.1.0",
-    "ps-node": "git+https://github.com/interactar/ps.git",
-    "request": "~2.74.0",
-    "shell-escape": "~0.2.0",
-    "tree-kill": "~1.1.0",
-    "underscore": "~1.8.3"
+    "config": "1.20.1",
+    "debug": "2.3.2",
+    "ip": "0.3.3",
+    "md5": "2.1.0",
+    "request": "2.74.0",
+    "shell-escape": "0.2.0",
+    "theeye-node-stat": "0.2.9",
+    "theeye-ps-aux": "0.3.0",
+    "theeye-ps-node": "0.1.1",
+    "tree-kill": "1.1.0",
+    "underscore": "1.8.3"
   },
   "scripts": {
     "core": "./node_modules/.bin/nodemon --watch core `pwd`/core/main.js",
@@ -28,10 +28,7 @@
   },
   "engine": "node >= 0.12",
   "devDependencies": {
-    "chai": "~3.5.0",
-    "mocha": "~3.0.2",
-    "nodemon": "~1.9.2",
-    "npm3": "~1.1.0"
+    "nodemon": "~1.9.2"
   },
   "os": [
     "win32",

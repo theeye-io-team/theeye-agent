@@ -6,20 +6,20 @@ var debug = require('debug')('eye::environment');
 var detectVersion = require('./lib/version');
 
 module.exports = function (next) {
-  var scriptsPath = process.env.THEEYE_AGENT_SCRIPT_PATH;
+  var env = process.env.NODE_ENV ;
+  var scriptsPath = process.env.THEEYE_AGENT_SCRIPT_PATH || config.scripts.path ;
+
   if (!scriptsPath) {
-    var path = (config.scripts&&config.scripts.path);
-    scriptsPath = path||(__dirname + '/../scripts');
+    scriptsPath = process.cwd() + '/../scripts' ;
   }
 
-  // detect agent version
   detectVersion(function(error,version){
 
     if (!process.env.THEEYE_AGENT_VERSION) {
       if (config.version) {
         process.env.THEEYE_AGENT_VERSION = config.version;
       }
-      // else live it empty
+      // else leave it empty
     }
     debug('agent version is %s', process.env.THEEYE_AGENT_VERSION);
 

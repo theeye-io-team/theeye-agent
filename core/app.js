@@ -2,26 +2,25 @@
 
 var ip = require('ip');
 var os = require('os');
-var debug = require('debug')('eye:agent:app');
-var EventEmitter = require('events').EventEmitter;
 var util = require('util');
-var TheEyeClient = require('./lib/theeye-client') ;
-var Worker = require('./worker');
+var debug = require('debug')('eye:agent:app');
+var TheEyeClient = require('./lib/theeye-client');
 var hostname = require('./lib/hostname');
+var Worker = require('./worker');
+var Listener = require('./worker/listener');
 
 function App () {
 
-  EventEmitter.call(this);
-
   var self = this;
 
-  var supervisor = require('config').supervisor||{};
-  supervisor.hostname = hostname;
-  supervisor.proxy = require('config').proxy||undefined;
+  var config = require('config');
+  var connection = config.supervisor||{};
+  connection.hostname = hostname;
+  connection.request = config.request;
 
   var _host_id;
   var _host_resource_id;
-  var _connection = new TheEyeClient(supervisor);
+  var _connection = new TheEyeClient(connection);
   var _workers = [];
 
   Object.defineProperty(this,'connection',{
@@ -33,35 +32,37 @@ function App () {
   });
 
   function connectSupervisor (next) {
-    _connection.refreshToken(function(error,token){
-      if(error) {
+    _connection.refreshToken(function (error,token) {
+      if (error) {
         debug('unable to get an access token');
         debug(error);
         next(error);
       } else {
-        _connection.registerAgent({
-          version: process.env.THEEYE_AGENT_VERSION,
-          info:{
-            platform: os.platform(),
-            hostname: hostname,
-            arch: os.arch(),
-            os_name: os.type(),
-            os_version: os.release(),
-            uptime: os.uptime(),
-            ip: ip.address()
-          }
-        },function(error,response){
-          _host_id = response.host_id;
-          _host_resource_id = response.resource_id;
-
-          if(error) {
-            debug(error);
-            next(error);
-          } else {
-            debug(response);
-            next(null);
-          }
-        });
+          _connection.create({
+            route: _connection.HOST + '/:hostname',
+            body: {
+              version: process.env.THEEYE_AGENT_VERSION,
+              info: {
+                platform: os.platform(),
+                hostname: hostname,
+                arch: os.arch(),
+                os_name: os.type(),
+                os_version: os.release(),
+                uptime: os.uptime(),
+                ip: ip.address()
+              }
+            },
+            success: function (response) {
+              _host_id = response.host_id;
+              _host_resource_id = response.resource_id;
+              debug(response);
+              next(null);
+            },
+            failure: function (err) {
+              debug(error);
+              next(error);
+            }
+          });
       }
     });
   }
@@ -80,40 +81,12 @@ function App () {
     });
   }
 
-  /**
-   *
-   * DEPRECATED
-   *
-  function searchConfigurationFiles (doneFn){
-    if (_workers.length == 0) {
-      debug('no workers configuration difined by supervisor');
-      debug('searching workers configuration in files');
-
-      var workerscfg = require('config').workers;
-      if (!Array.isArray(workerscfg)||workerscfg.length==0) {
-        debug('no workers defined via config');
-      } else {
-        debug('starting workers defined via config');
-        for (var index in workerscfg) {
-          var config = workerscfg[index];
-          config.resource_id = _host_resource_id;
-          var worker = Worker.spawn(config, _connection);
-          worker.run();
-        }
-      }
-    }
-
-    if(doneFn) doneFn(null, _workers);
-  }
-  */
-
   function initListener () {
-    var config = {
+    var worker = new Listener(_connection,{
       resource_id: _host_resource_id,
       type: 'listener',
       looptime: require('config').workers.listener.looptime||15000
-    }
-    var worker = Worker.spawn(config, _connection);
+    });
     worker.run();
     return worker;
   }
@@ -140,22 +113,24 @@ function App () {
         };
 
         if (!config) {
-          debug(msg);
           result.data.message = 'no agent configuration available';
           result.state = 'failure';
+          debug(result);
         } else {
           setupWorkers( config.workers );
           result.data.message = 'agent monitors updated';
           result.state = 'success';
         }
 
-        //searchConfigurationFiles(doneFn);
-        var listener = initListener();
-        _workers.push(listener);
+        if (!self.listener) {
+          self.listener = initListener();
+          self.listener.on('config:outdated',function(){
+            updateWorkers();
+          });
+        }
 
         debug('agent started');
-        self.emit('config:up-to-date',result);
-        if(next) next();
+        if(next) next(null,result);
       }
     );
   }
@@ -171,12 +146,10 @@ function App () {
     _workers = []; // destroy workers.
 
     debug('updating workers configuration');
-    getRemoteConfig();
+    getRemoteConfig(function(err,result){
+      self.listener.emit('config:updated',result);
+    });
   }
-
-  this.on('config:need-update',function(){
-    updateWorkers();
-  });
 
   this.start = function(specs,next) {
     tryConnectSupervisor(function(){
@@ -186,7 +159,5 @@ function App () {
 
   return this;
 }
-
-util.inherits(App, EventEmitter);
 
 module.exports = new App();
