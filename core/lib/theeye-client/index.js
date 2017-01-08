@@ -258,8 +258,8 @@ TheEyeClient.prototype = {
    */
   get: function(options) {
     var url = options.route;
-    if( options.id ) url += '/' + options.id;
-    if( options.child ) url += '/' + options.child;
+    if (options.id) url += '/' + options.id;
+    if (options.child) url += '/' + options.child;
 
     var request = this.performRequest({
       method: 'GET',

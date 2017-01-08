@@ -1,9 +1,8 @@
 'use strict';
 
 var path = require('path');
-var setEnv = require('./environment');
 
-setEnv(function(){
+require('./environment')(function(){
   //require("newrelic");
   var main ='eye:agent:main:error';
   var debug = require('debug')(main);

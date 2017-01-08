@@ -157,6 +157,12 @@ function App () {
     });
   }
 
+  this.startCLI = function(next){
+    tryConnectSupervisor(function(){
+      next()
+    });
+  }
+
   return this;
 }
 

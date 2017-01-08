@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 //var config = require('config');
 var fs = require('fs');
@@ -13,7 +13,7 @@ var AbstractWorker = require('../abstract');
  * this listen to orders and also send keep alive to the supervisor
  *
  */
-var Listener = AbstractWorker.extend({
+module.exports = AbstractWorker.extend({
 	type: 'listener',
 	/**
 	 * often the resource id is required. 
@@ -110,7 +110,6 @@ var Listener = AbstractWorker.extend({
 			}
 			return this;
 		}
-
 		/**
 		 *
 		 * parse job data
@@ -180,5 +179,3 @@ var Listener = AbstractWorker.extend({
 		});
 	}
 });
-
-module.exports = Listener;

@@ -142,3 +142,5 @@ to set a custom hostname. this will be used to register the agent and the host a
 
 
 
+#### For more read the [docs](https://github.com/interactar/theeye-agent/tree/master/docs).
+

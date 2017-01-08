@@ -1,0 +1,15 @@
+{
+  "name": "theeye-cli",
+  "version": "1.0.0",
+  "description": "theeye CLI client",
+  "main": "theeye-cli.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Facugon",
+  "license": "MIT",
+  "dependencies": {
+    "colors": "1.1.2",
+    "commander": "0.0.1"
+  }
+}

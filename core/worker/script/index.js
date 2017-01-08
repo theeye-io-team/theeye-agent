@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var Script = require('../../lib/script');
 var AbstractWorker = require('../abstract');
@@ -14,7 +14,7 @@ function isObject (value) {
 }
 
 
-var Worker = module.exports = AbstractWorker.extend({
+module.exports = AbstractWorker.extend({
   initialize: function(){
     var path = process.env.THEEYE_AGENT_SCRIPT_PATH;
     var config = this.config.script;
