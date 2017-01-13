@@ -428,17 +428,17 @@ TheEyeClient.prototype = {
   },
   updateResource : function(id,resourceUpdates,next) {
     this.performRequest({
-      method: 'PUT',
-      url: '/:customer/resource/' + id,
+      method: 'PATCH',
+      url: '/:customer/resource/' + id + '/state',
       body: resourceUpdates
     }, function(error,response){
-      if( error ) {
+      if (error) {
         logger.error('unable to update resource');
         logger.error(error.message);
-        if(next) next(error);
+        if (next) next(error);
       } else {
         logger.debug('resource updated');
-        if(next) next(null,response);
+        if (next) next(null,response);
       }
     });
   }
