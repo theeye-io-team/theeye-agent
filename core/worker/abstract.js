@@ -16,7 +16,7 @@ var AbstractWorker = module.exports = function (connection,config) {
   EventEmitter.call(this);
 
   this.config = config;
-  this.name = config.name||config.type;
+  this.name = (config.name||config.type);
   this.connection = connection;
   this.enable = true;
 
@@ -104,33 +104,6 @@ _.extend(AbstractWorker.prototype, EventEmitter.prototype, {
 		clearTimeout(this.timeout);
 		this.debug.log('worker stopped.');
 	},
-	downloadScript: function(script,done){
-		var self = this;
-		this.debug.log('getting script %s', script.id);
-		var stream = this.connection.scriptDownloadStream(script.id);
-
-		this.debug.log('download stream');
-		script.save(stream,function(error){
-			if(error){
-				self.debug.error(error);
-				return done(error);
-			}
-			self.debug.log('script downloaded');
-			done();
-		});
-	},
-	checkScript: function(script,next){
-		var self = this;
-		script.checkFile(function(success){
-			if(!success){ // not present or outdated
-				self.debug.log('script need to be downloaded');
-				self.downloadScript(script, next);
-			} else {
-				self.debug.log('script is ok');
-				next();
-			}
-		});
-	}
 });
 
 // copied the Backbone extend method

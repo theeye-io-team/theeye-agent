@@ -95,8 +95,12 @@ function App () {
     debug('intializing resource workers');
     configs.forEach(function(config) {
       var worker = Worker.spawn(config, _connection);
-      worker.run();
-      if(worker) _workers.push(worker);
+      if (!worker) {
+        debug('worker error');
+      } else {
+        worker.run();
+        _workers.push(worker);
+      }
     });
   }
 

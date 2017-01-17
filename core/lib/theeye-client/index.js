@@ -413,8 +413,7 @@ TheEyeClient.prototype = {
       }
     });
   },
-  scriptDownloadStream : function(scriptId)
-  {
+  scriptDownloadStream : function(scriptId) {
     return this.performRequest({
       method: 'get',
       url: '/:customer/script/' + scriptId  + '/download'
@@ -422,6 +421,18 @@ TheEyeClient.prototype = {
     .on('response', function(response) {
       if(response.statusCode != 200) {
         var error = new Error('get script response error ' + response.statusCode);
+        this.emit('error', error);
+      }
+    });
+  },
+  fileDownloadStream: function(id) {
+    return this.performRequest({
+      method: 'GET',
+      url: '/:customer/file/' + id  + '/download'
+    })
+    .on('response', function(response) {
+      if (response.statusCode!=200) {
+        var error = new Error('get file response error ' + response.statusCode);
         this.emit('error', error);
       }
     });

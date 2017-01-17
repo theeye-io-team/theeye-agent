@@ -8,12 +8,13 @@ var logger = {
 }
 
 var Workers = {
-  dstat:require('./dstat'),
-  listener:require('./listener'),
-  process:require('./process'),
-  psaux:require('./psaux'),
-  scraper:require('./scraper'),
-  script:require('./script')
+  dstat: require('./dstat'),
+  listener: require('./listener'),
+  process: require('./process'),
+  psaux: require('./psaux'),
+  scraper: require('./scraper'),
+  script: require('./script'),
+  file: require('./file')
 };
 
 module.exports = {
@@ -35,6 +36,14 @@ module.exports = {
     }
 
     logger.log('creating worker %s', config.type);
-    return new Workers[config.type](connection, config);
+
+    try {
+      var worker = new Workers[config.type](connection, config);
+    } catch (e) {
+      logger.error(e);
+      return null;
+    }
+
+    return worker;
   }
 };
