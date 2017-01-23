@@ -112,8 +112,9 @@ function App () {
         };
 
         if (!config) {
+          var msg = 'no agent configuration available';
           debug(msg);
-          result.data.message = 'no agent configuration available';
+          result.data.message = msg;
           result.state = 'failure';
         } else {
           setupWorkers( config.workers );
