@@ -6,7 +6,7 @@ var format = require('util').format;
 var AbstractWorker = require('../abstract');
 
 var FAILURE_STATE = 'failure';
-var NORMAL_STATE = 'normal';
+var SUCCESS_STATE = 'normal';
 
 function setupRequestObject(config){
   var version = process.env.THEEYE_AGENT_VERSION;
@@ -152,7 +152,7 @@ var Worker = module.exports = AbstractWorker.extend({
         var bodystr = JSON.stringify(body);
         if( new RegExp(config.pattern).test( bodystr ) === true ){
           return end(null,{
-            state: NORMAL_STATE,
+            state: SUCCESS_STATE,
             event: 'success',
             data:{ 
               message:'request success', 
@@ -181,7 +181,7 @@ var Worker = module.exports = AbstractWorker.extend({
         }
       } else {
         return end(null,{
-          state: NORMAL_STATE,
+          state: SUCCESS_STATE,
           event: 'success', 
           data:{ 
             message:'request success', 

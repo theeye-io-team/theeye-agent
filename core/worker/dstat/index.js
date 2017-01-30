@@ -6,9 +6,15 @@ var AbstractWorker = require('../abstract');
 var FAILURE_STATE = 'failure';
 var NORMAL_STATE = 'normal';
 
+var HIGH_CPU_EVENT = 'host:stats:cpu:high';
+var HIGH_MEM_EVENT = 'host:stats:mem:high';
+var HIGH_DISK_EVENT = 'host:stats:disk:high';
+var HIGH_CACHE_EVENT = 'host:stats:cache:high';
+var STATS_RECOVERED_EVENT = 'host:stats:normal';
+
 var Worker = module.exports = AbstractWorker.extend({
-  type:'dstat',
-  getData : function(next) {
+  type: 'dstat',
+  getData: function(next) {
     var self = this;
 
     try {
@@ -86,40 +92,40 @@ var Worker = module.exports = AbstractWorker.extend({
     if(load.cpu > this.config.limit.cpu){
       this.debug.error('ALERT: cpu load is too high');
       return next(null,{
-        "state": FAILURE_STATE,
-        "event":"host:stats:cpu:high",
-        "data": load
+        state: FAILURE_STATE,
+        event: HIGH_CPU_EVENT,
+        data: load
       });
     }
     if(load.mem > this.config.limit.mem){
       this.debug.error('ALERT: mem usage is too high');
       return next(null,{
-        "state": FAILURE_STATE,
-        "event":"host:stats:mem:high",
-        "data": load 
+        state: FAILURE_STATE,
+        event: HIGH_MEM_EVENT,
+        data: load 
       });
     }
     if(load.cache > this.config.limit.cache){
       this.debug.error('ALERT: cache usage is too high');
       return next(null,{
-        "state": FAILURE_STATE,
-        "event":"host:stats:cache:high",
-        "data": load,
+        state: FAILURE_STATE,
+        event: HIGH_CACHE_EVENT,
+        data: load,
       });
     }
 
     if(diskAlert){
       return next(null,{
-        "state": FAILURE_STATE,
-        "event":"host:stats:disk:high",
-        "data": load
+        state: FAILURE_STATE,
+        event: HIGH_DISK_EVENT,
+        data: load
       });
     }
 
     return next(null,{
-      "state": NORMAL_STATE,
-      "event":"host:stats:normal",
-      "data": load
+      state: NORMAL_STATE,
+      event: STATS_RECOVERED_EVENT,
+      data: load
     });
   }
 });
