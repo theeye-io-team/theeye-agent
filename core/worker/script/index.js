@@ -27,10 +27,14 @@ module.exports = AbstractWorker.extend({
   },
 	checkScript: function(next){
 		var self = this;
-		this.script.checkFile(function(success){
-			if(!success){ // not present or outdated
-				self.debug.log('script need to be downloaded');
-				self.downloadScript(next);
+		this.script.access(function(err){
+			if (err) { // no access to file
+        if (err.code === 'ENOENT') { // file does not exists
+          self.debug.log('script need to be downloaded');
+          self.downloadScript(next);
+        } else { // this is worst, can't access file at all, permissions maybe?
+          return next(err);
+        }
 			} else {
 				self.debug.log('script is ok');
 				next();

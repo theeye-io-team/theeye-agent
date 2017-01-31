@@ -24,6 +24,7 @@
   },
   "scripts": {
     "core": "./node_modules/.bin/nodemon --watch core `pwd`/core/main.js",
+    "debug": "./node_modules/.bin/nodemon --inspect=8888 --watch core `pwd`/core/main.js",
     "start": "/bin/bash ./run.sh",
     "remote": "DEBUG=* NODE_ENV=remote THEEYE_AGENT_SCRIPT_PATH=$PWD/scripts ./node_modules/.bin/nodemon `pwd`/core/main.js"
   },
