@@ -43,13 +43,13 @@ It also works with the agent configuration file.
 
 ```
 
-The next command will fetch all your available monitors
+The following command will fetch all your available monitors
 
 
 `NODE_ENV=cfgfilename ./cli/theeye-cli.js -a get -r resource`
 
 
-Note that you will be able to perform only actions allowed to the user you are using.
-Agents have limited permissions.
+Note that you will be able to perform only actions authorized to the user you are using.
+Agents for example, have limited permissions.
 To perform advanced actions (like create, delete or update) you will need a user with admin or higher permissions.
 
