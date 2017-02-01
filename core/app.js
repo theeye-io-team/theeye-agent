@@ -96,7 +96,7 @@ function App () {
     configs.forEach(function(config) {
       var worker = Worker.spawn(config, _connection);
       if (!worker) {
-        debug('worker error');
+        debug('EWORKER: unable to spawn worker');
       } else {
         worker.run();
         _workers.push(worker);
@@ -117,9 +117,10 @@ function App () {
         };
 
         if (!config) {
-          result.data.message = 'no agent configuration available';
+          var msg = 'no agent configuration available';
+          debug(msg);
+          result.data.message = msg;
           result.state = 'failure';
-          debug(result);
         } else {
           setupWorkers( config.workers );
           result.data.message = 'agent monitors updated';
