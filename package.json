@@ -20,6 +20,7 @@
     "theeye-ps-aux": "0.3.0",
     "theeye-ps-node": "0.1.1",
     "tree-kill": "1.1.0",
+    "uid-number": "0.0.6",
     "underscore": "1.8.3"
   },
   "scripts": {
