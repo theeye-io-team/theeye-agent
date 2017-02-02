@@ -116,19 +116,27 @@ function File (props) {
     });
   }
 
-  this.createFile = function (stream, next) {
-    var self = this;
+  this.createFile = function (readable, next) {
+    var self = this,
+      cbCalled = false;
+
     // filepath is path + filename
     // keep by default execution mode
+    debug('creating file %s..', this.filepath);
+
+    function done(err) {
+      if (!cbCalled) {
+        next(err);
+        cbCalled = true;
+      }
+    }
+
     var writable = fs.createWriteStream(this.filepath, { mode:'0755' });
-    stream
-      .on('error',function(error){
-        if (next) next(error);
-      })
-      .pipe( writable )
-      .on('finish',function(){
-        self.setAccess(next);
-      });
+    writable.on('error', done);
+    readable.on('error', done);
+    readable.pipe(writable).on('finish',function(){
+      self.setAccess(done);
+    });
   }
 
   this.setAccess = function (next) {
