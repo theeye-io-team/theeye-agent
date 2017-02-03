@@ -20,6 +20,18 @@ function statModeToOctalString (mode) {
 }
 
 /**
+ * given a mode string validate and returns it, or null if invalid
+ * @param {string} mode
+ * @return {string|null}
+ */
+function parseUnixOctalModeString (mode) {
+  if (mode.length != 4) return null;
+  if (['0','1','2','4'].indexOf(mode[0]) === -1) return null;
+  if (parseInt(mode.substr(1,mode.length)) > 777) return null;
+  return mode;
+}
+
+/**
  *
  * convert argument to unix id
  *
@@ -32,7 +44,7 @@ function statModeToOctalString (mode) {
 function parseUnixId (id) {
   var _id = parseInt(id);
   if (!Number.isInteger(_id) || id < 0) return null;
-  return id;
+  return _id;
 }
 
 function File (props) {
@@ -86,8 +98,9 @@ function File (props) {
   _md5 = props.md5;
   _filename = props.filename;
   _path = props.path;
-  _mode = props.mode; // assuming this is a correct value
 
+  // validate mode, uid & gid to avoid entering a loop
+  _mode = parseUnixOctalModeString(props.mode)||'0755'; // assuming this is a correct value
   _uid = parseUnixId(props.uid)||process.getuid();
   _gid = parseUnixId(props.gid)||process.getgid();
 
@@ -216,6 +229,7 @@ function File (props) {
     debug('setting [mode:%s][uid:%s][gid:%s]',mode,uid,gid);
 
     if (!mode||isNaN(mode)) mode = parseInt('0755',8);
+
     fs.chmod(path,mode,function(err){
       if (err) {
         debug(err);
