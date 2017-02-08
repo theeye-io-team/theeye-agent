@@ -25,6 +25,7 @@ function statModeToOctalString (mode) {
  * @return {string|null}
  */
 function parseUnixOctalModeString (mode) {
+  if (!mode||typeof mode != 'string') return null;
   if (mode.length != 4) return null;
   if (['0','1','2','4'].indexOf(mode[0]) === -1) return null;
   if (parseInt(mode.substr(1,mode.length)) > 777) return null;
@@ -63,18 +64,29 @@ function File (props) {
    * @private
    */
   var _md5;
+
   /**
-   * @name _filename
+   * @name _basename
    * @type string
    * @private
    */
-  var _filename;
+  var _basename;
+
   /**
+   * @name _dirname
+   * @type string
+   * @private
+   */
+  var _dirname;
+
+  /**
+   * the full path
    * @name _path
    * @type string
    * @private
    */
   var _path;
+
   /**
    * @name _mode
    * @type string string of permissions in the unix octal format
@@ -96,17 +108,32 @@ function File (props) {
 
   _id = props.id;
   _md5 = props.md5;
-  _filename = props.filename;
+
+  _dirname = props.dirname;
+  _basename = props.basename;
+
+  // path = dirname + basename
+  // https://nodejs.org/api/path.html
   _path = props.path;
+
+  if (!_path) {
+    throw new Error('EFILEPATH: path is required');
+  }
+  if (!_basename) {
+    throw new Error('EFILENAME: basename is required');
+  }
+  if (!_dirname) {
+    throw new Error('EFILEDIR: dirname is required');
+  }
 
   // validate mode, uid & gid to avoid entering a loop
   _mode = parseUnixOctalModeString(props.mode)||'0755'; // assuming this is a correct value
-  _uid = parseUnixId(props.uid)||process.getuid();
-  _gid = parseUnixId(props.gid)||process.getgid();
 
-  if (!_path) throw new Error('path is required.');
-  if (!_filename) throw new Error('filename is required.');
-  var _filepath = join(_path,_filename);
+  _uid = parseUnixId(props.uid);
+  if (_uid === null) _uid = process.getuid();
+
+  _gid = parseUnixId(props.gid);
+  if (_gid === null) _gid = process.getgid();
 
   Object.defineProperty(this,'id',{
     get: function() { return _id; },
@@ -133,13 +160,13 @@ function File (props) {
     enumerable:true,
   });
 
-  Object.defineProperty(this,'filepath',{
-    get: function() { return _filepath; },
+  Object.defineProperty(this,'basename',{
+    get: function() { return _basename; },
     enumerable:true,
   });
 
-  Object.defineProperty(this,'filename',{
-    get: function() { return _filename; },
+  Object.defineProperty(this,'dirname',{
+    get: function() { return _dirname; },
     enumerable:true,
   });
 
@@ -148,30 +175,38 @@ function File (props) {
     enumerable:true,
   });
 
-  this.access = function (next) {
-    debug('checking file access %s', this.filepath);
-
-    var accessMode = fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK | fs.constants.F_OK ;
-
-    fs.access(this.filepath, accessMode, (err) => {
-      if (err) return next(err);
-      var buf = fs.readFileSync(this.filepath);
+  this.checkMd5 = function (next) {
+    try {
+      var buf = fs.readFileSync(this.path);
       var currmd5 = md5(buf);
       debug('checking file md5 "%s" againts "%s"', currmd5, this.md5);
       if (currmd5!=this.md5) {
-        return next(false, FILE_OUTDATED);
+        var err = new Error('EMD5: file md5 sum mismatch');
+        err.code = 'EMD5';
+        next(err);
       } else {
-        return next(true);
+        next();
       }
+    } catch(e) {
+      return next(e);
+    }
+  }
+
+  this.checkAccess = function (next) {
+    debug('checking file access %s', this.path);
+    var accessMode = fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK | fs.constants.F_OK ;
+    fs.access(this.path, accessMode, (err) => {
+      if (err) return next(err);
+      return next(null);
     });
   }
 
-  this.stats = function (next) {
+  this.checkStats = function (next) {
     var _mode = this.mode,
       _uid = this.uid,
       _gid = this.gid ;
 
-    fs.stat(this.filepath, function(err, stat){
+    fs.stat(this.path, function(err, stat){
       if (err) return next(err);
 
       var permString = statModeToOctalString(stat.mode);
@@ -201,9 +236,8 @@ function File (props) {
     var self = this,
       cbCalled = false;
 
-    // filepath is path + filename
     // keep by default execution mode
-    debug('creating file %s..', this.filepath);
+    debug('creating file %s..', this.path);
 
     function done(err) {
       if (!cbCalled) {
@@ -212,7 +246,7 @@ function File (props) {
       }
     }
 
-    var writable = fs.createWriteStream(this.filepath, { mode:'0755' });
+    var writable = fs.createWriteStream(this.path, { mode:'0755' });
     writable.on('error', done);
     readable.on('error', done);
     readable.pipe(writable).on('finish',function(){
@@ -221,7 +255,7 @@ function File (props) {
   }
 
   this.setAccess = function (next) {
-    var path = this.filepath,
+    var path = this.path,
       mode = this.mode,
       uid = this.uid,
       gid = this.gid;
@@ -251,9 +285,9 @@ function File (props) {
 
   this.save = function (stream, next) {
     var self = this;
-    // path is without filename on it
-    if (!fs.existsSync(this.path)) {
-      mkdirp(this.path, function(err){
+
+    if (!fs.existsSync(this.dirname)) {
+      mkdirp(this.dirname, function(err){
         if (err) return next(err);
         else self.createFile(stream,next);
       });

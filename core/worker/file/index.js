@@ -5,7 +5,7 @@ var File = require('../../lib/file');
 
 var FAILURE_STATE = 'failure';
 var SUCCESS_STATE = 'success';
-var FILE_CHANGED_STATE = 'file_changed';
+var FILE_CHANGED_STATE = 'changed';
 
 var FILE_CHANGED_EVENT = 'monitor:file:success_changed';
 var FILE_ERROR_ACCESS_EVENT = 'monitor:file:error_access';
@@ -21,8 +21,9 @@ module.exports = AbstractWorker.extend({
 
     this.file = new File({
       id: file.id,
-      filename: file.filename,
       md5: file.md5,
+      basename: config.basename,
+      dirname: config.dirname,
       path: config.path,
       uid: config.uid,
       gid: config.gid,
@@ -45,6 +46,7 @@ module.exports = AbstractWorker.extend({
               } 
             });
           } else {
+            // file changed , trigger event
             next(null,{
               state: FILE_CHANGED_STATE,
               event: FILE_CHANGED_EVENT,
@@ -79,6 +81,7 @@ module.exports = AbstractWorker.extend({
               });
             }
           } else {
+            // file changed , trigger event
             next(null,{
               state: FILE_CHANGED_STATE,
               event: FILE_CHANGED_EVENT,
@@ -109,17 +112,56 @@ module.exports = AbstractWorker.extend({
         break;
     }
   },
+  processMd5Error: function(err,next) {
+    if (err.code === 'EMD5') {
+      // download file again
+      this.downloadFile(function (err) {
+        if (err) {
+          next(null,{
+            state: FAILURE_STATE,
+            event: FILE_ERROR_UNKNOWN_EVENT,
+            data: {
+              message: err.message,
+              error: err
+            }
+          });
+        } else {
+          // file changed , trigger event
+          next(null,{
+            state: FILE_CHANGED_STATE,
+            event: FILE_CHANGED_EVENT,
+            data: { }
+          });
+        }
+      });
+    } else {
+      next(null,{
+        state: FAILURE_STATE,
+        event: FILE_ERROR_UNKNOWN_EVENT,
+        data: {
+          message: err.message,
+          error: err
+        } 
+      });
+    }
+  },
   getData: function (next) {
     var self = this;
-    this.file.stats(function (err,stats) {
+    this.file.checkStats(function (err,stats) {
       if (err) {
         self.processStatsError(err,next);
       } else {
-        self.debug.log('file is ok');
-        next(null,{
-          state: SUCCESS_STATE,
-          event: SUCCESS_STATE,
-          data: { stats: stats } 
+        self.file.checkMd5(function(err){
+          if (err) {
+            self.processMd5Error(err,next);
+          } else {
+            self.debug.log('file is ok');
+            next(null,{
+              state: SUCCESS_STATE,
+              event: SUCCESS_STATE,
+              data: { stats: stats } 
+            });
+          }
         });
       }
     });
