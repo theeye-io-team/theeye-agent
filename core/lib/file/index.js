@@ -108,10 +108,8 @@ function File (props) {
 
   _id = props.id;
   _md5 = props.md5;
-
   _dirname = props.dirname;
   _basename = props.basename;
-
   // path = dirname + basename
   // https://nodejs.org/api/path.html
   _path = props.path;

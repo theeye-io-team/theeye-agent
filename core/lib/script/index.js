@@ -51,13 +51,13 @@ function Script (props) {
   });
 
   this.run = function(end){
-    var partial = this.filepath + ' ' + this.args ;
+    var partial = this.path + ' ' + this.args ;
     var formatted;
 
     var runas = this.runas;
     var regex = /%script%/;
 
-    if( runas && regex.test(runas) === true ){
+    if (runas && regex.test(runas) === true) {
       formatted = runas.replace(regex, partial);
     } else {
       formatted = partial;
@@ -69,6 +69,8 @@ function Script (props) {
   }
 
   this.execScript = function(script,options){
+    debug('running script "%s"', script);
+
     options||(options={});
     if (!options.timeout) {
       var timeout = (config.scripts&&config.scripts.execution_timeout)||undefined;
@@ -94,8 +96,6 @@ function Script (props) {
     this.once('end',function(){
       clearTimeout(timeout);
     });
-
-    debug('running script "%s"', script);
 
     child.stdout.on('data',function(data){
       partials.stdout += data;

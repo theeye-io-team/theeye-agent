@@ -14,8 +14,8 @@ module.exports = AbstractWorker.extend({
       args: config.arguments||[],
       runas: config.runas,
       md5: config.md5,
-      directory: directory,
-      filename: config.filename,
+      dirname: directory,
+      basename: config.filename,
       path: join(directory, config.filename),
     });
   },

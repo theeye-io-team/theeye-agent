@@ -17,8 +17,6 @@ module.exports = AbstractWorker.extend({
     var config = this.config,
       file = this.config.file;
 
-    this.debug.log(this.config);
-
     this.file = new File({
       id: file.id,
       md5: file.md5,
