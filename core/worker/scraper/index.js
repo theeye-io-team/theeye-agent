@@ -8,7 +8,7 @@ var AbstractWorker = require('../abstract');
 var FAILURE_STATE = 'failure';
 var SUCCESS_STATE = 'normal';
 
-function setupRequestObject(config){
+function setupRequestObject (config) {
   var version = process.env.THEEYE_AGENT_VERSION;
   var wrapper = request.defaults({
     proxy: process.env.http_proxy,
@@ -26,20 +26,19 @@ function setupRequestObject(config){
   return wrapper;
 }
 
-function validateRequestURI(uri){
+function validateRequestURI (uri) {
   var parsedUri = url.parse(uri);
   if( !(parsedUri.host || (parsedUri.hostname && parsedUri.port)) ){
     var error = new Error( format('invalid worker configuration. invalid uri "%s"', options.url) );
     error.code = 'E_INVALID_URL';
     throw error;
   }
-  return ;
+  return;
 }
 
-var Worker = module.exports = AbstractWorker.extend({
-  type:'scraper',
-
-  initialize : function() {
+module.exports = AbstractWorker.extend({
+  type: 'scraper',
+  initialize: function() {
     var timeout = parseInt(this.config.timeout);
     this.config.timeout = timeout;
 
@@ -48,8 +47,7 @@ var Worker = module.exports = AbstractWorker.extend({
     // on each cicle use the same pre-configured request object
     this.request = setupRequestObject(this.config);
   },
-
-  getData : function(next) {
+  getData: function(next) {
     var self = this;
     var config = this.config;
 

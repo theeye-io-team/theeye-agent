@@ -58,6 +58,7 @@ function File (props) {
    * @private
    */
   var _id;
+
   /**
    * @name _md5
    * @type string
@@ -93,12 +94,14 @@ function File (props) {
    * @private
    */
   var _mode;
+
   /**
    * @name _uid
    * @type integer unsigned integer
    * @private
    */
   var _uid;
+
   /**
    * @name _gid
    * @type integer unsigned integer
@@ -114,15 +117,9 @@ function File (props) {
   // https://nodejs.org/api/path.html
   _path = props.path;
 
-  if (!_path) {
-    throw new Error('EFILEPATH: path is required');
-  }
-  if (!_basename) {
-    throw new Error('EFILENAME: basename is required');
-  }
-  if (!_dirname) {
-    throw new Error('EFILEDIR: dirname is required');
-  }
+  if (!_path) throw new Error('EFILEPATH: path is required');
+  if (!_basename) throw new Error('EFILENAME: basename is required');
+  if (!_dirname) throw new Error('EFILEDIR: dirname is required');
 
   // validate mode, uid & gid to avoid entering a loop
   _mode = parseUnixOctalModeString(props.mode)||'0755'; // assuming this is a correct value

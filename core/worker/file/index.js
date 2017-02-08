@@ -17,16 +17,22 @@ module.exports = AbstractWorker.extend({
     var config = this.config,
       file = this.config.file;
 
-    this.file = new File({
-      id: file.id,
-      md5: file.md5,
-      basename: config.basename,
-      dirname: config.dirname,
-      path: config.path,
-      uid: config.uid,
-      gid: config.gid,
-      mode: config.permissions,
-    });
+    try {
+      this.file = new File({
+        id: file.id,
+        md5: file.md5,
+        basename: config.basename,
+        dirname: config.dirname,
+        path: config.path,
+        uid: config.uid,
+        gid: config.gid,
+        mode: config.permissions,
+      });
+    } catch (e) {
+      this.file = null;
+      e.code = 'EINIT';
+      this.error = e;
+    }
   },
   processStatsError: function (err,next) {
     var self = this;
@@ -144,6 +150,14 @@ module.exports = AbstractWorker.extend({
     }
   },
   getData: function (next) {
+    if (!this.file) {
+      var err = this.error;
+      if (!err) {
+        err = new Error('EFILE: file was not initialized. worker failed');
+      }
+      return next(err);
+    }
+
     var self = this;
     this.file.checkStats(function (err,stats) {
       if (err) {
@@ -156,7 +170,7 @@ module.exports = AbstractWorker.extend({
             self.debug.log('file is ok');
             next(null,{
               state: SUCCESS_STATE,
-              event: SUCCESS_STATE,
+              //event: SUCCESS_STATE,
               data: { stats: stats } 
             });
           }

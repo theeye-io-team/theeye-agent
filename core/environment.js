@@ -4,6 +4,7 @@ var fs = require('fs');
 var config = require('config');
 var debug = require('debug')('eye::environment');
 var detectVersion = require('./lib/version');
+require('./lib/extend-error');
 
 module.exports = function (next) {
   var env = process.env.NODE_ENV ;

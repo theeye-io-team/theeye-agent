@@ -2,14 +2,13 @@
 
 var util = require('util');
 var debug = require('debug');
-var AGENT_FAILURE_STATE = 'agent_failure';
 var _ = require('underscore');
 var EventEmitter = require('events').EventEmitter;
+var Constants = require('../constants');
 
 
-
-var AbstractWorker = module.exports = function (connection,config) {
-  if (this.constructor===AbstractWorker) {
+var MonitorWorker = function (connection,config) {
+  if (this.constructor === MonitorWorker) {
     throw new Error("Can't instantiate an abstract class!");
   }
 
@@ -31,7 +30,7 @@ var AbstractWorker = module.exports = function (connection,config) {
   return this;
 }
 
-_.extend(AbstractWorker.prototype, EventEmitter.prototype, {
+_.extend(MonitorWorker.prototype, EventEmitter.prototype, {
 	initialize: function() { },
 	getId : function() {
 		return null ;
@@ -45,12 +44,19 @@ _.extend(AbstractWorker.prototype, EventEmitter.prototype, {
 		);
 
 		this.getData(function(error,data){
-			if( error ){
+			if (error) {
 				self.debug.error('worker execution failed.');
 				self.debug.error(error);
 				self.submitWork({
-					state: AGENT_FAILURE_STATE,
-					data: { error:error }
+          event: Constants.WORKERS_ERROR_EVENT,
+					state: Constants.WORKERS_ERROR_STATE,
+          data: {
+            error: {
+              message: error.message,
+              code: error.code,
+              more: error
+            }
+          }
 				});
 				self.debug.log('stopping worker due to errors.');
 				self.stop();
@@ -107,7 +113,7 @@ _.extend(AbstractWorker.prototype, EventEmitter.prototype, {
 });
 
 // copied the Backbone extend method
-AbstractWorker.extend = function(protoProps, staticProps) {
+MonitorWorker.extend = function(protoProps, staticProps) {
 	var parent = this;
 	var child;
 
@@ -134,3 +140,5 @@ AbstractWorker.extend = function(protoProps, staticProps) {
 
 	return child;
 };
+
+module.exports = MonitorWorker;

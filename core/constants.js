@@ -2,5 +2,6 @@
 module.exports = {
   FAILURE_STATE: 'failure',
   SUCCESS_STATE: 'success',
-  WORKERS_ERROR_EVENT: 'agent:worker:error'
+  WORKERS_ERROR_STATE: 'worker_error',
+  WORKERS_ERROR_EVENT: 'agent:worker:error',
 }

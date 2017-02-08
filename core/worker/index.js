@@ -24,7 +24,7 @@ module.exports = {
    * @param Connection connection
    * @return Worker instance
    */
-  spawn: function(config,connection) {
+  spawn: function (config,connection) {
     if (config.disabled===true) {
       logger.log('worker disabled');
       return null;
@@ -40,6 +40,7 @@ module.exports = {
     try {
       var worker = new Workers[config.type](connection, config);
     } catch (e) {
+      logger.error('EWORKER: unable to spawn worker');
       logger.error(e);
       return null;
     }
