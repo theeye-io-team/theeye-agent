@@ -1,5 +1,14 @@
 # CHANGELOG
 
+### 0.10.0-beta - 2017-03-13
+
+> file monitor worker added    
+
+> improve workers errors detection and reporting     
+
+> adapt script monitor to support generic file lib    
+
+
 ### 0.9.4-beta - 2017-02-01
 
 > added samples link in README     

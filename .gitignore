@@ -7,3 +7,4 @@ downloads
 libs
 npm-debug.log
 *.js.orig
+bin/
