@@ -7,7 +7,7 @@ var debug = require('debug')('eye:lib:script');
 var config = require('config');
 var kill = require('tree-kill');
 
-var DEFAULT_EXECUTION_TIMEOUT = 10*60*1000;
+var DEFAULT_EXECUTION_TIMEOUT = 10 * 60 * 1000;
 
 var File = require('../file');
 var ScriptOutput = require('./output');
@@ -33,7 +33,7 @@ function Script (props) {
   var _args = this.prepareArguments(props.args);
   var _output = null;
 
-  Object.defineProperty(this,"args",{
+  Object.defineProperty(this,'args',{
     get: function() { return _args; },
     set: function(args) {
       _args = this.prepareArguments(args);
@@ -41,11 +41,11 @@ function Script (props) {
     },
     enumerable:true,
   });
-  Object.defineProperty(this,"runas",{
+  Object.defineProperty(this,'runas',{
     get: function() { return _runas; },
     enumerable:true,
   });
-  Object.defineProperty(this,"output",{
+  Object.defineProperty(this,'output',{
     get: function() { return _output; },
     enumerable:true,
   });
@@ -55,10 +55,10 @@ function Script (props) {
     var formatted;
 
     var runas = this.runas;
-    var regex = /%script%/;
+    var regex = /['|"]?%script%['|"]?/;
 
     if (runas && regex.test(runas) === true) {
-      formatted = runas.replace(regex, partial);
+      formatted = runas.replace(regex, '"' + partial + '"');
     } else {
       formatted = partial;
     }
