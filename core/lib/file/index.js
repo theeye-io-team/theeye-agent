@@ -10,6 +10,11 @@ var mkdirp = require('mkdirp');
 
 var debug = require('debug')('eye:lib:file');
 
+
+var getuid = process.getuid||(function(){ return null; }),
+  getgid = process.getgid||(function(){ return null; });
+
+
 /**
  * convert the returned stat.mode to the unix octal form
  * @return string
@@ -125,10 +130,10 @@ function File (props) {
   _mode = parseUnixOctalModeString(props.mode)||'0755'; // assuming this is a correct value
 
   _uid = parseUnixId(props.uid);
-  if (_uid === null) _uid = process.getuid();
+  if (_uid === null) _uid = getuid();
 
   _gid = parseUnixId(props.gid);
-  if (_gid === null) _gid = process.getgid();
+  if (_gid === null) _gid = getgid();
 
   Object.defineProperty(this,'id',{
     get: function() { return _id; },
@@ -204,6 +209,14 @@ function File (props) {
     fs.stat(this.path, function(err, stat){
       if (err) return next(err);
 
+      /** 
+       * @todo
+       * if no uid or gid, can change anything. temp Windows fix
+       */
+      if (!_uid||!_gid) {
+        return next(null,stat);
+      }
+
       var permString = statModeToOctalString(stat.mode);
       if (permString !== _mode) {
         var err = new Error('EMODE: current file mode is incorrect');
@@ -266,6 +279,9 @@ function File (props) {
       }
 
       debug('mode set');
+
+      // if no uid or no gid , just ignore.
+      if (!uid||!gid) return next();
 
       fs.chown(path,uid,gid,function(err){
         if (err) {
