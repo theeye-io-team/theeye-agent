@@ -48,8 +48,8 @@ _.extend(MonitorWorker.prototype, EventEmitter.prototype, {
 				self.debug.error('worker execution failed.');
 				self.debug.error(error);
 				self.submitWork({
+					state: Constants.ERROR_STATE,
           event: Constants.WORKERS_ERROR_EVENT,
-					state: Constants.WORKERS_ERROR_STATE,
           data: {
             error: {
               message: error.message,

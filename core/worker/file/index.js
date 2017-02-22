@@ -2,11 +2,7 @@
 
 var AbstractWorker = require('../abstract');
 var File = require('../../lib/file');
-
-var ERROR_STATE = 'error';
-var FAILURE_STATE = 'failure';
-var SUCCESS_STATE = 'success';
-var FILE_CHANGED_STATE = 'changed';
+var Constants = require('../../constants');
 
 var FILE_CHANGED_EVENT = 'monitor.file.success_changed';
 var FILE_ERROR_ACCESS_EVENT = 'monitor.file.error_access';
@@ -43,7 +39,7 @@ module.exports = AbstractWorker.extend({
         this.downloadFile(function (err) {
           if (err) {
             next(null,{
-              state: ERROR_STATE,
+              state: Constants.ERROR_STATE,
               event: FILE_ERROR_UNKNOWN_EVENT,
               data: {
                 message: err.message,
@@ -53,7 +49,7 @@ module.exports = AbstractWorker.extend({
           } else {
             // file changed , trigger event
             next(null,{
-              state: FILE_CHANGED_STATE,
+              state: Constants.CHANGED_STATE,
               event: FILE_CHANGED_EVENT,
               data: { } 
             });
@@ -68,7 +64,7 @@ module.exports = AbstractWorker.extend({
           if (err) {
             if (err.code == 'EPERM') {
               next(null,{
-                state: FAILURE_STATE,
+                state: Constants.FAILURE_STATE,
                 event: FILE_ERROR_EPERM_EVENT,
                 data: {
                   message: err.message,
@@ -77,7 +73,7 @@ module.exports = AbstractWorker.extend({
               });
             } else {
               next(null,{
-                state: ERROR_STATE,
+                state: Constants.ERROR_STATE,
                 event: FILE_ERROR_UNKNOWN_EVENT,
                 data: {
                   message: err.message,
@@ -88,7 +84,7 @@ module.exports = AbstractWorker.extend({
           } else {
             // file changed , trigger event
             next(null,{
-              state: FILE_CHANGED_STATE,
+              state: Constants.CHANGED_STATE,
               event: FILE_CHANGED_EVENT,
               data: { } 
             });
@@ -97,7 +93,7 @@ module.exports = AbstractWorker.extend({
         break;
       case 'EACCES': // can't access file at all, permissions maybe?
         next(null,{
-          state: FAILURE_STATE,
+          state: Constants.FAILURE_STATE,
           event: FILE_ERROR_ACCESS_EVENT,
           data: {
             message: err.message,
@@ -107,7 +103,7 @@ module.exports = AbstractWorker.extend({
         break;
       default: // unknown error happened
         next(null,{
-          state: ERROR_STATE,
+          state: Constants.ERROR_STATE,
           event: FILE_ERROR_UNKNOWN_EVENT,
           data: {
             message: err.message,
@@ -123,7 +119,7 @@ module.exports = AbstractWorker.extend({
       this.downloadFile(function (err) {
         if (err) {
           next(null,{
-            state: ERROR_STATE,
+            state: Constants.ERROR_STATE,
             event: FILE_ERROR_UNKNOWN_EVENT,
             data: {
               message: err.message,
@@ -133,7 +129,7 @@ module.exports = AbstractWorker.extend({
         } else {
           // file changed , trigger event
           next(null,{
-            state: FILE_CHANGED_STATE,
+            state: Constants.CHANGED_STATE,
             event: FILE_CHANGED_EVENT,
             data: { }
           });
@@ -141,7 +137,7 @@ module.exports = AbstractWorker.extend({
       });
     } else {
       next(null,{
-        state: ERROR_STATE,
+        state: Constants.ERROR_STATE,
         event: FILE_ERROR_UNKNOWN_EVENT,
         data: {
           message: err.message,
@@ -170,8 +166,7 @@ module.exports = AbstractWorker.extend({
           } else {
             self.debug.log('file is ok');
             next(null,{
-              state: SUCCESS_STATE,
-              //event: SUCCESS_STATE,
+              state: Constants.SUCCESS_STATE,
               data: { stats: stats } 
             });
           }
