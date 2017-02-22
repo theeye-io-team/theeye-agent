@@ -194,7 +194,8 @@ function File (props) {
 
   this.checkAccess = function (next) {
     debug('checking file access %s', this.path);
-    var accessMode = fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK | fs.constants.F_OK ;
+    //var accessMode = fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK | fs.constants.F_OK ;
+    var accessMode = fs.R_OK | fs.W_OK | fs.X_OK | fs.F_OK ;
     fs.access(this.path, accessMode, (err) => {
       if (err) return next(err);
       return next(null);
