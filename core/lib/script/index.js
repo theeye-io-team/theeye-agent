@@ -53,12 +53,13 @@ function Script (props) {
   this.run = function(end){
     var partial = this.path + ' ' + this.args ;
     var formatted;
-
     var runas = this.runas;
-    var regex = /['|"]?%script%['|"]?/;
+    var regex = /%script%/;
+    //var regex = /['|"]?%script%['|"]?/;
 
     if (runas && regex.test(runas) === true) {
-      formatted = runas.replace(regex, '"' + partial + '"');
+      formatted = runas.replace(regex, partial);
+      //formatted = runas.replace(regex, '"' + partial + '"');
     } else {
       formatted = partial;
     }
