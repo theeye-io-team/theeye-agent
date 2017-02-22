@@ -91,9 +91,9 @@ module.exports = AbstractWorker.extend({
         payload = {
           script_result: result,
           state: state,
-          event: detectEvent(result) || state,
+          event: detectEvent(result)||undefined,
           // data is available only when the script returns it
-          data: json ? (json.data||json) : undefined
+          data: (json?(json.data||json):undefined)
         };
 
         self.debug.log('execution result is %j', payload);

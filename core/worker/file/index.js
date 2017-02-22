@@ -3,14 +3,15 @@
 var AbstractWorker = require('../abstract');
 var File = require('../../lib/file');
 
+var ERROR_STATE = 'error';
 var FAILURE_STATE = 'failure';
 var SUCCESS_STATE = 'success';
 var FILE_CHANGED_STATE = 'changed';
 
-var FILE_CHANGED_EVENT = 'monitor:file:success_changed';
-var FILE_ERROR_ACCESS_EVENT = 'monitor:file:error_access';
-var FILE_ERROR_UNKNOWN_EVENT = 'monitor:file:error_unknown';
-var FILE_ERROR_EPERM_EVENT = 'monitor:file:error_perm';
+var FILE_CHANGED_EVENT = 'monitor.file.success_changed';
+var FILE_ERROR_ACCESS_EVENT = 'monitor.file.error_access';
+var FILE_ERROR_UNKNOWN_EVENT = 'monitor.file.error_unknown';
+var FILE_ERROR_EPERM_EVENT = 'monitor.file.error_perm';
 
 module.exports = AbstractWorker.extend({
   initialize: function () {
@@ -42,8 +43,8 @@ module.exports = AbstractWorker.extend({
         this.downloadFile(function (err) {
           if (err) {
             next(null,{
-              state: FAILURE_STATE,
-              event: FAILURE_STATE,
+              state: ERROR_STATE,
+              event: FILE_ERROR_UNKNOWN_EVENT,
               data: {
                 message: err.message,
                 error: err
@@ -76,7 +77,7 @@ module.exports = AbstractWorker.extend({
               });
             } else {
               next(null,{
-                state: FAILURE_STATE,
+                state: ERROR_STATE,
                 event: FILE_ERROR_UNKNOWN_EVENT,
                 data: {
                   message: err.message,
@@ -94,7 +95,7 @@ module.exports = AbstractWorker.extend({
           }
         });
         break;
-      case 'EACCES': // this is bad, can't access file at all, permissions maybe?
+      case 'EACCES': // can't access file at all, permissions maybe?
         next(null,{
           state: FAILURE_STATE,
           event: FILE_ERROR_ACCESS_EVENT,
@@ -106,7 +107,7 @@ module.exports = AbstractWorker.extend({
         break;
       default: // unknown error happened
         next(null,{
-          state: FAILURE_STATE,
+          state: ERROR_STATE,
           event: FILE_ERROR_UNKNOWN_EVENT,
           data: {
             message: err.message,
@@ -122,7 +123,7 @@ module.exports = AbstractWorker.extend({
       this.downloadFile(function (err) {
         if (err) {
           next(null,{
-            state: FAILURE_STATE,
+            state: ERROR_STATE,
             event: FILE_ERROR_UNKNOWN_EVENT,
             data: {
               message: err.message,
@@ -140,7 +141,7 @@ module.exports = AbstractWorker.extend({
       });
     } else {
       next(null,{
-        state: FAILURE_STATE,
+        state: ERROR_STATE,
         event: FILE_ERROR_UNKNOWN_EVENT,
         data: {
           message: err.message,
