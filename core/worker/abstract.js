@@ -68,7 +68,7 @@ _.extend(MonitorWorker.prototype, EventEmitter.prototype, {
 
 		this.sleep();
 	},
-	submitWork : function(data,next) {
+	submitWork: function(data,next) {
 		this.connection.updateResource(
 			this.config.resource_id, data, next
 		);

@@ -12,7 +12,8 @@ function setupRequestObject (config) {
     proxy: process.env.http_proxy,
     tunnel: false,
     timeout: parseInt(config.timeout),
-    json: config.json||false,
+    //json: config.json||false,
+    json: false,
     gzip: config.gzip||false,
     url: config.url,
     method: config.method,
@@ -49,24 +50,32 @@ module.exports = AbstractWorker.extend({
     var self = this;
     var config = this.config;
 
-    function end(failure, success){
-      if (success) {
-        self.debug.log("service normal");
-        return next(null,success);
-      } else {
-        if (!failure) {
-          failure = {
-            state: Constants.ERROR_STATE,
-            event: 'scraper.error',
-            data: {
-              message: 'unknown error',
-              event: 'error'
+    function submit (result) {
+      var body, data;
+      if (result) {
+        data = result.data;
+        if (data.response) {
+          if (body = data.response.body) {
+            if (body.length > Constants.PAYLOAD_BODY_SIZE) {
+              result.data.response.body = body.substring(0,Constants.PAYLOAD_DATA_SIZE) + '...(chunked)';
+              result.data.response.chunked = true;
+              result.data.response.message = 'respose body too large.';
             }
-          };
+          }
         }
+        return next(null,result);
+      } else {
+        var err = {
+          state: Constants.ERROR_STATE,
+          event: 'scraper.error',
+          data: {
+            message: 'unknown error',
+            event: 'error'
+          }
+        };
 
-        self.debug.log("service failure", failure);
-        return next(null,failure);
+        self.debug.log('monitor error: ', err);
+        return next(null,err);
       }
     }
 
@@ -74,7 +83,7 @@ module.exports = AbstractWorker.extend({
     this.request({},function(error, response, body){
       if (error) {
         self.debug.error(error);
-        return end({
+        return submit({
           state: Constants.FAILURE_STATE ,
           event: 'scraper.request.error',
           data: {
@@ -93,7 +102,7 @@ module.exports = AbstractWorker.extend({
         try {
           var statusCodeRegexp = new RegExp(config.status_code);
         } catch (e) {
-          return end({
+          return submit({
             state: Constants.ERROR_STATE,
             event: 'scraper.config.status_code.invalid_regexp',
             data: {
@@ -108,7 +117,7 @@ module.exports = AbstractWorker.extend({
         }
 
         if (statusCodeRegexp.test(response.statusCode) === false) {
-          return end({
+          return submit({
             state: Constants.FAILURE_STATE,
             event: 'scraper.status_code.not_match',
             data: {
@@ -128,7 +137,7 @@ module.exports = AbstractWorker.extend({
         try{
           var pattern = new RegExp(config.pattern);
         } catch(e) {
-          return end({
+          return submit({
             state: Constants.ERROR_STATE,
             event: 'scraper.config.pattern.invalid_regexp',
             data:{
@@ -144,9 +153,8 @@ module.exports = AbstractWorker.extend({
         }
 
         self.debug.log('testing pattern %s against %s',config.pattern, body);
-        var bodystr = JSON.stringify(body);
-        if (new RegExp(config.pattern).test( bodystr ) === true){
-          return end(null,{
+        if (new RegExp(config.pattern).test(body) === true){
+          return submit({
             state: Constants.SUCCESS_STATE,
             event: 'success',
             data: { 
@@ -160,7 +168,7 @@ module.exports = AbstractWorker.extend({
             } 
           });
         } else {
-          return end({
+          return submit({
             state: Constants.FAILURE_STATE,
             event: 'scraper.pattern.not_match',
             data: {
@@ -175,7 +183,7 @@ module.exports = AbstractWorker.extend({
           });
         }
       } else {
-        return end(null,{
+        return submit({
           state: Constants.SUCCESS_STATE,
           event: 'success', 
           data: { 

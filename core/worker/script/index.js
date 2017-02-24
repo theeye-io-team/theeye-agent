@@ -85,7 +85,7 @@ module.exports = AbstractWorker.extend({
         if (json) {
           state = isObject(json) ? json.state : json; // if object ? object.state : object as is .
         } else {
-          state = lastline; // ok , just asume the last line is the result state
+          state = lastline; // ok, just asume the last line is the result state
         }
 
         payload = {

@@ -195,8 +195,8 @@ TheEyeClient.prototype = {
    */
   performRequest : function(options, doneFn){
     try {
-      var connection = this;
       doneFn||(doneFn=function(){});
+      var connection = this;
       var hostname = this.hostname;
       var customer = this.client_customer;
 
