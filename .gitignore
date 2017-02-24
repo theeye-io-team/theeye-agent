@@ -6,6 +6,7 @@ config/*
 downloads
 libs
 npm-debug.log
+npm-debug.log.*
 *.js.orig
 bin/
 run_enclose.out
