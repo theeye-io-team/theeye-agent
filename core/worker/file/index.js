@@ -3,6 +3,8 @@
 var AbstractWorker = require('../abstract');
 var File = require('../../lib/file');
 var Constants = require('../../constants');
+//var userid = require('node-userid');
+var userid = require('userid');
 
 var FILE_CHANGED_EVENT = 'monitor.file.success_changed';
 var FILE_ERROR_ACCESS_EVENT = 'monitor.file.error_access';
@@ -11,20 +13,38 @@ var FILE_ERROR_EPERM_EVENT = 'monitor.file.error_perm';
 
 module.exports = AbstractWorker.extend({
   initialize: function () {
-    var config = this.config,
-      file = this.config.file;
+    var config = this.config;
+    var file = this.config.file;
+    var _uid, _gid;
+
+    if (this.config.user) {
+      try {
+        _uid = userid.uid(this.config.user);
+      } catch (e) {
+        this.debug.error(e);
+      }
+    }
+    if (this.config.group) {
+      try {
+        _gid = userid.gid(this.config.group);
+      } catch (e) {
+        this.debug.error(e);
+      }
+    }
+
+    var specs = {
+      id: file.id,
+      md5: file.md5,
+      basename: config.basename,
+      dirname: config.dirname,
+      path: config.path,
+      uid: _uid,
+      gid: _gid,
+      mode: config.permissions,
+    };
 
     try {
-      this.file = new File({
-        id: file.id,
-        md5: file.md5,
-        basename: config.basename,
-        dirname: config.dirname,
-        path: config.path,
-        uid: config.uid,
-        gid: config.gid,
-        mode: config.permissions,
-      });
+      this.file = new File(specs);
     } catch (e) {
       this.file = null;
       e.code = 'EINIT';

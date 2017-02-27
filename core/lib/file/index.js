@@ -6,14 +6,11 @@ var md5 = require('md5');
 var fs = require('fs');
 var util = require('util');
 var mkdirp = require('mkdirp');
-//var uidNumber = require('uid-number');
 
 var debug = require('debug')('eye:lib:file');
 
-
 var getuid = process.getuid||(function(){ return null; }),
   getgid = process.getgid||(function(){ return null; });
-
 
 /**
  * convert the returned stat.mode to the unix octal form
