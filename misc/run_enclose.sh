@@ -25,12 +25,12 @@ mkdir $target
 
 if [ ! -d "node_modules" ]; then
   echo "running npm --production"
-  npm install --production
+  npm install
 fi
 
 cd $root/node_modules/config
 
-npm --version
+echo "running npm version $(npm --version)"
 
 # add extra dependencies - not used by the agent anyway. but just to avoid errors and warnings
 npm install hjson toml cson properties
@@ -66,4 +66,7 @@ echo -e "NODE_ENV \t\t$NODE_ENV" >> $release
 echo -e "Node Version \t\t$node_version" >> $release
 echo -e "NPM Version \t\t$(npm --version)" >> $release
 
-echo "end"
+echo "summary"
+cat $target/release
+
+echo "done"
