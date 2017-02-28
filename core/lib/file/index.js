@@ -9,8 +9,12 @@ var mkdirp = require('mkdirp');
 
 var debug = require('debug')('eye:lib:file');
 
-var getuid = process.getuid||(function(){ return null; }),
-  getgid = process.getgid||(function(){ return null; });
+function noid () {
+  return null;
+}
+
+var getuid = process.getuid||noid;
+var getgid = process.getgid||noid;
 
 /**
  * convert the returned stat.mode to the unix octal form
@@ -124,7 +128,7 @@ function File (props) {
   if (!_dirname) throw new Error('EFILEDIR: dirname is required');
 
   // validate mode, uid & gid to avoid entering a loop
-  _mode = parseUnixOctalModeString(props.mode)||'0755'; // assuming this is a correct value
+  _mode = parseUnixOctalModeString(props.mode)||'0755'; // defaulting to 0755 on posix
 
   _uid = parseUnixId(props.uid);
   if (_uid === null) _uid = getuid();
@@ -200,9 +204,9 @@ function File (props) {
   }
 
   this.checkStats = function (next) {
-    var _mode = this.mode,
-      _uid = this.uid,
-      _gid = this.gid ;
+    var _mode = this.mode;
+    var _uid = this.uid;
+    var _gid = this.gid;
 
     fs.stat(this.path, function(err, stat){
       if (err) return next(err);
@@ -211,7 +215,7 @@ function File (props) {
        * @todo
        * if no uid or gid, can change anything. temp Windows fix
        */
-      if (!_uid||!_gid) {
+      if (_uid===null||_gid===null) {
         return next(null,stat);
       }
 
@@ -261,14 +265,14 @@ function File (props) {
   }
 
   this.setAccess = function (next) {
-    var path = this.path,
-      mode = this.mode,
-      uid = this.uid,
-      gid = this.gid;
-
-    debug('setting [mode:%s][uid:%s][gid:%s]',mode,uid,gid);
+    var path = this.path;
+    var mode = this.mode;
+    var uid = this.uid;
+    var gid = this.gid;
 
     if (!mode||isNaN(mode)) mode = parseInt('0755',8);
+
+    debug('setting [mode:%s][uid:%s][gid:%s]',mode,uid,gid);
 
     fs.chmod(path,mode,function(err){
       if (err) {
@@ -279,7 +283,7 @@ function File (props) {
       debug('mode set');
 
       // if no uid or no gid , just ignore.
-      if (!uid||!gid) return next();
+      if (uid===null||gid===null) return next();
 
       fs.chown(path,uid,gid,function(err){
         if (err) {
