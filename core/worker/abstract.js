@@ -2,21 +2,20 @@
 
 var util = require('util');
 var debug = require('debug');
-var AGENT_FAILURE_STATE = 'agent_failure';
 var _ = require('underscore');
 var EventEmitter = require('events').EventEmitter;
+var Constants = require('../constants');
 
 
-
-var AbstractWorker = module.exports = function (connection,config) {
-  if (this.constructor===AbstractWorker) {
+var MonitorWorker = function (connection,config) {
+  if (this.constructor === MonitorWorker) {
     throw new Error("Can't instantiate an abstract class!");
   }
 
   EventEmitter.call(this);
 
   this.config = config;
-  this.name = config.name||config.type;
+  this.name = (config.name||config.type);
   this.connection = connection;
   this.enable = true;
 
@@ -31,7 +30,7 @@ var AbstractWorker = module.exports = function (connection,config) {
   return this;
 }
 
-_.extend(AbstractWorker.prototype, EventEmitter.prototype, {
+_.extend(MonitorWorker.prototype, EventEmitter.prototype, {
 	initialize: function() { },
 	getId : function() {
 		return null ;
@@ -45,12 +44,19 @@ _.extend(AbstractWorker.prototype, EventEmitter.prototype, {
 		);
 
 		this.getData(function(error,data){
-			if( error ){
+			if (error) {
 				self.debug.error('worker execution failed.');
 				self.debug.error(error);
 				self.submitWork({
-					state: AGENT_FAILURE_STATE,
-					data: { error:error }
+					state: Constants.ERROR_STATE,
+          event: Constants.WORKERS_ERROR_EVENT,
+          data: {
+            error: {
+              message: error.message,
+              code: error.code,
+              more: error
+            }
+          }
 				});
 				self.debug.log('stopping worker due to errors.');
 				self.stop();
@@ -62,7 +68,7 @@ _.extend(AbstractWorker.prototype, EventEmitter.prototype, {
 
 		this.sleep();
 	},
-	submitWork : function(data,next) {
+	submitWork: function(data,next) {
 		this.connection.updateResource(
 			this.config.resource_id, data, next
 		);
@@ -104,37 +110,10 @@ _.extend(AbstractWorker.prototype, EventEmitter.prototype, {
 		clearTimeout(this.timeout);
 		this.debug.log('worker stopped.');
 	},
-	downloadScript: function(script,done){
-		var self = this;
-		this.debug.log('getting script %s', script.id);
-		var stream = this.connection.scriptDownloadStream(script.id);
-
-		this.debug.log('download stream');
-		script.save(stream,function(error){
-			if(error){
-				self.debug.error(error);
-				return done(error);
-			}
-			self.debug.log('script downloaded');
-			done();
-		});
-	},
-	checkScript: function(script,next){
-		var self = this;
-		script.checkFile(function(success){
-			if(!success){ // not present or outdated
-				self.debug.log('script need to be downloaded');
-				self.downloadScript(script, next);
-			} else {
-				self.debug.log('script is ok');
-				next();
-			}
-		});
-	}
 });
 
 // copied the Backbone extend method
-AbstractWorker.extend = function(protoProps, staticProps) {
+MonitorWorker.extend = function(protoProps, staticProps) {
 	var parent = this;
 	var child;
 
@@ -161,3 +140,5 @@ AbstractWorker.extend = function(protoProps, staticProps) {
 
 	return child;
 };
+
+module.exports = MonitorWorker;

@@ -8,12 +8,13 @@ var logger = {
 }
 
 var Workers = {
-  dstat:require('./dstat'),
-  listener:require('./listener'),
-  process:require('./process'),
-  psaux:require('./psaux'),
-  scraper:require('./scraper'),
-  script:require('./script')
+  dstat: require('./dstat'),
+  listener: require('./listener'),
+  process: require('./process'),
+  psaux: require('./psaux'),
+  scraper: require('./scraper'),
+  script: require('./script'),
+  file: require('./file')
 };
 
 module.exports = {
@@ -23,7 +24,7 @@ module.exports = {
    * @param Connection connection
    * @return Worker instance
    */
-  spawn: function(config,connection) {
+  spawn: function (config,connection) {
     if (config.disabled===true) {
       logger.log('worker disabled');
       return null;
@@ -35,6 +36,15 @@ module.exports = {
     }
 
     logger.log('creating worker %s', config.type);
-    return new Workers[config.type](connection, config);
+
+    try {
+      var worker = new Workers[config.type](connection, config);
+    } catch (e) {
+      logger.error('EWORKER: unable to spawn worker');
+      logger.error(e);
+      return null;
+    }
+
+    return worker;
   }
 };

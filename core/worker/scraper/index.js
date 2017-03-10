@@ -4,17 +4,16 @@ var request = require('request');
 var url = require('url');
 var format = require('util').format;
 var AbstractWorker = require('../abstract');
+var Constants = require('../../constants');
 
-var FAILURE_STATE = 'failure';
-var NORMAL_STATE = 'normal';
-
-function setupRequestObject(config){
+function setupRequestObject (config) {
   var version = process.env.THEEYE_AGENT_VERSION;
   var wrapper = request.defaults({
     proxy: process.env.http_proxy,
     tunnel: false,
     timeout: parseInt(config.timeout),
-    json: config.json||false,
+    //json: config.json||false,
+    json: false,
     gzip: config.gzip||false,
     url: config.url,
     method: config.method,
@@ -26,20 +25,19 @@ function setupRequestObject(config){
   return wrapper;
 }
 
-function validateRequestURI(uri){
+function validateRequestURI (uri) {
   var parsedUri = url.parse(uri);
   if( !(parsedUri.host || (parsedUri.hostname && parsedUri.port)) ){
     var error = new Error( format('invalid worker configuration. invalid uri "%s"', options.url) );
     error.code = 'E_INVALID_URL';
     throw error;
   }
-  return ;
+  return;
 }
 
-var Worker = module.exports = AbstractWorker.extend({
-  type:'scraper',
-
-  initialize : function() {
+module.exports = AbstractWorker.extend({
+  type: 'scraper',
+  initialize: function() {
     var timeout = parseInt(this.config.timeout);
     this.config.timeout = timeout;
 
@@ -48,37 +46,45 @@ var Worker = module.exports = AbstractWorker.extend({
     // on each cicle use the same pre-configured request object
     this.request = setupRequestObject(this.config);
   },
-
-  getData : function(next) {
+  getData: function(next) {
     var self = this;
     var config = this.config;
 
-    function end(failure, success){
-      if( success ){
-        self.debug.log("service normal");
-        return next(null,success);
-      } else {
-        if(!failure){
-          failure = {
-            state: FAILURE_STATE,
-            event: 'ERROR',
-            data: {
-              message: 'unknown error', event:'ERROR'
+    function submit (result) {
+      var body, data;
+      if (result) {
+        data = result.data;
+        if (data.response) {
+          if (body = data.response.body) {
+            if (body.length > Constants.PAYLOAD_BODY_SIZE) {
+              result.data.response.body = body.substring(0,Constants.PAYLOAD_DATA_SIZE) + '...(chunked)';
+              result.data.response.chunked = true;
+              result.data.response.message = 'respose body too large.';
             }
-          };
+          }
         }
+        return next(null,result);
+      } else {
+        var err = {
+          state: Constants.ERROR_STATE,
+          event: 'scraper.error',
+          data: {
+            message: 'unknown error',
+            event: 'error'
+          }
+        };
 
-        self.debug.log("service failure", failure);
-        return next(null,failure);
+        self.debug.log('monitor error: ', err);
+        return next(null,err);
       }
     }
 
     // request no require options here, it is already configured
     this.request({},function(error, response, body){
-      if( error ) {
+      if (error) {
         self.debug.error(error);
-        return end({
-          state: FAILURE_STATE ,
+        return submit({
+          state: Constants.FAILURE_STATE ,
           event: 'scraper.request.error',
           data: {
             message: error.name + '. ' + error.message,
@@ -96,10 +102,9 @@ var Worker = module.exports = AbstractWorker.extend({
         try {
           var statusCodeRegexp = new RegExp(config.status_code);
         } catch (e) {
-          var eventName = 'scraper.status_code.invalid_regexp';
-          return end({
-            state: eventName,
-            event: eventName,
+          return submit({
+            state: Constants.ERROR_STATE,
+            event: 'scraper.config.status_code.invalid_regexp',
             data: {
               message: 'status code regexp ' + config.status_code + ' is not valid regular expression',
               error: {
@@ -111,9 +116,9 @@ var Worker = module.exports = AbstractWorker.extend({
           });
         }
 
-        if( statusCodeRegexp.test( response.statusCode ) === false  ){
-          return end({
-            state: FAILURE_STATE,
+        if (statusCodeRegexp.test(response.statusCode) === false) {
+          return submit({
+            state: Constants.FAILURE_STATE,
             event: 'scraper.status_code.not_match',
             data: {
               message: 'status code ' + response.statusCode + ' expected to match ' + config.status_code,
@@ -132,10 +137,9 @@ var Worker = module.exports = AbstractWorker.extend({
         try{
           var pattern = new RegExp(config.pattern);
         } catch(e) {
-          var eventName = 'scraper.pattern.invalid_regexp';
-          return end({
-            state: eventName,
-            event: eventName,
+          return submit({
+            state: Constants.ERROR_STATE,
+            event: 'scraper.config.pattern.invalid_regexp',
             data:{
               message:'pattern invalid: ' + e.message,
               error: {
@@ -149,12 +153,11 @@ var Worker = module.exports = AbstractWorker.extend({
         }
 
         self.debug.log('testing pattern %s against %s',config.pattern, body);
-        var bodystr = JSON.stringify(body);
-        if( new RegExp(config.pattern).test( bodystr ) === true ){
-          return end(null,{
-            state: NORMAL_STATE,
+        if (new RegExp(config.pattern).test(body) === true){
+          return submit({
+            state: Constants.SUCCESS_STATE,
             event: 'success',
-            data:{ 
+            data: { 
               message:'request success', 
               event:'success', 
               response: {
@@ -165,10 +168,10 @@ var Worker = module.exports = AbstractWorker.extend({
             } 
           });
         } else {
-          return end({
-            state: FAILURE_STATE,
+          return submit({
+            state: Constants.FAILURE_STATE,
             event: 'scraper.pattern.not_match',
-            data:{
+            data: {
               message:'pattern does not match',
               code: 'scraper.pattern.not_match',
               response: {
@@ -180,10 +183,10 @@ var Worker = module.exports = AbstractWorker.extend({
           });
         }
       } else {
-        return end(null,{
-          state: NORMAL_STATE,
+        return submit({
+          state: Constants.SUCCESS_STATE,
           event: 'success', 
-          data:{ 
+          data: { 
             message:'request success', 
             response: {
               status_code: response.statusCode,

@@ -1,9 +1,45 @@
 # CHANGELOG
 
+### 0.10.0-beta - 2017-03-13
+
+> file monitor worker added    
+
+> improve workers errors detection and reporting     
+
+> adapt script monitor to support generic file lib    
+
+
+### 0.9.4-beta - 2017-02-01
+
+> added samples link in README     
+
+> added script to compile using enclose    
+
+> added theeye-cli    
+
+> default client request configuration options set (proxy, tunnel, json, gzip, timeout)      
+
+> change default script download location       
+
+> added file monitoring support with a file worker      
+
+> common file functions moved out of script worker to lib/file. also added extra features like mode, owner and group handling, and validations. also added error reporting.     
+
+> improve code legibility , add constants, standards, etc       
+
+> capture error on workers instantiation (try..catch)     
+
+### 0.9.3-beta - 2016-12-08
+
+> allow to pass options directly to request setup from the config file. default common options set in config/default.js 
+
+> removed enclose from package.json
+
+> update version of node-stat to lastest. this version includes an own fixed version of diskusage with fixed packages versions inside
+
 ### 0.9.2-beta - 2016-12-05
 
 > added sample code, docs and examples for scripts creation      
-
 
 > set network proxy using configuration file     
 

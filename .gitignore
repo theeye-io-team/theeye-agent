@@ -3,9 +3,11 @@ node_modules/
 newrelic*.log
 config/*
 .vimprj
-scripts
+downloads
 libs
 npm-debug.log
+npm-debug.log.*
 *.js.orig
-bin
 downloads
+bin/
+run_enclose.out

@@ -10,16 +10,16 @@ var Worker = require('./worker');
 var Listener = require('./worker/listener');
 
 function App () {
-
   var self = this;
 
-  var supervisor = require('config').supervisor||{};
-  supervisor.hostname = hostname;
-  supervisor.proxy = require('config').proxy||undefined;
+  var config = require('config');
+  var connection = config.supervisor||{};
+  connection.hostname = hostname;
+  connection.request = config.request;
 
+  var _connection = new TheEyeClient(connection);
   var _host_id;
   var _host_resource_id;
-  var _connection = new TheEyeClient(supervisor);
   var _workers = [];
 
   Object.defineProperty(this,'connection',{
@@ -69,7 +69,7 @@ function App () {
   // every 30 seconds retry;
   var interval = 30 * 1000;
   var attempts = 0;
-  function tryConnectSupervisor(nextFn){
+  function tryConnectSupervisor (nextFn) {
     attempts++;
     connectSupervisor(function(error){
       if(!error) return nextFn();
@@ -94,8 +94,10 @@ function App () {
     debug('intializing resource workers');
     configs.forEach(function(config) {
       var worker = Worker.spawn(config, _connection);
-      worker.run();
-      if(worker) _workers.push(worker);
+      if (worker!==null) {
+        worker.run();
+        _workers.push(worker);
+      }
     });
   }
 
@@ -154,6 +156,12 @@ function App () {
   this.start = function(specs,next) {
     tryConnectSupervisor(function(){
       getRemoteConfig(next);
+    });
+  }
+
+  this.startCLI = function(next){
+    tryConnectSupervisor(function(){
+      next()
     });
   }
 
