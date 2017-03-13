@@ -9,10 +9,19 @@ var FILE_ERROR_ACCESS_EVENT = 'monitor.file.error_access';
 var FILE_ERROR_UNKNOWN_EVENT = 'monitor.file.error_unknown';
 var FILE_ERROR_EPERM_EVENT = 'monitor.file.error_perm';
 
+var getuid = process.getuid||(function(){ return null; });
+var getgid = process.getgid||(function(){ return null; });
+
 module.exports = AbstractWorker.extend({
-  initialize: function () {
-    var config = this.config,
-      file = this.config.file;
+  initialize: function(){
+    var config = this.config;
+    var file = config.file;
+    var uid = config.uid;
+    var gid = config.gid;
+    var mode = config.permissions;
+
+    //if (!uid) { uid = getuid(); }
+    //if (!gid) { gid = getgid(); }
 
     try {
       this.file = new File({
@@ -21,9 +30,9 @@ module.exports = AbstractWorker.extend({
         basename: config.basename,
         dirname: config.dirname,
         path: config.path,
-        uid: config.uid,
-        gid: config.gid,
-        mode: config.permissions,
+        mode: mode,
+        uid: uid,
+        gid: gid
       });
     } catch (e) {
       this.file = null;
@@ -156,6 +165,7 @@ module.exports = AbstractWorker.extend({
     }
 
     var self = this;
+    this.debug.log('checking file stats');
     this.file.checkStats(function (err,stats) {
       if (err) {
         self.processStatsError(err,next);
@@ -188,5 +198,5 @@ module.exports = AbstractWorker.extend({
         next(null);
       }
     });
-  },
+  }
 });

@@ -6,14 +6,7 @@ var md5 = require('md5');
 var fs = require('fs');
 var util = require('util');
 var mkdirp = require('mkdirp');
-//var uidNumber = require('uid-number');
-
 var debug = require('debug')('eye:lib:file');
-
-
-var getuid = process.getuid||(function(){ return null; }),
-  getgid = process.getgid||(function(){ return null; });
-
 
 /**
  * convert the returned stat.mode to the unix octal form
@@ -33,7 +26,8 @@ function parseUnixOctalModeString (mode) {
   if (!mode||typeof mode != 'string') return null;
   if (mode.length != 4) return null;
   if (['0','1','2','4'].indexOf(mode[0]) === -1) return null;
-  if (parseInt(mode.substr(1,mode.length)) > 777) return null;
+  var num = parseInt(mode.substr(1,mode.length));
+  if (num > 777 || num <= 0) return null;
   return mode;
 }
 
@@ -95,7 +89,7 @@ function File (props) {
 
   /**
    * @name _mode
-   * @type string string of permissions in the unix octal format
+   * @type string permissions in Unix octal format
    * @private
    */
   var _mode;
@@ -122,18 +116,14 @@ function File (props) {
   // https://nodejs.org/api/path.html
   _path = props.path;
 
-  if (!_path) throw new Error('EFILEPATH: path is required');
-  if (!_basename) throw new Error('EFILENAME: basename is required');
-  if (!_dirname) throw new Error('EFILEDIR: dirname is required');
+  if (!_path) throw new Error('EPATH: path is required');
+  if (!_basename) throw new Error('EBASE: basename is required');
+  if (!_dirname) throw new Error('EDIR: dirname is required');
 
   // validate mode, uid & gid to avoid entering a loop
-  _mode = parseUnixOctalModeString(props.mode)||'0755'; // assuming this is a correct value
-
+  _mode = parseUnixOctalModeString(props.mode);
   _uid = parseUnixId(props.uid);
-  if (_uid === null) _uid = getuid();
-
   _gid = parseUnixId(props.gid);
-  if (_gid === null) _gid = getgid();
 
   Object.defineProperty(this,'id',{
     get: function() { return _id; },
@@ -210,19 +200,21 @@ function File (props) {
     fs.stat(this.path, function(err, stat){
       if (err) return next(err);
 
+      if (_mode !== null) {
+        var permString = statModeToOctalString(stat.mode);
+        if (permString !== _mode) {
+          var err = new Error('EMODE: current file mode is incorrect');
+          err.code = 'EMODE';
+          return next(err);
+        }
+      }
+
       /** 
        * @todo
-       * if no uid or gid, can change anything. temp Windows fix
+       * if no uid or gid, can't change anything. temp Windows fix
        */
       if (!_uid||!_gid) {
         return next(null,stat);
-      }
-
-      var permString = statModeToOctalString(stat.mode);
-      if (permString !== _mode) {
-        var err = new Error('EMODE: current file mode is incorrect');
-        err.code = 'EMODE';
-        return next(err);
       }
 
       if (stat.uid !== _uid) {
