@@ -8,6 +8,13 @@ var util = require('util');
 var mkdirp = require('mkdirp');
 var debug = require('debug')('eye:lib:file');
 
+function noid () {
+  return null;
+}
+
+var getuid = process.getuid||noid;
+var getgid = process.getgid||noid;
+
 /**
  * convert the returned stat.mode to the unix octal form
  * @return string
@@ -121,9 +128,13 @@ function File (props) {
   if (!_dirname) throw new Error('EDIR: dirname is required');
 
   // validate mode, uid & gid to avoid entering a loop
-  _mode = parseUnixOctalModeString(props.mode);
+  _mode = parseUnixOctalModeString(props.mode)||'0755'; // defaulting to 0755 on posix
+
   _uid = parseUnixId(props.uid);
+  if (_uid === null) _uid = getuid();
+
   _gid = parseUnixId(props.gid);
+  if (_gid === null) _gid = getgid();
 
   Object.defineProperty(this,'id',{
     get: function() { return _id; },
@@ -186,16 +197,16 @@ function File (props) {
     debug('checking file access %s', this.path);
     //var accessMode = fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK | fs.constants.F_OK ;
     var accessMode = fs.R_OK | fs.W_OK | fs.X_OK | fs.F_OK ;
-    fs.access(this.path, accessMode, (err) => {
+    fs.access(this.path, accessMode, function(err){
       if (err) return next(err);
       return next(null);
     });
   }
 
   this.checkStats = function (next) {
-    var _mode = this.mode,
-      _uid = this.uid,
-      _gid = this.gid ;
+    var _mode = this.mode;
+    var _uid = this.uid;
+    var _gid = this.gid;
 
     fs.stat(this.path, function(err, stat){
       if (err) return next(err);
@@ -213,8 +224,15 @@ function File (props) {
        * @todo
        * if no uid or gid, can't change anything. temp Windows fix
        */
-      if (!_uid||!_gid) {
+      if (_uid===null||_gid===null) {
         return next(null,stat);
+      }
+
+      var permString = statModeToOctalString(stat.mode);
+      if (permString !== _mode) {
+        var err = new Error('EMODE: current file mode is malformed');
+        err.code = 'EMODE';
+        return next(err);
       }
 
       if (stat.uid !== _uid) {
@@ -256,14 +274,14 @@ function File (props) {
   }
 
   this.setAccess = function (next) {
-    var path = this.path,
-      mode = this.mode,
-      uid = this.uid,
-      gid = this.gid;
-
-    debug('setting [mode:%s][uid:%s][gid:%s]',mode,uid,gid);
+    var path = this.path;
+    var mode = this.mode;
+    var uid = this.uid;
+    var gid = this.gid;
 
     if (!mode||isNaN(mode)) mode = parseInt('0755',8);
+
+    debug('setting [mode:%s][uid:%s][gid:%s]',mode,uid,gid);
 
     fs.chmod(path,mode,function(err){
       if (err) {
@@ -273,8 +291,8 @@ function File (props) {
 
       debug('mode set');
 
-      // if no uid or no gid , just ignore.
-      if (!uid||!gid) return next();
+      // if no uid or no gid , just ignore. node needs both to work
+      if (uid===null||gid===null) return next();
 
       fs.chown(path,uid,gid,function(err){
         if (err) {

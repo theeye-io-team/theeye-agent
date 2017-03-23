@@ -14,17 +14,23 @@ if [ -d "$target" ]; then
   rm -rf $target
 fi
 
+if [ -d "node_modules" ]; then
+  echo "rebuilding node_modules"
+  rm -rf "$PWD/node_modules"
+fi
+npm install --production
+
 echo "creating $target"
 mkdir $target
 
 if [ ! -d "node_modules" ]; then
   echo "running npm --production"
-  npm install --production
+  npm install
 fi
 
 cd $root/node_modules/config
 
-npm --version
+echo "running npm version $(npm --version)"
 
 # add extra dependencies - not used by the agent anyway. but just to avoid errors and warnings
 npm install hjson toml cson properties
@@ -36,6 +42,7 @@ enclose --version $node_version -o $target/theeye-agent --loglevel warning core/
 
 # copy bindings
 echo "copying bindings"
+cp node_modules/userid/build/Release/userid.node $target
 cp node_modules/ref/build/Release/binding.node $target
 cp node_modules/ffi/build/Release/ffi_bindings.node $target
 
@@ -48,16 +55,18 @@ fi
 cp config/default.js $target/config
 
 if [ -z "$NODE_ENV" ]; then
-  echo "copying production"
-  cp config/production.js $target/config
-else  
-  echo "copying $NODE_ENV"
-  cp config/$NODE_ENV.js $target/config
+  NODE_ENV='production'
 fi
 
+echo "copying $NODE_ENV"
+cp config/$NODE_ENV.js $target/config
 
-echo "Agent Version $(git describe)" >> $release
-echo "NODE_ENV $NODE_ENV" >> $release
-echo "Node Version $node_version" >> $release
+echo -e "Agent Version \t\t$(git describe)" >> $release
+echo -e "NODE_ENV \t\t$NODE_ENV" >> $release
+echo -e "Node Version \t\t$node_version" >> $release
+echo -e "NPM Version \t\t$(npm --version)" >> $release
 
-echo "end"
+echo "summary"
+cat $target/release
+
+echo "done"
