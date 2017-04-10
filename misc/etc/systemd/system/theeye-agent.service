@@ -5,7 +5,7 @@ Documentation=man:foo(1)
 
 [Service]
 # Note the -f: don't fail if there is no PID file
-ExecStart=/opt/theeye-agent/run.sh
+ExecStart=/opt/theeye-agent/runBinary.sh
 Restart=always
 StandardOutput=syslog
 StandardError=syslog
@@ -17,7 +17,7 @@ SyslogIdentifier=theeye-agent
 #It should be fixed.
 User=theeye-a
 Group=theeye-a
-Environment=statedir=/opt/theeye-agent/run.sh
+Environment=statedir=/opt/theeye-agent/runBinary.sh
 #Environment=NODE_ENV=production
 
 [Install]
