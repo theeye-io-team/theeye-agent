@@ -14,19 +14,21 @@ var FILE_ERROR_EPERM_EVENT = 'monitor.file.error_perm';
 module.exports = AbstractWorker.extend({
   initialize: function () {
     var config = this.config;
-    var file = this.config.file;
-    var _uid, _gid;
+    var file = config.file;
+    var uid = config.uid;
+    var gid = config.gid;
+    var mode = config.permissions;
 
     if (this.config.user) {
       try {
-        _uid = userid.uid(this.config.user);
+        uid = userid.uid(this.config.user);
       } catch (e) {
         this.debug.error(e);
       }
     }
     if (this.config.group) {
       try {
-        _gid = userid.gid(this.config.group);
+        gid = userid.gid(this.config.group);
       } catch (e) {
         this.debug.error(e);
       }
@@ -38,9 +40,9 @@ module.exports = AbstractWorker.extend({
       basename: config.basename,
       dirname: config.dirname,
       path: config.path,
-      uid: _uid,
-      gid: _gid,
-      mode: config.permissions,
+      mode: mode,
+      uid: uid,
+      gid: gid
     };
 
     try {
@@ -176,6 +178,7 @@ module.exports = AbstractWorker.extend({
     }
 
     var self = this;
+    this.debug.log('checking file stats');
     this.file.checkStats(function (err,stats) {
       if (err) {
         self.processStatsError(err,next);
@@ -208,5 +211,5 @@ module.exports = AbstractWorker.extend({
         next(null);
       }
     });
-  },
+  }
 });

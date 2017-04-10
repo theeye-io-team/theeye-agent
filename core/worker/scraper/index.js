@@ -51,7 +51,8 @@ module.exports = AbstractWorker.extend({
     var config = this.config;
 
     function submit (result) {
-      var body, data;
+      var body;
+      var data;
       if (result) {
         data = result.data;
         if (data.response) {
