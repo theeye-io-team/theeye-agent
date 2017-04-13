@@ -57,62 +57,62 @@ function coloredEcho {
   esac
 }
 
-function installUbuntuDebianPackages {
-    coloredEcho "Installing Ubuntu Packages..." magenta
-    # Installing last node and npm version
-    #Works for Ubuntu:Lucid  Precise  Saucy  Trusty  Utopic
-    coloredEcho "Installing curl..." magenta
-    apt-get install -y --force-yes curl sudo
-    curl -sL https://deb.nodesource.com/setup_4.x | bash - || curl -sL https://deb.nodesource.com/setup_0.12 | bash - 
-    apt-get install -y nodejs  >> $installLog 2>&1
-    coloredEcho "Base Install Done..." magenta
-}
-
-function installRedhatCentosFedoraPackages {
-    coloredEcho "Installing Centos/RHEL/Fedora Packages..." magenta
-    yum install -y curl
-	  curl -sL https://rpm.nodesource.com/setup_0.10 | bash -
-    yum install -y nodejs npm gcc-c++ make
-    coloredEcho "Base Install Done..." magenta
-}
-
-#nodeJs installation
-function baseInstall {
-  node_path=$(which node)
-  if [ -z $node_path ] ; then
-    # Instaling Base:
-    coloredEcho "nodeJS is Missing, Instalation begins..." red
-    coloredEcho "Installing nodejs..." magenta
-    linuxFlavor=$(awk -F= '/^NAME/{print $2}' /etc/os-release|sed 's/"//g'|cut -d' ' -f1)
-    if [ -z $linuxFlavor ];then
-      linuxFlavor=$(gawk -F= '/^NAME/{print $2}' /etc/os-release|sed 's/"//g'|cut -d' ' -f1)
-    fi
-    if [ -z $linuxFlavor ];then
-      linuxFlavor=`head -n1 /etc/issue |sed 's/"//g'|cut -d' ' -f1`
-    fi
-
-    echo "$linuxFlavor time !!!!!!!!!!!<<<<"
-    case "$linuxFlavor" in
-        "Ubuntu"|"Debian")
-            installUbuntuDebianPackages
-        ;;
-
-        "CentOS"|"Fedora"|"Red")
-            installRedhatCentosFedoraPackages
-        ;;
-
-        *)
-            echo "unkown Linux Flavor $linuxFlavor"
-        ;;
-
-    esac
-
-
-    # All extra stuff for server add here
-    coloredEcho "nodeJs Setup Finished, moving forward" green
-  fi
-  coloredEcho "base Install Done..." magenta
-}
+#function installUbuntuDebianPackages {
+#    coloredEcho "Installing Ubuntu Packages..." magenta
+#    # Installing last node and npm version
+#    #Works for Ubuntu:Lucid  Precise  Saucy  Trusty  Utopic
+#    coloredEcho "Installing curl..." magenta
+#    apt-get install -y --force-yes curl sudo
+#    curl -sL https://deb.nodesource.com/setup_4.x | bash - || curl -sL https://deb.nodesource.com/setup_0.12 | bash - 
+#    apt-get install -y nodejs  >> $installLog 2>&1
+#    coloredEcho "Base Install Done..." magenta
+#}
+#
+#function installRedhatCentosFedoraPackages {
+#    coloredEcho "Installing Centos/RHEL/Fedora Packages..." magenta
+#    yum install -y curl
+#	  curl -sL https://rpm.nodesource.com/setup_0.10 | bash -
+#    yum install -y nodejs npm gcc-c++ make
+#    coloredEcho "Base Install Done..." magenta
+#}
+#
+##nodeJs installation
+#function baseInstall {
+#  node_path=$(which node)
+#  if [ -z $node_path ] ; then
+#    # Instaling Base:
+#    coloredEcho "nodeJS is Missing, Instalation begins..." red
+#    coloredEcho "Installing nodejs..." magenta
+#    linuxFlavor=$(awk -F= '/^NAME/{print $2}' /etc/os-release|sed 's/"//g'|cut -d' ' -f1)
+#    if [ -z $linuxFlavor ];then
+#      linuxFlavor=$(gawk -F= '/^NAME/{print $2}' /etc/os-release|sed 's/"//g'|cut -d' ' -f1)
+#    fi
+#    if [ -z $linuxFlavor ];then
+#      linuxFlavor=`head -n1 /etc/issue |sed 's/"//g'|cut -d' ' -f1`
+#    fi
+#
+#    echo "$linuxFlavor time !!!!!!!!!!!<<<<"
+#    case "$linuxFlavor" in
+#        "Ubuntu"|"Debian")
+#            installUbuntuDebianPackages
+#        ;;
+#
+#        "CentOS"|"Fedora"|"Red")
+#            installRedhatCentosFedoraPackages
+#        ;;
+#
+#        *)
+#            echo "unkown Linux Flavor $linuxFlavor"
+#        ;;
+#
+#    esac
+#
+#
+#    # All extra stuff for server add here
+#    coloredEcho "nodeJs Setup Finished, moving forward" green
+#  fi
+#  coloredEcho "base Install Done..." magenta
+#}
 
 function installCrontabAndLogrotationFile {
   confFile='/etc/theeye/theeye.conf'
@@ -120,7 +120,7 @@ function installCrontabAndLogrotationFile {
   #
   echo "*/15 * * * * root http_proxy=$http_proxy /usr/bin/curl -s $agentUrl/setup.sh |bash -s $clientID '$clientSecret' $clientCustomer > /dev/null 2>&1 || true" > /etc/cron.d/agentupdate
   echo 'PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin'> /etc/cron.d/agentwatchdog
-  echo '* * * * * root ps axu|grep -v grep|grep agent.run.sh > /dev/null 2>&1; if [ $? -eq "1"  ];then /usr/sbin/service theeye-agent restart;fi ||true ' >> /etc/cron.d/agentwatchdog
+  echo '* * * * * root ps axu|grep -v grep|grep agent.runBinary.sh > /dev/null 2>&1; if [ $? -eq "1"  ];then /usr/sbin/service theeye-agent restart;fi ||true ' >> /etc/cron.d/agentwatchdog
   echo "
   /var/log/backend/*.log {
     daily
@@ -287,8 +287,8 @@ else
 	coloredEcho "setting http_proxy. $http_proxy" red 2>&1 | $tee
 	echo $http_proxy > /tmp/http_proxy
 
-	coloredEcho "Step 1 of 5- Check if nodeJS exists and If it doesn't, install it." green 2>&1 | $tee
-	baseInstall 2>&1 | $tee
+#	coloredEcho "Step 1 of 5- Check if nodeJS exists and If it doesn't, install it." green 2>&1 | $tee
+#	baseInstall 2>&1 | $tee
 
 	coloredEcho "Step 2 of 5- Installing Cron File for agent update" green 2>&1 | $tee
 	installCrontabAndLogrotationFile 2>&1 | $tee
@@ -305,8 +305,6 @@ else
 	service theeye-agent start
 	echo "## List Process Running:"  >> $installLog
 	ps -ef |grep theeye  >> $installLog
-	echo "## dump run.sh:"  >> $installLog
-	cat $destinationPath/run.sh 2>&1 | $tee
 	echo "## theeye-agent:"  >> $installLog
 	cat /etc/init/theeye-agent.conf 2>&1 | $tee
 	echo "## agent config (/etc/theeye/theeye.conf):"  >> $installLog
@@ -323,7 +321,7 @@ if [ $? -eq "1" ];then
        echo "Please send us an email to support@theeye.io indicating:
              Operative System / Version and attaching your /tmp/*.theEyeInstallation.log.gz"
        echo "starting manually...."
-       $destinationPath/run.sh
+       $destinationPath/runBinary.sh
 else
   bannerPrint
   echo "We added sudoer permission at $sudoerFile, you can move forward and customize It for matching your security criteria"

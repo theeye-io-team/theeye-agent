@@ -16,18 +16,18 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Theeye agent daemon"              # String describing the service
 NAME="theeye-agent"                     # Name of the service, will be used in another vars
-DAEMON="/opt/theeye-agent/run.sh"      # Path to the service executable, e.g. /usr/bin/java
+DAEMON="/opt/theeye-agent/runBinary.sh" # Path to the service executable, e.g. /usr/bin/java
 DAEMON_ARGS=" "  # Arguments passed to the service startup
 
-WORK_DIR="/var/lib/${NAME}"               # Working directory where the service will be started, defaults to /var/lib/${NAME}
-USER=theeye-a                                # User that will spawn the process, defaults to the service name
-GROUP=$USER                               # Group that will spawn the process, defaults to the service name
+WORK_DIR="/var/lib/${NAME}"             # Working directory where the service will be started, defaults to /var/lib/${NAME}
+USER=theeye-a                           # User that will spawn the process, defaults to the service name
+GROUP=$USER                             # Group that will spawn the process, defaults to the service name
 if [ ! -d $WORK_DIR ];
 then
 	mkdir $WORK_DIR && chown $USER:$GROUP theeye-agent $WORK_DIR
 fi
-PIDFILE=/var/run/${NAME}.pid              # Pid file location, defaults to /var/run/${NAME}.pid
-SCRIPTNAME=/etc/init.d/$NAME              # Location of this init script
+PIDFILE=/var/run/${NAME}.pid            # Pid file location, defaults to /var/run/${NAME}.pid
+SCRIPTNAME=/etc/init.d/$NAME            # Location of this init script
 LOG_PATH=/var/log/                   # Standard output and Standard error will be outputted here
 
 START_STOP_DAEMON_OPTIONS="--chuid=$USER:$GROUP --background --chdir=$WORK_DIR"
