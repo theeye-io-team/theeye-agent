@@ -28,16 +28,17 @@ if [ ! -d "node_modules" ]; then
   npm install
 fi
 
-cd $root/node_modules/config
+#cd $root/node_modules/config
 
 echo "running npm version $(npm --version)"
 
 # add extra dependencies - not used by the agent anyway. but just to avoid errors and warnings
-npm install hjson toml cson properties
+npm install hjson toml cson properties x2js
 
 # run enclose
 cd $root
 
+echo "running enclose"
 enclose --version $node_version -o $target/theeye-agent --loglevel warning core/main.js
 
 # copy bindings
