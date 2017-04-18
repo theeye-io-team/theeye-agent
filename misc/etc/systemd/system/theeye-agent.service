@@ -15,8 +15,10 @@ SyslogIdentifier=theeye-agent
 
 #It should be set as User:theeye-a and Group:theeye-a, cause a bug with permissions at the dstats package on centos we left this way:
 #It should be fixed.
-User=theeye-a
-Group=theeye-a
+User=root
+Group=root
+#User=theeye-a
+#Group=theeye-a
 Environment=statedir=/opt/theeye-agent/runBinary.sh
 #Environment=NODE_ENV=production
 

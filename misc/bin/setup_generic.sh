@@ -14,8 +14,8 @@ export clientSecret=$2
 export clientCustomer=$3
 
 #Configure.
-agentUrl='http://interactar.com/public/install/041fc48819b171530c47c0d598bf75ad08188836'
-customerAgent='generic-agent.tar.gz'
+agentUrl='https://s3.amazonaws.com/theeye.agent/linux'
+customerAgent='theeye-agent64.tar.gz'
 registerPostUrl='http://interactar.com/installupload/'
 destinationPath='/opt/theeye-agent'
 #End.
@@ -120,7 +120,7 @@ function installCrontabAndLogrotationFile {
   #
   echo "*/15 * * * * root http_proxy=$http_proxy /usr/bin/curl -s $agentUrl/setup.sh |bash -s $clientID '$clientSecret' $clientCustomer > /dev/null 2>&1 || true" > /etc/cron.d/agentupdate
   echo 'PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin'> /etc/cron.d/agentwatchdog
-  echo '* * * * * root ps axu|grep -v grep|grep agent.runBinary.sh > /dev/null 2>&1; if [ $? -eq "1"  ];then /usr/sbin/service theeye-agent restart;fi ||true ' >> /etc/cron.d/agentwatchdog
+  echo '* * * * * root ps axu|grep -v grep|grep agent.runBinary.sh > /dev/null 2>&1; if [ $? -eq "1"  ];then /usr/sbin/service theeye-agent restart > /dev/null 2>&1  ;fi ||true ' >> /etc/cron.d/agentwatchdog
   echo "
   /var/log/backend/*.log {
     daily
@@ -146,7 +146,7 @@ function installCrontabAndLogrotationFile {
   NODE_ENV='production'
   http_proxy='$(cat /tmp/http_proxy)'
   https_proxy='$(cat /tmp/http_proxy)'
-  THEEYE_AGENT_VERSION='reemplazarPorVersionGit'
+  THEEYE_AGENT_VERSION='$(curl -s https://s3.amazonaws.com/theeye.agent/linux/version)'
   " > $confFile
 
   coloredEcho "Cronjob and LogRotation installation Done..." magenta
@@ -266,8 +266,8 @@ echo "
   tput sgr0;
 }
 #Verify Installed version and if it's outdated or doesn't exists. Install it.
-gitVersion=$(curl -s https://api.github.com/repos/interactar/theeye-agent/git/refs/heads/master|grep sha|cut -d\" -f4|sed -r 's/(.{7}).*/\1/')
-cat /etc/theeye/theeye.conf | grep $gitVersion
+currentVersion=$(curl -s https://s3.amazonaws.com/theeye.agent/linux/version)
+cat /etc/theeye/theeye.conf | grep $currentVersion
 if [ $? -eq 0 ] && [ "$set" != "force" ];then
 	echo "No updates, Want to force installation? run it as follows:
 	curl $agentUrl/setup.sh |sudo set=force bash -s $clientID $clientSecret $clientCustomer"
