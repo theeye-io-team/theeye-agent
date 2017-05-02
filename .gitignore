@@ -8,6 +8,7 @@ libs
 npm-debug.log
 npm-debug.log.*
 *.js.orig
+downloads
 bin/
 run_enclose.out
 *.tar.gz
