@@ -60,7 +60,7 @@ module.exports = AbstractWorker.extend({
             if (body.length > Constants.PAYLOAD_BODY_SIZE) {
               result.data.response.body = body.substring(0,Constants.PAYLOAD_DATA_SIZE) + '...(chunked)';
               result.data.response.chunked = true;
-              result.data.response.message = 'respose body too large.';
+              result.data.response.message = 'respose body truncated. too large';
             }
           }
         }
