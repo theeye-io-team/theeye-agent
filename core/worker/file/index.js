@@ -4,7 +4,17 @@ var AbstractWorker = require('../abstract');
 var File = require('../../lib/file');
 var Constants = require('../../constants');
 //var userid = require('node-userid');
-var userid = require('userid');
+
+const os = require('os')
+var userid
+if (os.platform() != 'win32') {
+  userid = require('userid');
+} else {
+  userid = {
+    uid: () => null,
+    gid: () => null
+  }
+}
 
 var FILE_CHANGED_EVENT = 'monitor.file.success_changed';
 var FILE_ERROR_ACCESS_EVENT = 'monitor.file.error_access';

@@ -8,11 +8,11 @@ var TheEyeClient = require('./lib/theeye-client');
 var hostname = require('./lib/hostname');
 var Worker = require('./worker');
 var Listener = require('./worker/listener');
+var config = require('config');
 
 function App () {
   var self = this;
 
-  var config = require('config');
   var connection = config.supervisor||{};
   connection.hostname = hostname;
   connection.request = config.request;
@@ -30,6 +30,34 @@ function App () {
     get:function(){ return _workers; }
   });
 
+  function registerAgent (next) {
+    _connection.create({
+      route: _connection.HOST + '/:hostname',
+      body: {
+        version: process.env.THEEYE_AGENT_VERSION,
+        info: {
+          platform: os.platform(),
+          hostname: hostname,
+          arch: os.arch(),
+          os_name: os.type(),
+          os_version: os.release(),
+          uptime: os.uptime(),
+          ip: ip.address()
+        }
+      },
+      success: function (response) {
+        _host_id = response.host_id;
+        _host_resource_id = response.resource_id;
+        debug(response);
+        next(null);
+      },
+      failure: function (err) {
+        debug(error);
+        next(error);
+      }
+    });
+  }
+
   function connectSupervisor (next) {
     _connection.refreshToken(function (error,token) {
       if (error) {
@@ -37,31 +65,7 @@ function App () {
         debug(error);
         next(error);
       } else {
-          _connection.create({
-            route: _connection.HOST + '/:hostname',
-            body: {
-              version: process.env.THEEYE_AGENT_VERSION,
-              info: {
-                platform: os.platform(),
-                hostname: hostname,
-                arch: os.arch(),
-                os_name: os.type(),
-                os_version: os.release(),
-                uptime: os.uptime(),
-                ip: ip.address()
-              }
-            },
-            success: function (response) {
-              _host_id = response.host_id;
-              _host_resource_id = response.resource_id;
-              debug(response);
-              next(null);
-            },
-            failure: function (err) {
-              debug(error);
-              next(error);
-            }
-          });
+        registerAgent(next)
       }
     });
   }
@@ -72,7 +76,7 @@ function App () {
   function tryConnectSupervisor (nextFn) {
     attempts++;
     connectSupervisor(function(error){
-      if(!error) return nextFn();
+      if (!error) return nextFn();
       debug('connection failed. trying again in "%s" seconds', interval/1000);
       var timeout = setTimeout(function(){
         tryConnectSupervisor(nextFn);

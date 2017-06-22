@@ -1,4 +1,5 @@
 module.exports = {
+  stand_alone: false,
   /**
    * the listener is the default worker.
    * this worker provide information and status of the agent to the api
@@ -32,9 +33,9 @@ module.exports = {
    * THEEYE_SUPERVISOR_CLIENT_SECRET
    * THEEYE_SUPERVISOR_CLIENT_CUSTOMER
    */
-  supervisor:{ },
+  supervisor: {},
   request: {
-    proxy: (process.env.https_proxy||process.env.http_proxy),
+    proxy: (process.env.https_proxy || process.env.http_proxy),
     tunnel: false,
     json: true,
     gzip: true,
