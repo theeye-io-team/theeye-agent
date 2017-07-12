@@ -52,8 +52,8 @@ function App () {
         next(null);
       },
       failure: function (err) {
-        debug(error);
-        next(error);
+        debug(err);
+        next(err);
       }
     });
   }
