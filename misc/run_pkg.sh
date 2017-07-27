@@ -39,7 +39,7 @@ npm install hjson toml cson properties x2js
 cd $root
 
 echo "running enclose"
-enclose --version $node_version -o $target/theeye-agent --loglevel warning core/main.js
+pkg --targets node6-linux --out-path $target/theeye-agent --debug core/main.js
 
 # copy bindings
 echo "copying bindings"
