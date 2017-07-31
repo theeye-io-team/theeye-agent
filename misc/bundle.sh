@@ -31,11 +31,13 @@ cp -r runBinary.sh $target
 
 echo "adding version to package"
 
-git describe > $target/version
+release=`git describe`
+
+echo $release > $target/version
 
 echo "creating package"
 
-tar -czf theeye-agent64.tar.gz $target
+tar -czf theeye-agent64-$release.tar.gz $target
 
 echo "removing temporal files"
 
