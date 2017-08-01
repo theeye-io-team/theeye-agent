@@ -3,12 +3,11 @@
 var AbstractWorker = require('../abstract');
 var File = require('../../lib/file');
 var Constants = require('../../constants');
-//var userid = require('node-userid');
 
 const os = require('os')
 var userid
 if (os.platform() != 'win32') {
-  userid = require('userid');
+  userid = require('userid')
 } else {
   userid = {
     uid: () => null,
@@ -23,24 +22,24 @@ var FILE_ERROR_EPERM_EVENT = 'monitor.file.error_perm';
 
 module.exports = AbstractWorker.extend({
   initialize: function () {
-    var config = this.config;
-    var file = config.file;
-    var uid = config.uid;
-    var gid = config.gid;
-    var mode = config.permissions;
+    var config = this.config
+    var file = config.file
+    var mode = config.permissions
+    var uid = null
+    var gid = null
 
-    if (this.config.user) {
+    if (this.config.os_username) {
       try {
-        uid = userid.uid(this.config.user);
+        uid = userid.uid(this.config.os_username)
       } catch (e) {
-        this.debug.error(e);
+        this.debug.error(e)
       }
     }
-    if (this.config.group) {
+    if (this.config.os_groupname) {
       try {
-        gid = userid.gid(this.config.group);
+        gid = userid.gid(this.config.os_groupname)
       } catch (e) {
-        this.debug.error(e);
+        this.debug.error(e)
       }
     }
 
@@ -53,14 +52,14 @@ module.exports = AbstractWorker.extend({
       mode: mode,
       uid: uid,
       gid: gid
-    };
+    }
 
     try {
-      this.file = new File(specs);
+      this.file = new File(specs)
     } catch (e) {
-      this.file = null;
-      e.code = 'EINIT';
-      this.error = e;
+      this.file = null
+      e.code = 'EINIT'
+      this.error = e
     }
   },
   processStatsError: function (err,next) {
