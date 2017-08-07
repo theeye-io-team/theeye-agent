@@ -16,15 +16,11 @@ services:
             - theeye-supervisor:theeye-supervisor
     #This command override default initialization for development process, which is npm run start ;)
     environment:
-       - THEEYE_SUPERVISOR_CLIENT_ID=sauron
-       - THEEYE_SUPERVISOR_CLIENT_SECRET=sauron
-       - THEEYE_SUPERVISOR_CLIENT_CUSTOMER=demo
        - THEEYE_AGENT_SCRIPT_PATH=/src/theeye-agent/scripts
-       - THEEYE_AGENT_DEBUG=eye:*
+       - THEEYE_AGENT_DEBUG=*eye*
        - THEEYE_SUPERVISOR_API_URL=http://theeye-supervisor:60080
-       - NODE_ENV=development
-  
-    command: npm run devel
+       - NODE_ENV=devel
+    command: npm run core
 
 networks:
    theeye:
