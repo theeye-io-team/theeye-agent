@@ -1,4 +1,5 @@
-FROM node:0.12
+#FROM node:0.12
+FROM node:6.11
 MAINTAINER Javier Ailbirt <jailbirt@interactar.com>
 ENV destDir /src/theeye-agent
 # Create app directory
