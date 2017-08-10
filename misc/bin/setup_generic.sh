@@ -130,7 +130,7 @@ function installCrontabAndLogrotationFile {
     compress
     sharedscripts
     postrotate
-    /usr/bin/service theeye-agent restart
+    /usr/bin/service theeye-agent restart || /usr/bin/systemctl restart theeye-agent
     endscript
   } " > /etc/logrotate.d/theeye-agent
   mkdir -p /etc/theeye
@@ -217,7 +217,7 @@ fi
 }
 function downloadAndSetupAgent {
   sudoerFile='/etc/sudoers.d/theeye-agent'
-  service theeye-agent stop
+  service theeye-agent stop || systemctl stop theeye-agent
   cd $destinationPath/../
   coloredEcho "Downloading agent and installing it at $destinationPath ..." cyan
   curl -O $agentUrl/$customerAgent
@@ -301,8 +301,8 @@ else
 
 	coloredEcho "Step 5 of 5- Restart the agent and tell remote server that updation has finished. " greenn 2>&1 | $tee
 	fixCustomSOissues
-	service theeye-agent stop
-	service theeye-agent start
+	service theeye-agent stop || systemctl stop theeye-agent
+	service theeye-agent start || systemctl start theeye-agent
 	echo "## List Process Running:"  >> $installLog
 	ps -ef |grep theeye  >> $installLog
 	echo "## theeye-agent:"  >> $installLog
