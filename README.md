@@ -12,6 +12,7 @@ at the moments this are the supported distributions by the instalation script
 > centos   
 > redhat   
 > fedora   
+> coreOs
 
 
 ## Windows Installer.
