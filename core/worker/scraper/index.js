@@ -55,14 +55,19 @@ module.exports = AbstractWorker.extend({
       var data;
       if (result) {
         data = result.data;
-        if (data.response) {
-          if (body = data.response.body) {
-            if (body.length > Constants.PAYLOAD_BODY_SIZE) {
-              result.data.response.body = body.substring(0,Constants.PAYLOAD_DATA_SIZE) + '...(chunked)';
-              result.data.response.chunked = true;
-              result.data.response.message = 'respose body truncated. too large';
+        if (Constants.WORKERS_SCRAPER_SUBMIT_BODY===true) {
+          if (data.response) {
+            let body = data.response.body
+            if (body) {
+              if (body.length > Constants.WORKERS_SCRAPER_SUBMIT_BODY_SIZE) {
+                result.data.response.body = body.substring(0, Constants.WORKERS_SCRAPER_SUBMIT_BODY_SIZE) + '...(chunked)';
+                result.data.response.chunked = true;
+                result.data.response.message = 'respose body truncated. too large';
+              }
             }
           }
+        } else {
+          result.data.response.body = ''
         }
         return next(null,result);
       } else {

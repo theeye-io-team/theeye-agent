@@ -11,7 +11,7 @@ module.exports = function(doneFn) {
   //
   var cmd = 'cd ' + process.cwd() + ' && git describe';
   exec(cmd,{},function(error,stdout,stderr){
-    version = (error||stderr) ? 'unknown' : stdout;
+    version = (error||stderr) ? 'cannot determine version' : stdout.trim();
     process.env.THEEYE_AGENT_VERSION = version;
     doneFn(null,version);
   });
