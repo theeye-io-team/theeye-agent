@@ -67,10 +67,10 @@ module.exports = AbstractWorker.extend({
     this.checkScript(function(error){
       // if(error) return done(error);
       self.script.run(function(result){
-        var json,
-          state,
-          payload,
-          lastline = result.lastline;
+        var json
+        var state
+        var payload
+        var lastline = result.lastline
 
         try {
           // try to convert JSON
@@ -88,13 +88,11 @@ module.exports = AbstractWorker.extend({
           state = lastline; // ok, just asume the last line is the result state
         }
 
-        payload = {
-          script_result: result,
+        payload = Object.assign({}, result, {
           state: state,
-          event: detectEvent(result)||undefined,
-          // data is available only when the script returns it
-          data: (json?(json.data||json):undefined)
-        };
+          // data is available only if the script return 'data' property in a readable way
+          data: (json ? (json.data||json) : {})
+        })
 
         self.debug.log('execution result is %j', payload);
 
@@ -103,11 +101,6 @@ module.exports = AbstractWorker.extend({
     });
   }
 });
-
-function detectEvent (data) {
-  if (data.killed) return 'killed';
-  return undefined;
-}
 
 function isObject (value) {
   return Object.prototype.toString.call(value) == '[object Object]';
