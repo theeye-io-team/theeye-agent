@@ -61,48 +61,47 @@ module.exports = AbstractWorker.extend({
       done();
     });
   },
-  getData : function(next) {
-    var self = this;
+  getData: function(next) {
+    var self = this
 
     this.checkScript(function(error){
-      // if(error) return done(error);
       self.script.run(function(result){
-        var json
-        var state
-        var payload
-        var lastline = result.lastline
+        const lastline = result.lastline
+        const data = Object.assign({}, result)
+
+        var output, state, payload
 
         try {
-          // try to convert JSON
-          json = JSON.parse(lastline);
+          // try to parse lastline string as JSON output
+          output = JSON.parse(lastline)
+          if (isObject(output)) {
+            if (output.state) state = output.state
+            else state = null
+          } else {
+            if (typeof output === 'string') {
+              state = output
+            } else {
+              state = null
+            }
+          }
+          data.output = output
         } catch (e) {
-          // it is not JSON
-          self.debug.error('cannot parse output. invalid JSON');
-          self.debug.error(e.message);
-          json = null;
+          // if it is not a JSON
+          self.debug.error('cannot parse output. invalid JSON')
+          self.debug.error(e.message)
+          state = lastline // a string
         }
 
-        if (json) {
-          state = isObject(json) ? json.state : json; // if object ? object.state : object as is .
-        } else {
-          state = lastline; // ok, just asume the last line is the result state
-        }
+        payload = { state: state, data: data }
 
-        payload = Object.assign({}, result, {
-          state: state,
-          // data is available only if the script return 'data' property in a readable way
-          data: (json ? (json.data||json) : {})
-        })
+        self.debug.log('execution result is %j', payload)
 
-        self.debug.log('execution result is %j', payload);
-
-        return next(null,payload);
-      });
-    });
+        return next(null, payload)
+      })
+    })
   }
-});
+})
 
 function isObject (value) {
-  return Object.prototype.toString.call(value) == '[object Object]';
+  return Object.prototype.toString.call(value) == '[object Object]'
 }
-

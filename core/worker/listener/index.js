@@ -96,10 +96,10 @@ module.exports = AbstractWorker.extend({
           type: 'script',
           script: {
             id: specs.script.id,
-            arguments: specs.task.script_arguments,
-            runas: specs.task.script_runas,
             filename: specs.script.filename,
             md5: specs.script.md5,
+            arguments: specs.script_arguments,
+            runas: specs.script_runas,
           }
         };
         // invoke worker
