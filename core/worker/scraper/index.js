@@ -51,6 +51,7 @@ module.exports = AbstractWorker.extend({
     var config = this.config;
 
     function submit (result) {
+      self.debug.log('scraper job result %o', result)
       var body;
       var data;
       if (result) {
@@ -60,9 +61,10 @@ module.exports = AbstractWorker.extend({
             let body = data.response.body
             if (body) {
               if (body.length > Constants.WORKERS_SCRAPER_SUBMIT_BODY_SIZE) {
-                result.data.response.body = body.substring(0, Constants.WORKERS_SCRAPER_SUBMIT_BODY_SIZE) + '...(chunked)';
-                result.data.response.chunked = true;
-                result.data.response.message = 'respose body truncated. too large';
+                self.debug.log('response body is too large. body size will be truncated to %s kb long', Constants.WORKERS_SCRAPER_SUBMIT_BODY_SIZE)
+                result.data.response.body = body.substring(0, Constants.WORKERS_SCRAPER_SUBMIT_BODY_SIZE) + '...(chunked)'
+                result.data.response.chunked = true
+                result.data.response.message = 'respose body truncated. too large'
               }
             }
           }
@@ -104,7 +106,7 @@ module.exports = AbstractWorker.extend({
         });
       }
 
-      if( config.status_code ){
+      if (config.status_code) {
         try {
           var statusCodeRegexp = new RegExp(config.status_code);
         } catch (e) {
