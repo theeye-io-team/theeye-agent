@@ -87,10 +87,11 @@ module.exports = AbstractWorker.extend({
       }
     }
 
-    // request no require options here, it is already configured
+    // request does not require any options here, it was already configured
     this.request({},function(error, response, body){
       if (error) {
-        self.debug.error(error);
+        self.debug.error('request failed')
+        self.debug.error('%o',error)
         return submit({
           state: Constants.FAILURE_STATE ,
           event: 'scraper.request.error',
@@ -98,12 +99,13 @@ module.exports = AbstractWorker.extend({
             message: error.name + '. ' + error.message,
             expected: config.status_code,
             response: {
-              status_code: response.statusCode,
+              status_code: response && response.statusCode,
               body: body,
-              headers: response.headers
+              headers: response && response.headers,
+              error: error.reason
             }
           }
-        });
+        })
       }
 
       if (config.status_code) {

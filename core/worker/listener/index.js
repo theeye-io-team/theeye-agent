@@ -115,10 +115,12 @@ module.exports = AbstractWorker.extend({
      * parse job data
      *
      */
-    var job = new Job(job);
+    var job = new Job(job)
     job.process(function(result){
-      self.connection.submitJobResult(job.id, result);
-    });
+      self.connection.submitJobResult(job.id, result, (err) => {
+        if (err) this.debug.error('%o',err)
+      })
+    })
   },
 
   /**
