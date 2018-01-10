@@ -17,7 +17,7 @@ module.exports = AbstractWorker.extend({
   type: 'listener',
   /**
    * often the resource id is required. 
-   * in this case the asociated host resource id
+   * in this case the associated host resource id
    * @param Function (optional) next
    * @return String resource id
    */
@@ -124,11 +124,11 @@ module.exports = AbstractWorker.extend({
   },
 
   /**
-   * the process to be performed once on each worker cicle.
+   * the procedure to be performed on each worker cicle.
    * @param Function next
    * @return null
    */
-  keepAlive : function () {
+  keepAlive: function () {
     var self = this;
     var resource = this.supervisor_resource;
 
@@ -146,38 +146,25 @@ module.exports = AbstractWorker.extend({
       }
     });
 
-    // send keep alive
-    this.debug.log('sending keep alive...');
-    this.sendKeepAlive();
     this.sleep();
   },
-  sendKeepAlive : function () {
-    var self = this;
-    this.connection.update({
-      route:'/:customer/agent/:hostname',
-      failure:function(err){
-        self.debug.error(err);
-      },
-      success:function(body){}
-    });
-  },
-  getJob : function (done) {
+  getJob: function (done) {
     this.connection.fetch({
-      route:'/:customer/job',
+      route: '/:customer/job',
       query: {
         process_next: 1,
         hostname: this.connection.hostname
       },
-      failure:function(err){
-        done(err);
+      failure: function(err){
+        done(err)
       },
-      success:function(body){
-        if( Array.isArray(body.jobs) && body.jobs.length > 0 ){
-          done(null, body.jobs[0]);
+      success: function(body){
+        if (Array.isArray(body.jobs) && body.jobs.length > 0) {
+          done(null, body.jobs[0])
         } else {
-          done();
+          done()
         }
       }
-    });
+    })
   }
-});
+})

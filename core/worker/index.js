@@ -14,7 +14,8 @@ var Workers = {
   psaux: require('./psaux'),
   scraper: require('./scraper'),
   script: require('./script'),
-  file: require('./file')
+  file: require('./file'),
+  ping: require('./ping')
 };
 
 module.exports = {

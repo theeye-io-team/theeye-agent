@@ -6,8 +6,12 @@ module.exports = {
    */
   workers: {
     listener: {
-      type: "listener",
+      type: 'listener',
       looptime: 15000
+    },
+    ping: {
+      type: 'ping',
+      looptime: 5000
     }
   },
   version: undefined,

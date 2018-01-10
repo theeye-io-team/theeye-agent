@@ -7,15 +7,17 @@ var debug = require('debug')('eye:agent:app');
 var TheEyeClient = require('./lib/theeye-client');
 var hostname = require('./lib/hostname');
 var Worker = require('./worker');
-var Listener = require('./worker/listener');
-var config = require('config');
+var ListenerWorker = require('./worker/listener');
+var PingWorker = require('./worker/ping');
+var localConfig = require('config');
+var WorkerConstants = require('./constants/worker')
 
 function App () {
   var self = this;
 
-  var connection = config.supervisor||{};
+  var connection = localConfig.supervisor||{};
   connection.hostname = hostname;
-  connection.request = config.request;
+  connection.request = localConfig.request;
 
   var _connection = new TheEyeClient(connection);
   var _host_id;
@@ -85,18 +87,47 @@ function App () {
   }
 
   function initListener () {
-    var worker = new Listener(_connection,{
-      resource_id: _host_resource_id,
-      type: 'listener',
-      looptime: require('config').workers.listener.looptime||15000
-    });
-    worker.run();
-    return worker;
+    var config = localConfig.workers.listener
+    if (!self.listener && config.enabled!==false) {
+      var worker = new ListenerWorker(_connection, {
+        resource_id: _host_resource_id,
+        type: WorkerConstants.Listener.type,
+        looptime: config.looptime || WorkerConstants.Listener.looptime
+      })
+      worker.run()
+      worker.on('config:outdated',function(){
+        updateWorkers()
+      })
+
+      self.listener = worker
+    }
   }
 
-  function setupWorkers (configs) {
+  function initPing () {
+    var config = localConfig.workers.ping
+    if (!self.ping && config.enabled!==false) {
+      var worker = new PingWorker(_connection, {
+        resource_id: _host_resource_id,
+        type: WorkerConstants.Ping.type,
+        looptime: config.looptime || WorkerConstants.Ping.looptime
+      })
+      worker.run()
+      worker.on('config:outdated',function(){
+        updateWorkers()
+      })
+
+      self.ping = worker
+    }
+  }
+
+  function initLocalWorkers () {
+    initListener()
+    initPing()
+  }
+
+  function setupWorkers (workersConfig) {
     debug('intializing resource workers');
-    configs.forEach(function(config) {
+    workersConfig.forEach(function(config) {
       var worker = Worker.spawn(config, _connection);
       if (worker!==null) {
         worker.run();
@@ -106,39 +137,32 @@ function App () {
   }
 
   function getRemoteConfig (next) {
-    debug('getting agent config');
+    debug('obtaining agent config')
     _connection.getAgentConfig(
       hostname, 
-      function(error,config){
+      function (error,remoteConfig) {
         var result = {
-          data:{
-            message: null,
-          },
+          data: { message: null },
           state: ''
-        };
+        }
 
-        if (!config) {
+        if (!remoteConfig) {
           var msg = 'no agent configuration available';
           debug(msg);
           result.data.message = msg;
           result.state = 'failure';
         } else {
-          setupWorkers( config.workers );
+          setupWorkers( remoteConfig.workers );
           result.data.message = 'agent monitors updated';
           result.state = 'success';
         }
 
-        if (!self.listener) {
-          self.listener = initListener();
-          self.listener.on('config:outdated',function(){
-            updateWorkers();
-          });
-        }
+        initLocalWorkers ()
 
-        debug('agent started');
-        if(next) next(null,result);
+        debug('agent started')
+        if (next) next(null,result)
       }
-    );
+    )
   }
 
   function updateWorkers () {
@@ -153,20 +177,22 @@ function App () {
 
     debug('updating workers configuration');
     getRemoteConfig(function(err,result){
-      self.listener.emit('config:updated',result);
-    });
+      if (self.listener) {
+        self.listener.emit('config:updated',result);
+      }
+    })
   }
 
   this.start = function(specs,next) {
     tryConnectSupervisor(function(){
       getRemoteConfig(next);
-    });
+    })
   }
 
   this.startCLI = function(next){
     tryConnectSupervisor(function(){
       next()
-    });
+    })
   }
 
   return this;
