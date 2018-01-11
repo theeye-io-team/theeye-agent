@@ -279,30 +279,39 @@ function File (props) {
     var uid = this.uid;
     var gid = this.gid;
 
-    if (!mode||isNaN(mode)) mode = parseInt('0755',8);
+    function chmod (next) {
+      if (!mode||isNaN(mode)) return next()
+      debug('setting mode %s', mode)
+      fs.chmod(path, mode, function (err) {
+        if (err) {
+          debug(err)
+          return next(err)
+        }
+        debug('mode set')
+        next()
+      })
+    }
 
-    debug('setting [mode:%s][uid:%s][gid:%s]',mode,uid,gid);
-
-    fs.chmod(path,mode,function(err){
-      if (err) {
-        debug(err);
-        return next(err);
-      }
-
-      debug('mode set');
-
+    function chown (next) {
       // if no uid or no gid , just ignore. node needs both to work
-      if (uid===null||gid===null) return next();
-
+      if (uid===null||gid===null) return next()
+      debug('setting owner uid: %s, gid: %s', uid, gid)
       fs.chown(path,uid,gid,function(err){
         if (err) {
-          debug(err);
-          return next(err);
+          debug(err)
+          return next(err)
         }
-        debug('permissions set');
-        return next();
-      });
-    });
+        debug('owner set')
+        return next()
+      })
+    }
+
+    chmod(function(err){
+      if (err) return next(err)
+      chown(function(err){
+        next(err)
+      })
+    })
   }
 
   this.save = function (stream, next) {
