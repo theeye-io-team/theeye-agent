@@ -128,7 +128,7 @@ function File (props) {
   if (!_dirname) throw new Error('EDIR: dirname is required');
 
   // validate mode, uid & gid to avoid entering a loop
-  _mode = parseUnixOctalModeString(props.mode)||'0755'; // defaulting to 0755 on posix
+  _mode = parseUnixOctalModeString(props.mode); // defaulting to 0755 on posix
 
   _uid = parseUnixId(props.uid);
   if (_uid === null) _uid = getuid();
