@@ -128,7 +128,7 @@ function File (props) {
   if (!_dirname) throw new Error('EDIR: dirname is required');
 
   // validate mode, uid & gid to avoid entering a loop
-  _mode = parseUnixOctalModeString(props.mode); // defaulting to 0755 on posix
+  _mode = parseUnixOctalModeString(props.mode);
 
   _uid = parseUnixId(props.uid);
   if (_uid === null) _uid = getuid();
@@ -211,40 +211,29 @@ function File (props) {
     fs.stat(this.path, function(err, stat){
       if (err) return next(err);
 
-      if (_mode !== null) {
+      if (_mode!==null) {
         var permString = statModeToOctalString(stat.mode);
         if (permString !== _mode) {
-          var err = new Error('EMODE: current file mode is incorrect');
+          var err = new Error('EMODE: file mode does not match');
           err.code = 'EMODE';
-          return next(err);
+          return next(err,stat);
         }
       }
 
-      /** 
-       * @todo
-       * if no uid or gid, can't change anything. temp Windows fix
-       */
-      if (_uid===null||_gid===null) {
-        return next(null,stat);
+      if (_uid!==null) {
+        if (stat.uid !== _uid) {
+          var err = new Error('EOWNER: file uid does not match');
+          err.code = 'EOWNER';
+          return next(err,stat);
+        }
       }
 
-      var permString = statModeToOctalString(stat.mode);
-      if (permString !== _mode) {
-        var err = new Error('EMODE: current file mode is malformed');
-        err.code = 'EMODE';
-        return next(err);
-      }
-
-      if (stat.uid !== _uid) {
-        var err = new Error('EOWNER: current file uid is incorrect');
-        err.code = 'EOWNER';
-        return next(err);
-      }
-
-      if (stat.gid !== _gid) {
-        var err = new Error('EGROUP: current file gid is incorrect');
-        err.code = 'EGROUP';
-        return next(err);
+      if (_gid!==null) {
+        if (stat.gid !== _gid) {
+          var err = new Error('EGROUP: file gid does not match');
+          err.code = 'EGROUP';
+          return next(err,stat);
+        }
       }
 
       next(null,stat);
@@ -252,8 +241,8 @@ function File (props) {
   }
 
   this.createFile = function (readable, next) {
-    var self = this,
-      cbCalled = false;
+    var self = this
+    var cbCalled = false
 
     // keep by default execution mode
     debug('creating file %s..', this.path);
@@ -268,16 +257,49 @@ function File (props) {
     var writable = fs.createWriteStream(this.path, { mode:'0755' });
     writable.on('error', done);
     readable.on('error', done);
-    readable.pipe(writable).on('finish',function(){
-      self.setAccess(done);
-    });
+    readable
+      .pipe(writable)
+      .on('finish',function(){
+        self.setAccess(done)
+      })
   }
 
-  this.setAccess = function (next) {
+  this.setAccess = function (done) {
+    const self = this
+    self.setMode(function(err){
+      if (err) return done(err)
+      self.setOwner(function(err){
+        return done(err)
+      })
+    })
+  }
+
+  this.setOwner = function (callback) {
     var path = this.path;
-    var mode = this.mode;
     var uid = this.uid;
     var gid = this.gid;
+
+    function chown (next) {
+      // if no uid or no gid , just ignore. node needs both to work
+      if (uid===null||gid===null) return next()
+
+      debug('setting owner uid: %s, gid: %s', uid, gid)
+      fs.chown(path, uid, gid, function (err) {
+        if (err) {
+          debug(err)
+          return next(err)
+        }
+        debug('owner set')
+        return next()
+      })
+    }
+
+    chown(function(err){ callback(err) })
+  }
+
+  this.setMode = function (callback) {
+    var path = this.path;
+    var mode = this.mode;
 
     function chmod (next) {
       if (!mode||isNaN(mode)) return next()
@@ -292,26 +314,7 @@ function File (props) {
       })
     }
 
-    function chown (next) {
-      // if no uid or no gid , just ignore. node needs both to work
-      if (uid===null||gid===null) return next()
-      debug('setting owner uid: %s, gid: %s', uid, gid)
-      fs.chown(path,uid,gid,function(err){
-        if (err) {
-          debug(err)
-          return next(err)
-        }
-        debug('owner set')
-        return next()
-      })
-    }
-
-    chmod(function(err){
-      if (err) return next(err)
-      chown(function(err){
-        next(err)
-      })
-    })
+    chmod(function(err){ callback(err) })
   }
 
   this.save = function (stream, next) {

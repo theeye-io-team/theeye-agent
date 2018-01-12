@@ -64,6 +64,7 @@ module.exports = AbstractWorker.extend({
   },
   processStatsError: function (err,next) {
     var self = this;
+    this.debug.error('%s',err.message)
     switch (err.code) {
       case 'ENOENT':
         this.debug.log('downloading file');
