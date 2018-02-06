@@ -117,8 +117,8 @@ module.exports = AbstractWorker.extend({
      */
     var job = new Job(job)
     job.process(function(result){
-      self.connection.submitJobResult(job.id, result, (err) => {
-        if (err) this.debug.error('%o',err)
+      self.connection.submitJobResult(job.id, result, function(err){
+        if (err) self.debug.error('%o',err)
       })
     })
   },
