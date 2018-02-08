@@ -14,6 +14,7 @@
     "ip": "0.3.3",
     "md5": "2.1.0",
     "mkdirp": "0.5.1",
+    "ngrok": "2.2.25",
     "request": "2.74.0",
     "shell-escape": "0.2.0",
     "theeye-node-stat": "0.3",
@@ -25,7 +26,7 @@
   },
   "scripts": {
     "core": "./node_modules/.bin/nodemon --watch core `pwd`/core/main.js",
-    "debug": "./node_modules/.bin/nodemon --inspect=8888 --watch core `pwd`/core/main.js",
+    "debug": "./node_modules/.bin/nodemon --inspect=6662 --watch core `pwd`/core/main.js",
     "start": "/bin/bash ./run.sh",
     "remote": "DEBUG=* NODE_ENV=remote THEEYE_AGENT_SCRIPT_PATH=$PWD/scripts ./node_modules/.bin/nodemon `pwd`/core/main.js"
   },

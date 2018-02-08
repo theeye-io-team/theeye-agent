@@ -16,36 +16,34 @@ var Workers = {
   script: require('./script'),
   file: require('./file'),
   ping: require('./ping')
-};
+}
 
-module.exports = {
-  /**
-   * Create and return an instance of worker
-   * @param Object config
-   * @param Connection connection
-   * @return Worker instance
-   */
-  spawn: function (config,connection) {
-    if (config.disabled===true) {
-      logger.log('worker disabled');
-      return null;
-    }
-
-    if (!config.type) {
-      logger.error('worker configuration has missing property "type".');
-      return null;
-    }
-
-    logger.log('creating worker %s', config.type);
-
-    try {
-      var worker = new Workers[config.type](connection, config);
-    } catch (e) {
-      logger.error('EWORKER: unable to spawn worker');
-      logger.error(e);
-      return null;
-    }
-
-    return worker;
+/**
+ * Create and return an instance of worker
+ * @param Object config
+ * @param Connection connection
+ * @return Worker instance
+ */
+module.exports.spawn = function (config,connection) {
+  if (config.disabled===true) {
+    logger.log('worker disabled');
+    return null;
   }
-};
+
+  if (!config.type) {
+    logger.error('worker configuration has missing property "type".');
+    return null;
+  }
+
+  logger.log('creating worker %s', config.type);
+
+  try {
+    var worker = new Workers[config.type](connection, config);
+  } catch (e) {
+    logger.error('EWORKER: unable to spawn worker');
+    logger.error(e);
+    return null;
+  }
+
+  return worker;
+}

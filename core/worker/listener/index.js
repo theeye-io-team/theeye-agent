@@ -7,6 +7,7 @@ var md5 = require('md5');
 var extend = require('util')._extend;
 var Script = require('../../lib/script');
 var AbstractWorker = require('../abstract');
+var JobsFactory = require('./job')
 
 /**
  *
@@ -14,6 +15,7 @@ var AbstractWorker = require('../abstract');
  *
  */
 module.exports = AbstractWorker.extend({
+  jobs: {},
   type: 'listener',
   /**
    * often the resource id is required. 
@@ -40,89 +42,28 @@ module.exports = AbstractWorker.extend({
    * @param Job data
    * @return null
    */
-  processJob : function(job) {
-    var self = this;
-    /**
-     *
-     * job factory
-     *
-     */
-    function Job (attribs) {
-      // @TODO this should be a job type to add to the factory
-      if( attribs.name == 'agent:config:update' ) {
-        return new Job.AgentUpdateJob(attribs);
-      } else {
-        var name = attribs._type;
-        if(!name) throw new Error('invalid job. no type specified');
-        return new Job[name](attribs);
-      }
+  processJob: function (data) {
+    var connection = this.connection
+    var debug = this.debug
+
+    var options = {
+      connection: connection,
+      listener: this
     }
-    //
-    // agent config update job
-    //
-    Job.AgentUpdateJob = function(specs){
-      this.id = specs.id;
-      this.process = function(done){
-        self.once('config:updated', done);
-        self.emit('config:outdated');
-      }
-      return this;
-    }
-    //
-    // scraper job
-    //
-    Job.ScraperJob = function(specs) {
-      this.id = specs.id;
-      this.process = function(done){
-        // prepare config
-        var config = extend(specs.task,{ type: 'scraper' });
-        // invoke worker
-        var scraper = require('../index').spawn(config, self.connection);
-        scraper.getData(function(err,result){
-          return done(result);
-        });
-      }
-      return this;
-    }
-    //
-    // script job
-    //
-    Job.ScriptJob = function(specs) {
-      this.id = specs.id;
-      this.process = function(done){
-        // prepare config
-        var config = {
-          disabled: false,
-          type: 'script',
-          script: {
-            id: specs.script.id,
-            filename: specs.script.filename,
-            md5: specs.script.md5,
-            arguments: specs.script_arguments,
-            runas: specs.script_runas,
-          }
-        };
-        // invoke worker
-        var script = require('../index').spawn(config, self.connection);
-        script.getData(function(err,result){
-          return done(result);
-        });
-      }
-      return this;
-    }
+
     /**
      *
      * parse job data
      *
      */
-    var job = new Job(job)
-    job.process(function(result){
-      self.connection.submitJobResult(job.id, result, function(err){
-        if (err) self.debug.error('%o',err)
+    var job = JobsFactory.create(data, options)
+    job.getResults(function (err, result) {
+      if (err) debug.error('%o',err)
+      connection.submitJobResult(job.id, err||result, function(err){
+        if (err) debug.error('%o',err)
       })
     })
   },
-
   /**
    * the procedure to be performed on each worker cicle.
    * @param Function next
