@@ -1,5 +1,6 @@
 var ngrok = require('ngrok')
-var debug = require('debug')('job:integrations:ngrok')
+var debug = require('debug')('eye:agent:listener:job:integrations:ngrok')
+var Constants = require('../../../../constants');
 
 const OPERATION_START = 'start'
 const OPERATION_STOP = 'stop'
@@ -34,8 +35,20 @@ module.exports = function (specs, options) {
     }, function (err, url) {
       if (err) {
         debug('ngrok error. connect error')
-        debug('%o',err)
-        done(err)
+        debug('%o', err)
+
+        var err = {
+          state: Constants.FAILURE_STATE,
+          event: 'integration.ngrok.failed',
+          data: {
+            message: err.message,
+            error_code: err.error_code,
+            status_code: err.status_code,
+            details: err.details
+          }
+        }
+
+        return done(err)
       }
       tunnelURL = url
       done(null,{ state: STATE_STARTED, data: { url: tunnelURL } })
