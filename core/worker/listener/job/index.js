@@ -6,6 +6,7 @@
  *
  */
 var WorkersFactory = require('../../index')
+var extend = require('util')._extend;
 
 var JobFactory = { }
 

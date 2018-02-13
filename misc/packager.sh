@@ -2,7 +2,7 @@
 
 root="$PWD"
 target="theeye-agent/"
-bin="bin/"
+bin="bin"
 
 if [ ! -d "$target" ]; then
   mkdir $target

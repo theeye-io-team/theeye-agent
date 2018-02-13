@@ -4,7 +4,6 @@
 var fs = require('fs');
 var path = require('path');
 var md5 = require('md5');
-var extend = require('util')._extend;
 var Script = require('../../lib/script');
 var AbstractWorker = require('../abstract');
 var JobsFactory = require('./job')

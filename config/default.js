@@ -19,6 +19,9 @@ module.exports = {
     path: ( __dirname + '/../downloads' ),
     execution_timeout: 10 * 60 * 1000 // 10 minutes in milliseconds
   },
+  binaries: {
+    path: process.env.THEEYE_AGENT_BINARIES_PATH || ( __dirname + '/../bin' )
+  },
   /**
    * can set connection information like this
    *

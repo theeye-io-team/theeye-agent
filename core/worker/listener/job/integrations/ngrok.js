@@ -1,6 +1,7 @@
-var ngrok = require('ngrok')
 var debug = require('debug')('eye:agent:listener:job:integrations:ngrok')
 var Constants = require('../../../../constants');
+var ngrok = require('../../../../lib/ngrok')
+var config = require('config')
 
 const OPERATION_START = 'start'
 const OPERATION_STOP = 'stop'
@@ -25,6 +26,10 @@ module.exports = function (specs, options) {
   })
 
   var operation = specs.operation
+
+  ngrok.configure({
+    spawnCwd: config.binaries.path
+  })
 
   function start (done) {
     debug('starting ngrok')
