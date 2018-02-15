@@ -1,6 +1,7 @@
 "use strict";
 
-var util = require('util');
+var inherits = require('util').inherits
+var assign = require('lodash/assign')
 var exec = require('child_process').exec;
 var platform = require('os').platform();
 var debug = require('debug')('eye:lib:script');
@@ -29,6 +30,7 @@ function Script (props) {
     return parsed;
   }
 
+  var _env = props.env;
   var _runas = props.runas;
   var _args = this.prepareArguments(props.args);
   var _output = null;
@@ -43,6 +45,10 @@ function Script (props) {
   });
   Object.defineProperty(this,'runas',{
     get: function() { return _runas; },
+    enumerable:true,
+  });
+  Object.defineProperty(this,'env',{
+    get: function() { return _env; },
     enumerable:true,
   });
   Object.defineProperty(this,'output',{
@@ -72,27 +78,28 @@ function Script (props) {
   this.execScript = function(script,options){
     debug('running script "%s"', script);
 
-    options||(options={});
+    options||(options={})
     if (!options.timeout) {
-      var timeout = (config.scripts&&config.scripts.execution_timeout)||undefined;
-      options.timeout = timeout||DEFAULT_EXECUTION_TIMEOUT;
+      var timeout = ( config.scripts && config.scripts.execution_timeout ) || undefined
+      options.timeout = timeout || DEFAULT_EXECUTION_TIMEOUT
     }
 
-    var self = this,
-      killed = false,
-      child = exec(script),
-      partials = {stdout:'',stderr:'',log:''},
-      exec_timeout = parseInt(options.timeout),
-      exec_start = process.hrtime();
+    var self = this
+    var killed = false
+    var env = assign({}, process.env, this.env)
+    var child = exec(script, { env })
+    var partials = { stdout: '', stderr: '', log: '' }
+    var exec_timeout = parseInt(options.timeout)
+    var exec_start = process.hrtime()
 
     var timeout = setTimeout(function(){
       debug('killing child script ("%s")', script);
       killed = true;
       kill(child.pid,'SIGKILL',function(err){
         if (err) debug(err);
-        else debug('kill send');
+        else debug('kill sent');
       });
-    },exec_timeout);
+    }, exec_timeout)
 
     this.once('end',function(){
       clearTimeout(timeout);
@@ -129,16 +136,14 @@ function Script (props) {
         log: partials.log
       });
 
-      self.emit('end',util._extend(
-        _output.toObject(),{
-          signal: signal,
-          killed: Boolean(killed),
-          times: {
-            seconds: exec_diff[0],
-            nanoseconds: exec_diff[1],
-          }
+      self.emit('end', assign({}, _output.toObject(), {
+        signal: signal,
+        killed: Boolean(killed),
+        times: {
+          seconds: exec_diff[0],
+          nanoseconds: exec_diff[1],
         }
-      ));
+      }))
     });
 
     child.on('error',function(err){
@@ -157,6 +162,6 @@ function Script (props) {
   }
 }
 
-util.inherits(Script, File);
+inherits(Script, File);
 
 module.exports = Script;

@@ -20,6 +20,7 @@ module.exports = {
     execution_timeout: 10 * 60 * 1000 // 10 minutes in milliseconds
   },
   binaries: {
+    // use absolute paths here. binary agent requires it. __dirname only works using source code
     path: process.env.THEEYE_AGENT_BINARIES_PATH || ( __dirname + '/../bin' )
   },
   /**

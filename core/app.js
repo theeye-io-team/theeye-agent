@@ -87,7 +87,7 @@ function App () {
   }
 
   function initListener () {
-    var config = localConfig.workers.listener
+    var config = localConfig.workers.listener || {}
     if (!self.listener && config.enabled!==false) {
       var worker = new ListenerWorker(_connection, {
         resource_id: _host_resource_id,

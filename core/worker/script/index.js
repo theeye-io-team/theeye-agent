@@ -13,6 +13,7 @@ module.exports = AbstractWorker.extend({
       id: config.id,
       args: config.arguments||[],
       runas: config.runas,
+      env: config.env,
       md5: config.md5,
       dirname: directory,
       basename: config.filename,

@@ -41,7 +41,7 @@ module.exports = AbstractWorker.extend({
    * @param Job data
    * @return null
    */
-  processJob: function (data) {
+  processJob: function (jobData) {
     var connection = this.connection
     var debug = this.debug
 
@@ -52,10 +52,10 @@ module.exports = AbstractWorker.extend({
 
     /**
      *
-     * parse job data
+     * parse job jobData
      *
      */
-    var job = JobsFactory.create(data, options)
+    var job = JobsFactory.create(jobData, options)
     job.getResults(function (err, result) {
       if (err) debug.error('%o',err)
       connection.submitJobResult(job.id, err||result, function(err){

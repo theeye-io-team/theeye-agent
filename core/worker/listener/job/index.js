@@ -6,7 +6,7 @@
  *
  */
 var WorkersFactory = require('../../index')
-var extend = require('util')._extend;
+var assign = require('lodash/assign');
 
 var JobFactory = { }
 
@@ -59,7 +59,7 @@ JobFactory.ScraperJob = function(specs, options) {
 
   function process (done) {
     // prepare config
-    var config = extend(specs.task,{ type: 'scraper' });
+    var config = assign({}, specs.task, { type: 'scraper' });
     // invoke worker
     var scraper = WorkersFactory.spawn(config, connection)
     scraper.getData(function(err,result){
@@ -86,6 +86,7 @@ JobFactory.ScriptJob = function(specs, options) {
 
   function process (done) {
     // prepare config
+    let event_data = specs.event_data || {}
     var config = {
       disabled: false,
       type: 'script',
@@ -95,6 +96,12 @@ JobFactory.ScriptJob = function(specs, options) {
         md5: specs.script.md5,
         arguments: specs.script_arguments,
         runas: specs.script_runas,
+        env: {
+          // IMPORTANTE. use empty string for passing vars into diff languages.
+          THEEYE_WF: specs.event || '', // is workflow ?
+          THEEYE_WF_LASTLINE: event_data.lastline || '',
+          THEEYE_WF_DATA: event_data.data || ''
+        }
       }
     };
     // invoke worker
