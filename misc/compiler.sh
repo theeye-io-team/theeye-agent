@@ -77,6 +77,7 @@ echo -e "Agent Version \t\t$(git describe)" >> $release
 echo -e "NODE_ENV config \t\t$NODE_ENV" >> $release
 echo -e "Node Version \t\t$node_version" >> $release
 echo -e "NPM Version \t\t$(npm --version)" >> $release
+echo -e "PKG Version \t\t$(pkg --version)" >> $release
 
 echo "summary"
 cat $target/release

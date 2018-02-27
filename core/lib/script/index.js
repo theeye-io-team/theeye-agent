@@ -86,7 +86,7 @@ function Script (props) {
 
     var self = this
     var killed = false
-    var env = assign({}, process.env, this.env)
+    var env = assign({}, process.env||{}, this.env)
     var child = exec(script, { env })
     var partials = { stdout: '', stderr: '', log: '' }
     var exec_timeout = parseInt(options.timeout)
