@@ -2,15 +2,10 @@
 
 var NStat = require('theeye-node-stat');
 var AbstractWorker = require('../abstract');
-
 var FAILURE_STATE = 'failure';
 var NORMAL_STATE = 'normal';
 
-var HIGH_CPU_EVENT = 'host:stats:cpu:high';
-var HIGH_MEM_EVENT = 'host:stats:mem:high';
-var HIGH_DISK_EVENT = 'host:stats:disk:high';
-var HIGH_CACHE_EVENT = 'host:stats:cache:high';
-var STATS_RECOVERED_EVENT = 'host:stats:normal';
+const EventConstants = require('../../constants/events')
 
 var Worker = module.exports = AbstractWorker.extend({
   type: 'dstat',
@@ -93,7 +88,7 @@ var Worker = module.exports = AbstractWorker.extend({
       this.debug.error('ALERT: cpu load is too high');
       return next(null,{
         state: FAILURE_STATE,
-        event: HIGH_CPU_EVENT,
+        event: EventConstants.STATS_HIGH_CPU,
         data: load
       });
     }
@@ -101,7 +96,7 @@ var Worker = module.exports = AbstractWorker.extend({
       this.debug.error('ALERT: mem usage is too high');
       return next(null,{
         state: FAILURE_STATE,
-        event: HIGH_MEM_EVENT,
+        event: EventConstants.STATS_HIGH_MEM,
         data: load 
       });
     }
@@ -109,7 +104,7 @@ var Worker = module.exports = AbstractWorker.extend({
       this.debug.error('ALERT: cache usage is too high');
       return next(null,{
         state: FAILURE_STATE,
-        event: HIGH_CACHE_EVENT,
+        event: EventConstants.STATS_HIGH_CACHE,
         data: load,
       });
     }
@@ -117,14 +112,14 @@ var Worker = module.exports = AbstractWorker.extend({
     if(diskAlert){
       return next(null,{
         state: FAILURE_STATE,
-        event: HIGH_DISK_EVENT,
+        event: EventConstants.STATS_HIGH_DISK,
         data: load
       });
     }
 
     return next(null,{
       state: NORMAL_STATE,
-      event: STATS_RECOVERED_EVENT,
+      event: EventConstants.STATS_RECOVERED,
       data: load
     });
   }

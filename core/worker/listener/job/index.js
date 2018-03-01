@@ -100,7 +100,7 @@ JobFactory.ScriptJob = function(specs, options) {
           // IMPORTANTE. use empty string for passing vars into diff languages.
           THEEYE_WF: specs.event || '', // is workflow ?
           THEEYE_WF_LASTLINE: event_data.lastline || '',
-          THEEYE_WF_DATA: event_data.data || ''
+          THEEYE_WF_OUTPUT: event_data.output || ''
         }
       }
     };

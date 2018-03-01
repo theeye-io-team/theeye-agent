@@ -6,6 +6,8 @@ var format = require('util').format;
 var AbstractWorker = require('../abstract');
 var Constants = require('../../constants');
 
+const EventConstants = require('../../constants/events')
+
 function setupRequestObject (config) {
   var version = process.env.THEEYE_AGENT_VERSION;
   var wrapper = request.defaults({
@@ -75,10 +77,9 @@ module.exports = AbstractWorker.extend({
       } else {
         var err = {
           state: Constants.ERROR_STATE,
-          event: 'scraper.error',
+          event: EventConstants.SCRAPER_ERROR,
           data: {
-            message: 'unknown error',
-            event: 'error'
+            message: 'unknown error'
           }
         };
 
@@ -94,7 +95,7 @@ module.exports = AbstractWorker.extend({
         self.debug.error('%o',error)
         return submit({
           state: Constants.FAILURE_STATE ,
-          event: 'scraper.request.error',
+          event: EventConstants.SCRAPER_ERROR_REQ,
           data: {
             message: error.name + '. ' + error.message,
             expected: config.status_code,
@@ -114,7 +115,7 @@ module.exports = AbstractWorker.extend({
         } catch (e) {
           return submit({
             state: Constants.ERROR_STATE,
-            event: 'scraper.config.status_code.invalid_regexp',
+            event: EventConstants.SCRAPER_ERROR_CONFIG_STATUS_CODE_INVALID_REGEX,
             data: {
               message: 'status code regexp ' + config.status_code + ' is not valid regular expression',
               error: {
@@ -129,7 +130,7 @@ module.exports = AbstractWorker.extend({
         if (statusCodeRegexp.test(response.statusCode) === false) {
           return submit({
             state: Constants.FAILURE_STATE,
-            event: 'scraper.status_code.not_match',
+            event: EventConstants.SCRAPER_MISMATCH_STATUS_CODE,
             data: {
               message: 'status code ' + response.statusCode + ' expected to match ' + config.status_code,
               expected: config.status_code,
@@ -149,27 +150,25 @@ module.exports = AbstractWorker.extend({
         } catch(e) {
           return submit({
             state: Constants.ERROR_STATE,
-            event: 'scraper.config.pattern.invalid_regexp',
+            event: EventConstants.SCRAPER_ERROR_CONFIG_PATTERN_INVALID_REGEX,
             data:{
-              message:'pattern invalid: ' + e.message,
+              message: 'pattern invalid: ' + e.message,
               error: {
                 message: e.message,
                 stack: e.stack,
                 name: e.name
-              },
-              event: 'ERROR'
+              }
             }
-          });
+          })
         }
 
         self.debug.log('testing pattern %s against %s',config.pattern, body);
         if (new RegExp(config.pattern).test(body) === true){
           return submit({
             state: Constants.SUCCESS_STATE,
-            event: 'success',
+            event: EventConstants.SUCCESS,
             data: { 
               message:'request success', 
-              event:'success', 
               response: {
                 status_code: response.statusCode,
                 body: body,
@@ -180,10 +179,9 @@ module.exports = AbstractWorker.extend({
         } else {
           return submit({
             state: Constants.FAILURE_STATE,
-            event: 'scraper.pattern.not_match',
+            event: EventConstants.SCRAPER_MISMATCH_PATTERN,
             data: {
-              message:'pattern does not match',
-              code: 'scraper.pattern.not_match',
+              message: 'pattern does not match',
               response: {
                 status_code: response.statusCode,
                 body: body,
@@ -195,7 +193,7 @@ module.exports = AbstractWorker.extend({
       } else {
         return submit({
           state: Constants.SUCCESS_STATE,
-          event: 'success', 
+          event: EventConstants.SUCCESS,
           data: { 
             message:'request success', 
             response: {
@@ -204,8 +202,8 @@ module.exports = AbstractWorker.extend({
               headers: response.headers
             }
           } 
-        });
+        })
       }
-    });
+    })
   }
-});
+})
