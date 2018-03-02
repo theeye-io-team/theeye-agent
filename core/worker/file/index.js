@@ -78,8 +78,8 @@ module.exports = AbstractWorker.extend({
           } else {
             // file changed , trigger event
             next(null,{
-              state: Constants.SUCCESS_STATE,
-              event: EventConstants.FILE_CHANGED,
+              state: EventConstants.CHANGED,
+              event: EventConstants.FILE_RESTORED,
               data: { } 
             });
           }
@@ -113,8 +113,8 @@ module.exports = AbstractWorker.extend({
           } else {
             // file changed , trigger event
             next(null,{
-              state: Constants.SUCCESS_STATE,
-              event: EventConstants.FILE_CHANGED,
+              state: EventConstants.CHANGED,
+              event: EventConstants.FILE_RESTORED,
               data: { } 
             });
           }
@@ -158,8 +158,8 @@ module.exports = AbstractWorker.extend({
         } else {
           // file changed , trigger event
           next(null,{
-            state: Constants.SUCCESS_STATE,
-            event: EventConstants.FILE_CHANGED,
+            state: EventConstants.CHANGED,
+            event: EventConstants.FILE_RESTORED,
             data: { }
           });
         }
