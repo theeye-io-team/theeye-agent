@@ -33,37 +33,45 @@ module.exports = function (specs, options) {
 
   function start (done) {
     debug('starting ngrok')
-    ngrok.connect({
-      authtoken: specs.authtoken,
-      proto: specs.protocol,
-      addr: Number(specs.address)
-    }, function (err, url) {
-      if (err) {
-        debug('ngrok error. connect error')
-        debug('%o', err)
+    try {
+      ngrok.connect({
+        authtoken: specs.authtoken,
+        proto: specs.protocol,
+        addr: Number(specs.address)
+      }, function (err, url) {
+        if (err) {
+          debug('ngrok error. connect error')
+          debug('%o', err)
 
-        var err = {
-          state: Constants.FAILURE_STATE,
-          event: 'integration.ngrok.failed',
-          data: {
-            message: err.message,
-            error_code: err.error_code,
-            status_code: err.status_code,
-            details: err.details
+          var err = {
+            state: Constants.FAILURE_STATE,
+            event: 'integration.ngrok.failed',
+            data: {
+              message: err.message,
+              error_code: err.error_code,
+              status_code: err.status_code,
+              details: err.details
+            }
           }
-        }
 
-        return done(err)
-      }
-      tunnelURL = url
-      done(null,{ state: STATE_STARTED, data: { url: tunnelURL } })
-    })
+          return done(err)
+        }
+        tunnelURL = url
+        done(null,{ state: STATE_STARTED, data: { url: tunnelURL } })
+      })
+    } catch (e) {
+      done(e)
+    }
   }
 
   function stop (done) {
     debug('stopping ngrok')
-    ngrok.disconnect(tunnelURL) // stops one
-    done(null,{ state: STATE_STOPPED, data: { url: tunnelURL } })
+    try {
+      ngrok.disconnect(tunnelURL) // stops one
+      done(null, { state: STATE_STOPPED, data: { url: tunnelURL } })
+    } catch (e) {
+      done(e)
+    }
   }
 
   function error (done) {
