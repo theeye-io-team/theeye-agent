@@ -1,5 +1,5 @@
 {
-  "version": "0.13.1",
+  "version": "0.13.2",
   "name": "TheEye-Agent",
   "description": "TheEye Agent - TheEye Client",
   "author": "Facugon <facugon@interactar.com>",
@@ -26,8 +26,8 @@
     "userid": "git+https://github.com/theeye-io-team/node-userid.git#0.2.1"
   },
   "scripts": {
-    "core": "./node_modules/.bin/nodemon --watch core `pwd`/core/main.js",
-    "debug": "./node_modules/.bin/nodemon --inspect=6662 --watch core `pwd`/core/main.js",
+    "core": "node `pwd`/core/main.js",
+    "inspect": "node --inspect=6662 `pwd`/core/main.js",
     "start": "/bin/bash ./run.sh",
     "remote": "DEBUG=* NODE_ENV=remote THEEYE_AGENT_SCRIPT_PATH=$PWD/scripts ./node_modules/.bin/nodemon `pwd`/core/main.js"
   },

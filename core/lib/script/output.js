@@ -4,7 +4,7 @@ function ScriptOutput(props){
 
   var _stdout = props.stdout||'';
   var _stderr = props.stderr||'';
-  var _code = props.code||null;
+  var _code = Number.isInteger(props.code) ? props.code : null;
   var _log = props.log||'';
   var _lastline = getLastline( _log );
 
