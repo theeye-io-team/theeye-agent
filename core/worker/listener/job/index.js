@@ -27,14 +27,12 @@ module.exports.create = function (attribs, options) {
 JobFactory.AgentUpdateJob = function(specs, options){
   var listener = options.listener
 
-  this.selfManaged = false
-
   this.id = specs.id
   this.specs = specs
   this.options = options
 
   function process (done) {
-    listener.once('config:updated', (result) => {
+    listener.once('config:updated', function (result) {
       done(null, result)
     })
     listener.emit('config:outdated')
@@ -50,8 +48,6 @@ JobFactory.AgentUpdateJob = function(specs, options){
 //
 JobFactory.ScraperJob = function(specs, options) {
   var connection = options.connection
-
-  this.selfManaged = false
 
   this.id = specs.id;
   this.specs = specs
@@ -78,9 +74,7 @@ JobFactory.ScraperJob = function(specs, options) {
 JobFactory.ScriptJob = function(specs, options) {
   var connection = options.connection
 
-  this.selfManaged = false
-
-  this.id = specs.id;
+  this.id = specs.id
   this.specs = specs
   this.options = options
 

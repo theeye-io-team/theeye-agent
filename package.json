@@ -22,8 +22,10 @@
     "theeye-ps-aux": "0.3.3",
     "theeye-ps-node": "0.1.1",
     "tree-kill": "1.1.0",
-    "underscore": "1.8.3",
-    "userid": "git+https://github.com/theeye-io-team/node-userid.git#0.2.1"
+    "underscore": "1.8.3"
+  },
+  "optionalDependencies": {
+    "userid": "git+https://github.com/theeye-io-team/node-userid.git#0.2.2"
   },
   "scripts": {
     "core": "node `pwd`/core/main.js",

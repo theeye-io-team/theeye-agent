@@ -16,8 +16,6 @@ module.exports = function (specs, options) {
   this.specs = specs
   this.options = options
 
-  this.selfManaged = true
-
   var tunnelURL
   Object.defineProperty(this, 'url', {
     get () {
