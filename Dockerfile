@@ -6,6 +6,8 @@ ENV destDir /src/theeye-agent
 RUN mkdir -p ${destDir}
 # Install Supervisor
 RUN npm install -g supervisor
+# Google API
+RUN npm install googleapis@27 --save
 #Set working Directory
 WORKDIR ${destDir}
 # Bundle app source
