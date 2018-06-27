@@ -89,6 +89,7 @@ JobFactory.ScriptJob = function(specs, options) {
         filename: specs.script.filename,
         md5: specs.script.md5,
         arguments: specs.script_arguments,
+        arguments_specification: specs.task.task_arguments, // need to know argument types
         runas: specs.script_runas,
         env: {
           // IMPORTANTE. use empty string for passing vars into diff languages.
@@ -97,7 +98,8 @@ JobFactory.ScriptJob = function(specs, options) {
           THEEYE_WF_OUTPUT: event_data.output || ''
         }
       }
-    };
+    }
+
     // invoke worker
     var script = WorkersFactory.spawn(config, connection)
     script.getData(function(err,result){
