@@ -51,7 +51,7 @@ function Script (props) {
       if (args && Array.isArray(args)) {
         parsed = []
         args.forEach((arg, idx) => {
-          if (specs[idx].type === 'file') {
+          if (specs && specs[idx] && specs[idx].type === 'file') {
             let filename = base64str2file(arg, config.scripts.path)
             parsed.push(filename)
           } else {
