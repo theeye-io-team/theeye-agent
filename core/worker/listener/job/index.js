@@ -6,7 +6,6 @@
  *
  */
 var WorkersFactory = require('../../index')
-var assign = require('lodash/assign');
 
 var JobFactory = { }
 
@@ -55,7 +54,7 @@ JobFactory.ScraperJob = function(specs, options) {
 
   function process (done) {
     // prepare config
-    var config = assign({}, specs.task, { type: 'scraper' });
+    var config = Object.assign(specs.task, { type: 'scraper' })
     // invoke worker
     var scraper = WorkersFactory.spawn(config, connection)
     scraper.getData(function(err,result){
