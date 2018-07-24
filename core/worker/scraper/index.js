@@ -10,22 +10,23 @@ var agentConfig = require('config')
 const EventConstants = require('../../constants/events')
 
 function setupRequestObject (config) {
-  var version = process.env.THEEYE_AGENT_VERSION;
-  var wrapper = request.defaults({
-    proxy: process.env.http_proxy,
-    tunnel: false,
-    timeout: parseInt(config.timeout),
-    //json: config.json||false,
-    json: false,
-    gzip: config.gzip||false,
+  let defaultConfig = agentConfig.workers.scraper
+  let version = process.env.THEEYE_AGENT_VERSION
+  let wrapper = request.defaults({
+    proxy: config.proxy || defaultConfig.proxy,
+    tunnel: config.tunnel || defaultConfig.tunnel,
+    timeout: parseInt(config.timeout || defaultConfig.timeout),
+    json: config.json || defaultConfig.json,
+    gzip: config.gzip || defaultConfig.gzip,
     url: config.url,
     method: config.method,
-    body: config.body,
+    body: (config.json===true) ? JSON.parse(config.body) : config.body,
     headers: {
-      'User-Agent':'TheEyeAgent/' + version.trim()
+      'User-Agent': 'TheEyeAgent/' + version.trim()
     }
-  });
-  return wrapper;
+  })
+
+  return wrapper
 }
 
 function validateRequestURI (uri) {
@@ -46,8 +47,10 @@ module.exports = AbstractWorker.extend({
 
     validateRequestURI(this.config.url);
 
+    this.debug.log('creating request object %o', this.config)
+
     // on each cicle use the same pre-configured request object
-    this.request = setupRequestObject(this.config);
+    this.request = setupRequestObject(this.config)
   },
   getData: function(next) {
     var self = this;
@@ -65,12 +68,13 @@ module.exports = AbstractWorker.extend({
         const submitBody = () => {
           // this is to force via code
           if (Constants.WORKERS_SCRAPER_SUBMIT_BODY === false) {
+            self.debug.log('cannot submit body. disabled by code (build required)')
             return false
           }
 
           let check = (
-            config.submit_body === true ||
             agentConfig.workers.scraper.submit_body === true ||
+            config.submit_body === true ||
             process.env.THEEYE_AGENT_SCRAPER_SUBMIT_BODY === 'true'
           )
 
@@ -133,7 +137,7 @@ module.exports = AbstractWorker.extend({
     }
 
     // request does not require any options here, it was already configured
-    this.request({},function(error, response, body){
+    this.request({}, function (error, response, body) {
       if (error) {
         self.debug.error('request failed')
         self.debug.error('%o',error)
