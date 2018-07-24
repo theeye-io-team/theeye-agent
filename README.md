@@ -130,16 +130,28 @@ If the agent is running properly, you would probably want to setup a specific us
 
 optional arguments are passsed via shell env.
 
-`THEEYE_CLIENT_HOSTNAME='myawesomehost.com' ./run.sh`
+`THEEYE_CLIENT_HOSTNAME='myAwesomeBot' ./run.sh`
 
 if you want to use any option as a default settings, you can set it in the config file.
 
 
-### Options.
+### Options (all options are undefined by default).
 
-to set a custom hostname. this will be used to register the agent and the host agains the api. hostname-customer combination **MUST** be unique.
+#### THEEYE_CLIENT_HOSTNAME (string)
 
-> THEEYE_CLIENT_HOSTNAME='the_hostname_you_want'
+To set a custom name to register the agent. a new Bot will be registered in the API. botname-customer combination **MUST** be unique (the most common use cases).
+
+> THEEYE_CLIENT_HOSTNAME='the_botname_you_want'
+
+**Exceptions.**
 
 
+Use Case 1: if the same name is used for several agents/bots all will be consuming task from the same queue and will be reporting monitoring information to the same pool. Doing this way you will get load balancing (if multiple hosts are using)/multitasking (faster jobs feedback) and high havailability of jobs processing.
 
+#### THEEYE_AGENT_SCRAPER_SUBMIT_BODY (boolean)
+
+prevent all task/monitor web request to submit response body to the api.
+
+#### THEEYE_AGENT_SCRIPT_PATH (string)
+
+temporarily change scripts download path. set it perpamently via config file 
