@@ -5,6 +5,7 @@ var url = require('url');
 var format = require('util').format;
 var AbstractWorker = require('../abstract');
 var Constants = require('../../constants');
+var agentConfig = require('config')
 
 const EventConstants = require('../../constants/events')
 
@@ -54,26 +55,69 @@ module.exports = AbstractWorker.extend({
 
     function submit (result) {
       self.debug.log('scraper job result %o', result)
-      var body;
-      var data;
+      let body
+      let data
+
       if (result) {
-        data = result.data;
-        if (Constants.WORKERS_SCRAPER_SUBMIT_BODY===true) {
-          if (data.response) {
-            let body = data.response.body
-            if (body) {
-              if (body.length > Constants.WORKERS_SCRAPER_SUBMIT_BODY_SIZE) {
-                self.debug.log('response body is too large. body size will be truncated to %s kb long', Constants.WORKERS_SCRAPER_SUBMIT_BODY_SIZE)
-                result.data.response.body = body.substring(0, Constants.WORKERS_SCRAPER_SUBMIT_BODY_SIZE) + '...(chunked)'
-                result.data.response.chunked = true
-                result.data.response.message = 'respose body truncated. too large'
-              }
+        data = result.data
+        if (data.response) { body = data.response.body }
+
+        const submitBody = () => {
+          // this is to force via code
+          if (Constants.WORKERS_SCRAPER_SUBMIT_BODY === false) {
+            return false
+          }
+
+          let check = (
+            config.submit_body === true ||
+            agentConfig.workers.scraper.submit_body === true ||
+            process.env.THEEYE_AGENT_SCRAPER_SUBMIT_BODY === 'true'
+          )
+
+          if (check === true) {
+            let contentHeader = data.response.headers['content-type']
+            if (
+              /application.json/.test(contentHeader) === true ||
+              agentConfig.worker.scraper.only_json_response !== true
+            ) {
+              return true
             }
           }
-        } else {
-          result.data.response.body = ''
+          return false
         }
-        return next(null,result);
+
+        const filterBody = () => {
+          let bodyTooLong = (
+            body.length > Constants.WORKERS_SCRAPER_SUBMIT_BODY_SIZE
+          )
+
+          if (bodyTooLong) {
+            self.debug.log(
+              'response body is too long. body size will be truncated to %s kb long',
+              Constants.WORKERS_SCRAPER_SUBMIT_BODY_SIZE
+            )
+
+            result.data.response.body = [
+              body.substring(0, Constants.WORKERS_SCRAPER_SUBMIT_BODY_SIZE),
+              '...(chunked)'
+            ].join('')
+
+            result.data.response.chunked = true
+            result.data.response.message = 'respose body truncated. too long'
+          }
+        }
+
+        if (body) {
+          if (submitBody() !== true) {
+            // empty it
+            result.data.response.body = ''
+          } else {
+            self.debug.log('can submitting body')
+            filterBody()
+          }
+        }
+
+        return next(null,result)
       } else {
         var err = {
           state: Constants.ERROR_STATE,
@@ -83,7 +127,7 @@ module.exports = AbstractWorker.extend({
           }
         };
 
-        self.debug.log('monitor error: ', err);
+        self.debug.log('monitor error: ', err)
         return next(null,err);
       }
     }
