@@ -15,7 +15,12 @@ module.exports = {
     },
     scraper: {
       submit_body: false,
-      only_json_response: true // server response header application/json is mandatory
+      only_json_response: true, // server response header application/json is mandatory
+      gzip: true,
+      json: false,
+      proxy: process.env.http_proxy || undefined,
+      timeout: 5,
+      tunnel: false
     }
   },
   version: undefined,
