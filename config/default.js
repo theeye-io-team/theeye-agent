@@ -12,6 +12,10 @@ module.exports = {
     ping: {
       type: 'ping',
       looptime: 5000
+    },
+    scraper: {
+      submit_body: false,
+      only_json_response: true // server response header application/json is mandatory
     }
   },
   version: undefined,
