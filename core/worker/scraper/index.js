@@ -67,15 +67,15 @@ module.exports = AbstractWorker.extend({
 
         const submitBody = () => {
           // this is to force via code
-          if (Constants.WORKERS_SCRAPER_SUBMIT_BODY === false) {
+          if (Constants.WORKERS_SCRAPER_REGISTER_BODY === false) {
             self.debug.log('cannot submit body. disabled by code (build required)')
             return false
           }
 
           let check = (
-            agentConfig.workers.scraper.submit_body === true ||
-            config.submit_body === true ||
-            process.env.THEEYE_AGENT_SCRAPER_SUBMIT_BODY === 'true'
+            agentConfig.workers.scraper.register_body === true ||
+            config.register_body === true ||
+            process.env.THEEYE_AGENT_SCRAPER_REGISTER_BODY === 'true'
           )
 
           if (check === true) {
@@ -92,17 +92,17 @@ module.exports = AbstractWorker.extend({
 
         const filterBody = () => {
           let bodyTooLong = (
-            body.length > Constants.WORKERS_SCRAPER_SUBMIT_BODY_SIZE
+            body.length > Constants.WORKERS_SCRAPER_REGISTER_BODY_SIZE
           )
 
           if (bodyTooLong) {
             self.debug.log(
               'response body is too long. body size will be truncated to %s kb long',
-              Constants.WORKERS_SCRAPER_SUBMIT_BODY_SIZE
+              Constants.WORKERS_SCRAPER_REGISTER_BODY_SIZE
             )
 
             result.data.response.body = [
-              body.substring(0, Constants.WORKERS_SCRAPER_SUBMIT_BODY_SIZE),
+              body.substring(0, Constants.WORKERS_SCRAPER_REGISTER_BODY_SIZE),
               '...(chunked)'
             ].join('')
 

@@ -14,8 +14,8 @@ module.exports = {
       looptime: 5000
     },
     scraper: {
-      submit_body: false,
-      only_json_response: true, // server response header application/json is mandatory
+      register_body: false,
+      only_json_response: true, // server response header application/json is mandatory. ignore response body if not JSON
       gzip: true,
       json: false,
       proxy: process.env.http_proxy || undefined,
