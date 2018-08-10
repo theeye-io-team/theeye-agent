@@ -56,13 +56,13 @@ module.exports = AbstractWorker.extend({
     var self = this;
     var config = this.config;
 
-    function submit (result) {
-      self.debug.log('scraper job result %o', result)
+    function submit (payload) {
+      self.debug.log('scraper job result payload %o', payload)
       let body
       let data
 
-      if (result) {
-        data = result.data
+      if (payload) {
+        data = payload.data
         if (data.response) { body = data.response.body }
 
         const submitBody = () => {
@@ -101,27 +101,28 @@ module.exports = AbstractWorker.extend({
               Constants.WORKERS_SCRAPER_REGISTER_BODY_SIZE
             )
 
-            result.data.response.body = [
+            payload.data.response.body = [
               body.substring(0, Constants.WORKERS_SCRAPER_REGISTER_BODY_SIZE),
               '...(chunked)'
             ].join('')
 
-            result.data.response.chunked = true
-            result.data.response.message = 'respose body truncated. too long'
+            payload.data.response.chunked = true
+            payload.data.response.message = 'respose body truncated. too long'
           }
         }
 
         if (body) {
           if (submitBody() !== true) {
             // empty it
-            result.data.response.body = ''
+            payload.data.response.body = ''
           } else {
-            self.debug.log('can submitting body')
             filterBody()
           }
         }
 
-        return next(null,result)
+        payload.data.output = payload.data.response.body
+
+        return next(null, payload)
       } else {
         var err = {
           state: Constants.ERROR_STATE,
@@ -131,8 +132,8 @@ module.exports = AbstractWorker.extend({
           }
         };
 
-        self.debug.log('monitor error: ', err)
-        return next(null,err);
+        self.debug.error('scraper error: ', err)
+        return next(null, err);
       }
     }
 

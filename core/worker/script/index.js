@@ -78,35 +78,43 @@ module.exports = AbstractWorker.extend({
       }
 
       self.script.run(function (result) {
-        const lastline = result.lastline
         const data = Object.assign({}, result)
 
-        var output, state, payload
-
+        let jsonLastline, payload, output = null, state = null 
         try {
           // try to parse lastline string as JSON output
-          output = JSON.parse(lastline)
-          if (isObject(output)) {
-            if (output.state) { state = output.state }
-            else state = null
-          } else {
-            if (typeof output === 'string') {
-              state = output
+          jsonLastline = JSON.parse(result.lastline)
+
+          // looking for state and output
+          if (isObject(jsonLastline)) {
+            if (jsonLastline.state) {
+              state = jsonLastline.state
+              output = (jsonLastline.output || jsonLastline.data)
             } else {
               state = null
             }
+          } else if (Array.isArray(jsonLastline)) {
+            state = undefined // undefined
+            output = jsonLastline
+          } else if (typeof jsonLastline === 'string') {
+            state = jsonLastline
+            output = jsonLastline
+          } else {
+            self.debug.log('unhandled ' + jsonLastline)
+            // ???
           }
-          data.output = output
+
+          data.output = output // force data.output
         } catch (e) {
           // if it is not a JSON
-          self.debug.error('cannot parse output. invalid JSON')
-          self.debug.error(e.message)
-          state = lastline // a string
+          self.debug.log('failed to parse lastline as JSON')
+          self.debug.log(e.message)
+          state = result.lastline // a string
         }
 
-        payload = { state: state, data: data }
+        payload = { state, data }
 
-        self.debug.log('execution result is %j', payload)
+        self.debug.log('execution result payload is %j', payload)
 
         return next(null, payload)
       })

@@ -23,5 +23,5 @@ require('./environment')(function(){
   });
 
   var app = require('./app');
-  app.start({},function(){ });
+  app.start()
 });

@@ -86,7 +86,7 @@ function App () {
     });
   }
 
-  function initListener () {
+  function startListener () {
     var config = localConfig.workers.listener || {}
     if (!self.listener && config.enabled!==false) {
       var worker = new ListenerWorker(_connection, {
@@ -103,7 +103,7 @@ function App () {
     }
   }
 
-  function initPing () {
+  function startPing () {
     var config = localConfig.workers.ping
     if (!self.ping && config.enabled!==false) {
       var worker = new PingWorker(_connection, {
@@ -120,27 +120,31 @@ function App () {
     }
   }
 
-  function initLocalWorkers () {
-    initListener()
-    initPing()
+  function startCoreWorkers () {
+    startListener()
+    startPing()
   }
 
-  function setupWorkers (workersConfig) {
-    debug('intializing resource workers');
+  function startWorkers (workersConfig) {
+    if (localConfig.workers.enabled===false) {
+      return debug('workers disabled')
+    }
+
+    debug('intializing workers')
     workersConfig.forEach(function(config) {
-      var worker = Worker.spawn(config, _connection);
+      var worker = Worker.spawn(config, _connection)
       if (worker!==null) {
-        worker.run();
-        _workers.push(worker);
+        worker.run()
+        _workers.push(worker)
       }
-    });
+    })
   }
 
   function getRemoteConfig (next) {
     debug('obtaining agent config')
     _connection.getAgentConfig(
       hostname, 
-      function (error,remoteConfig) {
+      function (error, remoteConfig) {
         var result = {
           data: { message: null },
           state: ''
@@ -152,15 +156,12 @@ function App () {
           result.data.message = msg;
           result.state = 'failure';
         } else {
-          setupWorkers( remoteConfig.workers );
+          startWorkers( remoteConfig.workers );
           result.data.message = 'agent monitors updated';
           result.state = 'success';
         }
 
-        initLocalWorkers ()
-
-        debug('agent started')
-        if (next) next(null,result)
+        if (next) { next(null, result) }
       }
     )
   }
@@ -176,16 +177,26 @@ function App () {
     _workers = []; // destroy workers.
 
     debug('updating workers configuration');
-    getRemoteConfig(function(err,result){
+    configureAgent(function(err, result){
       if (self.listener) {
-        self.listener.emit('config:updated',result);
+        self.listener.emit('config:updated', result);
       }
     })
   }
 
-  this.start = function(specs,next) {
+  function configureAgent (next) {
+    getRemoteConfig((err, result) => {
+      startCoreWorkers ()
+      debug('agent configured')
+      next(err, result)
+    })
+  }
+
+  this.start = function (next) {
+    next || (next = () => {})
+    
     tryConnectSupervisor(function(){
-      getRemoteConfig(next);
+      configureAgent(next)
     })
   }
 

@@ -1,10 +1,11 @@
 module.exports = {
-  stand_alone: false,
+  server: false,
   /**
    * the listener is the default worker.
    * this worker provide information and status of the agent to the api
    */
   workers: {
+    enabled: true,
     listener: {
       type: 'listener',
       looptime: 15000

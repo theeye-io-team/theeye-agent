@@ -78,8 +78,15 @@ JobFactory.ScriptJob = function(specs, options) {
   this.options = options
 
   function process (done) {
+    let wfSum
+    try {
+      wfSum = JSON.stringify(specs.workflow_summary)
+    } catch (e) {
+      wfSum = ''
+    }
+
     // prepare config
-    let event_data = specs.event_data || {}
+    //let event_data = specs.event_data || {}
     var config = {
       disabled: false,
       type: 'script',
@@ -91,10 +98,8 @@ JobFactory.ScriptJob = function(specs, options) {
         arguments_specification: specs.task.task_arguments, // need to know argument types
         runas: specs.script_runas,
         env: {
-          // IMPORTANTE. use empty string for passing vars into diff languages.
-          THEEYE_WF: specs.event || '', // is workflow ?
-          THEEYE_WF_LASTLINE: event_data.lastline || '',
-          THEEYE_WF_OUTPUT: event_data.output || ''
+          // IMPORTANTE. use empty string for passing empty vars into diff programming languages.
+          THEEYE_WORKFLOW_SUMMARY: wfSum // the workflow results
         }
       }
     }
