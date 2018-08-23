@@ -15,6 +15,7 @@ module.exports = {
       looptime: 5000
     },
     scraper: {
+      strictSSL: false,
       register_body: false,
       only_json_response: true, // server response header application/json is mandatory. ignore response body if not JSON
       gzip: true,

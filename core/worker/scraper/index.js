@@ -13,6 +13,7 @@ function setupRequestObject (config) {
   let defaultConfig = agentConfig.workers.scraper
   let version = process.env.THEEYE_AGENT_VERSION
   let wrapper = request.defaults({
+    strictSSL: config.strictSSL || defaultConfig.strictSSL,
     proxy: config.proxy || defaultConfig.proxy,
     tunnel: config.tunnel || defaultConfig.tunnel,
     timeout: parseInt(config.timeout || defaultConfig.timeout),
