@@ -22,9 +22,9 @@ function setupRequestObject (config) {
     url: config.url,
     method: config.method,
     body: (config.json===true) ? JSON.parse(config.body) : config.body,
-    headers: {
+    headers: Object.assign({}, config.headers, {
       'User-Agent': 'TheEyeAgent/' + version.trim()
-    }
+    })
   })
 
   return wrapper
@@ -42,7 +42,7 @@ function validateRequestURI (uri) {
 
 module.exports = AbstractWorker.extend({
   type: 'scraper',
-  initialize: function() {
+  initialize () {
     var timeout = parseInt(this.config.timeout);
     this.config.timeout = timeout;
 
@@ -53,9 +53,9 @@ module.exports = AbstractWorker.extend({
     // on each cicle use the same pre-configured request object
     this.request = setupRequestObject(this.config)
   },
-  getData: function(next) {
-    var self = this;
-    var config = this.config;
+  getData (next) {
+    var self = this
+    var config = this.config
 
     function submit (payload) {
       self.debug.log('scraper job result payload %o', payload)
@@ -138,7 +138,8 @@ module.exports = AbstractWorker.extend({
       }
     }
 
-    // request does not require any options here, it was already configured
+    // request does not require any options here
+    // it was already configured
     this.request({}, function (error, response, body) {
       if (error) {
         self.debug.error('request failed')
