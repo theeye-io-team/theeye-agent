@@ -73,17 +73,17 @@ module.exports = AbstractWorker.extend({
             return false
           }
 
-          let check = (
+          let registerBody = (
             agentConfig.workers.scraper.register_body === true ||
             config.register_body === true ||
             process.env.THEEYE_AGENT_SCRAPER_REGISTER_BODY === 'true'
           )
 
-          if (check === true) {
+          if (registerBody === true) {
             let contentHeader = data.response.headers['content-type']
             if (
               /application.json/.test(contentHeader) === true ||
-              agentConfig.worker.scraper.only_json_response !== true
+              agentConfig.workers.scraper.only_json_response !== true
             ) {
               return true
             }

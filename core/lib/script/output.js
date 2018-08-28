@@ -2,19 +2,19 @@
 
 function ScriptOutput(props){
 
-  var _stdout = props.stdout||'';
-  var _stderr = props.stderr||'';
-  var _code = Number.isInteger(props.code) ? props.code : null;
-  var _log = props.log||'';
-  var _lastline = getLastline( _log );
+  var _stdout = props.stdout || ''
+  var _stderr = props.stderr || ''
+  var _code = Number.isInteger(props.code) ? props.code : null
+  var _log = props.log || ''
+  var _lastline = getLastline(_log)
 
   this.toJSON = function (){
     return {
-      stdout : this.stdout,
-      stderr : this.stderr,
-      code : this.code,
-      log : this.log,
-      lastline : this.lastline
+      //stdout: this.stdout,
+      //stderr: this.stderr,
+      code: this.code,
+      log: this.log,
+      lastline: this.lastline
     }
   }
 

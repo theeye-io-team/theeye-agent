@@ -172,7 +172,7 @@ function Script (props) {
         log: partials.log
       })
 
-      self.emit('end', util._extend(
+      self.emit('end', Object.assign({},
         _output.toObject(), {
           signal: signal,
           killed: Boolean(killed),
