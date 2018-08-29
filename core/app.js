@@ -126,8 +126,11 @@ function App () {
   }
 
   function startWorkers (workersConfig) {
-    if (localConfig.workers.enabled===false) {
-      return debug('workers disabled')
+    if (
+      localConfig.workers.enabled === false ||
+      process.env.THEEYE_AGENT_WORKERS_DISABLED === 'true'
+    ) {
+      return debug('WARNING: Workers disabled')
     }
 
     debug('intializing workers')
