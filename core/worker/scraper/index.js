@@ -12,19 +12,25 @@ const EventConstants = require('../../constants/events')
 function setupRequestObject (config) {
   let defaultConfig = agentConfig.workers.scraper
   let version = process.env.THEEYE_AGENT_VERSION
+  let headers = Object.assign({}, config.headers, {
+    'User-Agent': 'TheEyeAgent/' + version.trim()
+  })
+
+  if (config.json===true) {
+    headers['Content-Type'] = 'application/json'
+  }
+
   let wrapper = request.defaults({
     strictSSL: config.strictSSL || defaultConfig.strictSSL,
     proxy: config.proxy || defaultConfig.proxy,
     tunnel: config.tunnel || defaultConfig.tunnel,
     timeout: parseInt(config.timeout || defaultConfig.timeout),
-    json: config.json || defaultConfig.json,
     gzip: config.gzip || defaultConfig.gzip,
     url: config.url,
     method: config.method,
-    body: (config.json===true) ? JSON.parse(config.body) : config.body,
-    headers: Object.assign({}, config.headers, {
-      'User-Agent': 'TheEyeAgent/' + version.trim()
-    })
+    json: false, // cannot change this. response should be always string
+    body: config.body,
+    headers
   })
 
   return wrapper
@@ -58,7 +64,7 @@ module.exports = AbstractWorker.extend({
     var config = this.config
 
     function submit (payload) {
-      self.debug.log('scraper job result payload %o', payload)
+      self.debug.log('scraper job result payload %j', payload)
       let body
       let data
 
@@ -195,7 +201,7 @@ module.exports = AbstractWorker.extend({
         }
       }
 
-      if( config.parser == 'pattern' ){
+      if (config.parser == 'pattern') {
         try{
           var pattern = new RegExp(config.pattern);
         } catch(e) {

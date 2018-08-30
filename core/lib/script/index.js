@@ -11,6 +11,7 @@ var util = require('util')
 var fs = require('fs');
 var crypto = require('crypto')
 var path = require('path')
+var shellescape = require('shell-escape')
 
 function Script (props) {
   File.apply(this, arguments)
@@ -48,7 +49,7 @@ function Script (props) {
   const prepareArguments = (args, specs) => {
     var parsed
     try {
-      if (args && Array.isArray(args)) {
+      if (Array.isArray(args) && args.length>0) {
         parsed = []
         args.forEach((arg, idx) => {
           if (specs && specs[idx] && specs[idx].type === 'file') {
@@ -56,10 +57,10 @@ function Script (props) {
             parsed.push(filename)
           } else {
             // escape spaces both for linux and windows
-            parsed.push((/\s/.test(arg)) ? ('"' + arg + '"') : arg)
+            parsed.push(arg)
           }
         })
-        parsed = parsed.join(' ')
+        parsed = shellescape(parsed)
       } else {
         parsed = ''
       }
@@ -95,6 +96,7 @@ function Script (props) {
 
   this.run = function (end) {
     var partial = this.path + ' ' + this.args
+
     var formatted
     var runas = this.runas
     var regex = /%script%/

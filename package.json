@@ -29,7 +29,7 @@
   },
   "scripts": {
     "core": "node `pwd`/core/main.js",
-    "inspect": "node --inspect=6662 `pwd`/core/main.js",
+    "inspect": "node --inspect `pwd`/core/main.js",
     "start": "/bin/bash ./run.sh",
     "remote": "DEBUG=* NODE_ENV=remote THEEYE_AGENT_SCRIPT_PATH=$PWD/scripts ./node_modules/.bin/nodemon `pwd`/core/main.js"
   },
