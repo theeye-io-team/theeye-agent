@@ -13,3 +13,4 @@ bin/
 run_enclose.out
 *.tar.gz
 *.tgz
+agents-scripts

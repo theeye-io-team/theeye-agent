@@ -94,7 +94,7 @@ JobFactory.ScriptJob = function(specs, options) {
         id: specs.script.id,
         filename: specs.script.filename,
         md5: specs.script.md5,
-        arguments: specs.script_arguments,
+        arguments: specs.task_arguments_values,
         arguments_specification: specs.task.task_arguments, // need to know argument types
         runas: specs.script_runas,
         env: {
