@@ -26,16 +26,20 @@ module.exports = function (next) {
 function createScriptsPath (next) {
   var scriptsPath = process.env.THEEYE_AGENT_SCRIPT_PATH || config.scripts.path
   if (!scriptsPath) {
-    scriptsPath = process.cwd() + '/../scripts'
+    scriptsPath = process.cwd() + '/../downloads'
   }
-  process.env.THEEYE_AGENT_SCRIPT_PATH = scriptsPath
-  debug('scripts path is %s', scriptsPath)
 
-  fs.exists(scriptsPath, function(exists){
+  //process.env.THEEYE_AGENT_SCRIPT_PATH = scriptsPath
+
+  config.scripts.path = scriptsPath
+
+  debug('scripts path is %s', config.scripts.path)
+
+  fs.exists(scriptsPath, function (exists) {
     if (!exists) {
-      fs.mkdirSync(scriptsPath,'0755')
+      fs.mkdirSync(scriptsPath, '0755')
     }
-    next(null,scriptsPath)
+    next(null, scriptsPath)
   })
 }
 

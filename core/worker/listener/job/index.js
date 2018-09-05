@@ -95,7 +95,6 @@ JobFactory.ScriptJob = function(specs, options) {
         filename: specs.script.filename,
         md5: specs.script.md5,
         arguments: specs.task_arguments_values,
-        arguments_specification: specs.task.task_arguments, // need to know argument types
         runas: specs.script_runas,
         env: {
           // IMPORTANTE. use empty string for passing empty vars into diff programming languages.

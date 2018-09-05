@@ -3,7 +3,7 @@
 var exec = require('child_process').exec
 var debug = require('debug')('eye:lib:script')
 var kill = require('tree-kill')
-var config = require('config')
+var agentConfig = require('config')
 var DEFAULT_EXECUTION_TIMEOUT = 10 * 60 * 1000
 var File = require('../file')
 var ScriptOutput = require('./output')
@@ -12,6 +12,7 @@ var fs = require('fs');
 var crypto = require('crypto')
 var path = require('path')
 var shellescape = require('shell-escape')
+var isDataUrl = require('valid-data-url')
 
 function Script (props) {
   File.apply(this, arguments)
@@ -23,37 +24,40 @@ function Script (props) {
    * @return {String} returns the name with the extension
    */
   const base64str2file = (str, basename) => {
-    var regex = /^data:.+\/(.+);base64,(.*)$/;
-    var matches = str.match(regex)
-    let id = crypto.randomBytes(20).toString('hex')
+    try {
+      var regex = /^data:.+\/(.+);base64,(.*)$/;
+      var matches = str.match(regex)
+      let id = crypto.randomBytes(20).toString('hex')
 
-    if (!matches) { return null }
+      if (!matches) { return null }
 
-    var ext = matches[1]
-    var data = matches[2]
-    var buffer = new Buffer(data, 'base64')
+      var ext = matches[1]
+      var data = matches[2]
+      var buffer = new Buffer(data, 'base64')
 
-    let filename = path.join(basename, id + '.' + ext)
-    fs.writeFileSync(filename, buffer)
+      let filename = path.join(basename, id + '.' + ext)
+      fs.writeFileSync(filename, buffer)
 
-    return filename
+      return filename
+    } catch (e) {
+      return e.message
+    }
   }
 
   /**
    * parse arguments, escape, trim. also ignore file arguments
    *
    * @param {Array} args
-   * @param {Array} specs
    * @return {String}
    */
-  const prepareArguments = (args, specs) => {
+  const prepareArguments = (args) => {
     var parsed
     try {
       if (Array.isArray(args) && args.length>0) {
         parsed = []
         args.forEach((arg, idx) => {
-          if (specs && specs[idx] && specs[idx].type === 'file') {
-            let filename = base64str2file(arg, config.scripts.path)
+          if (isDataUrl(arg)) {
+            let filename = base64str2file(arg, agentConfig.scripts.path)
             parsed.push(filename)
           } else {
             // escape spaces both for linux and windows
@@ -78,7 +82,7 @@ function Script (props) {
   Object.defineProperty(this, 'args', {
     get: function () { return _args },
     set: function (args) {
-      _args = prepareArguments(args, props.args_specs)
+      _args = prepareArguments(args)
       return this
     },
     enumerable: true
@@ -92,7 +96,7 @@ function Script (props) {
     enumerable: true
   })
 
-  _args = prepareArguments(props.args, props.args_specs)
+  _args = prepareArguments(props.args)
 
   this.run = function (end) {
     var partial = this.path + ' ' + this.args
@@ -119,7 +123,7 @@ function Script (props) {
 
     options || (options = {})
 
-    var execTimeout = (config.scripts && config.scripts.execution_timeout) || undefined
+    var execTimeout = (agentConfig.scripts && agentConfig.scripts.execution_timeout) || undefined
     if (!execTimeout) {
       execTimeout = options.timeout || DEFAULT_EXECUTION_TIMEOUT
     }

@@ -3,15 +3,16 @@
 var Script = require('../../lib/script')
 var AbstractWorker = require('../abstract')
 var join = require('path').join
+var scriptsConfig = require('config').scripts
 
 module.exports = AbstractWorker.extend({
   initialize: function () {
-    var directory = process.env.THEEYE_AGENT_SCRIPT_PATH
+    //var directory = process.env.THEEYE_AGENT_SCRIPT_PATH
+    var directory = scriptsConfig.path
     var config = this.config.script
     this.script = new Script({
       id: config.id,
       args: config.arguments || [],
-      args_specs: config.arguments_specification || [],
       runas: config.runas,
       env: config.env,
       md5: config.md5,
