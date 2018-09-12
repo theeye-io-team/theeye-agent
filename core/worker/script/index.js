@@ -90,10 +90,10 @@ module.exports = AbstractWorker.extend({
           if (isObject(jsonLastline)) {
             if (jsonLastline.state) {
               state = jsonLastline.state
-              output = (jsonLastline.output || jsonLastline.data)
             } else {
               state = null
             }
+            output = (jsonLastline.output || jsonLastline.data || jsonLastline)
           } else if (Array.isArray(jsonLastline)) {
             state = undefined // undefined
             output = jsonLastline
