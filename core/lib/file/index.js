@@ -241,22 +241,25 @@ function File (props) {
   }
 
   this.createFile = function (readable, next) {
-    var self = this
-    var cbCalled = false
+    const self = this
+    let cbCalled = false
 
     // keep by default execution mode
     debug('creating file %s..', this.path);
 
-    function done(err) {
+    var writable = fs.createWriteStream(this.path, { mode:'0755' });
+
+    function done (err) {
       if (!cbCalled) {
-        next(err);
-        cbCalled = true;
+        readable.destroy()
+        writable.end()
+        next(err)
+        cbCalled = true
       }
     }
 
-    var writable = fs.createWriteStream(this.path, { mode:'0755' });
-    writable.on('error', done);
-    readable.on('error', done);
+    writable.on('error', done)
+    readable.on('error', done)
     readable
       .pipe(writable)
       .on('finish',function(){
