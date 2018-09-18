@@ -8,6 +8,9 @@ RUN mkdir -p ${destDir}
 RUN npm install -g supervisor
 # Google API
 RUN npm install googleapis@27 --save
+# Install Convert and jq
+RUN apt-get update 
+RUN apt-get install -y jq imagemagick
 #Set working Directory
 WORKDIR ${destDir}
 # Bundle app source
