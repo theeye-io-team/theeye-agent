@@ -8,7 +8,7 @@ var DEFAULT_EXECUTION_TIMEOUT = 10 * 60 * 1000
 var File = require('../file')
 var ScriptOutput = require('./output')
 var util = require('util')
-var fs = require('fs');
+var fs = require('fs')
 var crypto = require('crypto')
 var path = require('path')
 var shellescape = require('shell-escape')
@@ -25,7 +25,7 @@ function Script (props) {
    */
   const base64str2file = (str, basename) => {
     try {
-      var regex = /^data:.+\/(.+);base64,(.*)$/;
+      var regex = /^data:.+\/(.+);base64,(.*)$/
       var matches = str.match(regex)
       let id = crypto.randomBytes(20).toString('hex')
 
@@ -104,11 +104,11 @@ function Script (props) {
     var formatted
     var runas = this.runas
     var regex = /%script%/
-    // var regex = /['|"]?%script%['|"]?/;
+    // var regex = /['|"]?%script%['|"]?/
 
     if (runas && regex.test(runas) === true) {
       formatted = runas.replace(regex, partial)
-      // formatted = runas.replace(regex, '"' + partial + '"');
+      // formatted = runas.replace(regex, '"' + partial + '"')
     } else {
       formatted = partial
     }
@@ -150,13 +150,11 @@ function Script (props) {
     child.stdout.on('data', function (data) {
       partials.stdout += data
       partials.log += data
-      self.emit('stdout', data)
     })
 
     child.stderr.on('data', function (data) {
       partials.stderr += data
       partials.log += data
-      self.emit('stderr', data)
     })
 
     child.on('close', function (code, signal) {

@@ -205,18 +205,18 @@ module.exports = AbstractWorker.extend({
     });
   },
   downloadFile: function (next) {
-		var self = this,
-      file = this.file,
-      stream = this.connection.fileDownloadStream(file.id);
+		var self = this
+    var file = this.file
+    var stream = this.connection.fileDownloadStream(file.id)
 
-    file.save(stream,function (error) {
+    file.save(stream, function (error) {
       if (error) {
-        self.debug.error(error);
-        return next(error);
+        self.debug.error(error)
+        return next(error)
       } else {
-        self.debug.log('file downloaded');
-        next(null);
+        self.debug.log('file downloaded')
+        next(null)
       }
-    });
+    })
   }
-});
+})

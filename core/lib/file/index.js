@@ -321,17 +321,16 @@ function File (props) {
   }
 
   this.save = function (stream, next) {
-    var self = this;
-
+    var self = this
     if (!fs.existsSync(this.dirname)) {
-      mkdirp(this.dirname, function(err){
-        if (err) return next(err);
-        else self.createFile(stream,next);
-      });
+      mkdirp(this.dirname, function (err) {
+        if (err) { return next(err) }
+        else self.createFile(stream, next)
+      })
     } else {
-      self.createFile(stream,next);
+      self.createFile(stream, next)
     }
-    return this;
+    return this
   }
 }
 
