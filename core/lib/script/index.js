@@ -122,19 +122,22 @@ function Script (props) {
     debug('running script "%s"', script)
 
     options || (options = {})
+    const self = this
+    let killed = false
+    let partials = { stdout: [], stderr: [], log: [] }
+    let execStart = process.hrtime()
 
-    var execTimeout = (agentConfig.scripts && agentConfig.scripts.execution_timeout) || undefined
+    let execTimeout = (agentConfig.scripts && agentConfig.scripts.execution_timeout) || undefined
     if (!execTimeout) {
-      execTimeout = options.timeout || DEFAULT_EXECUTION_TIMEOUT
+      execTimeout = (options.timeout || DEFAULT_EXECUTION_TIMEOUT)
     }
 
-    var self = this
-    var killed = false
-    var partials = { stdout: '', stderr: '', log: '' }
-    var execStart = process.hrtime()
-    var child = exec(script, { env: options.env || {} })
+    let child = exec(script, {
+      env: options.env || {},
+      maxBuffer: 1024, //agentConfig.scripts.max_buffer
+    })
 
-    var timeoutId = setTimeout(function () {
+    let timeoutId = setTimeout(function () {
       debug('killing child script ("%s")', script)
       killed = true
       kill(child.pid, 'SIGKILL', function (err) {
@@ -148,13 +151,13 @@ function Script (props) {
     })
 
     child.stdout.on('data', function (data) {
-      partials.stdout += data
-      partials.log += data
+      partials.stdout.push(data)
+      partials.log.push(data)
     })
 
     child.stderr.on('data', function (data) {
-      partials.stderr += data
-      partials.log += data
+      partials.stderr.push(data)
+      partials.log.push(data)
     })
 
     child.on('close', function (code, signal) {
@@ -171,9 +174,9 @@ function Script (props) {
 
       _output = new ScriptOutput({
         code: code,
-        stdout: partials.stdout,
-        stderr: partials.stderr,
-        log: partials.log
+        stdout: partials.stdout.join(''),
+        stderr: partials.stderr.join(''),
+        log: partials.log.join('')
       })
 
       self.emit('end', Object.assign({},

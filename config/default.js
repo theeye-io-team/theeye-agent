@@ -27,7 +27,8 @@ module.exports = {
   version: undefined,
   scripts: {
     path: ( __dirname + '/../downloads' ),
-    execution_timeout: 10 * 60 * 1000 // 10 minutes in milliseconds
+    execution_timeout: 10 * 60 * 1000, // 10 minutes in milliseconds
+    max_buffer: 1024 * 200 // kb to bytes
   },
   binaries: {
     // use absolute paths here. binary agent requires it. __dirname only works using source code
