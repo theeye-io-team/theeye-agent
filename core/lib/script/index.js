@@ -15,6 +15,7 @@ var shellescape = require('shell-escape')
 var isDataUrl = require('valid-data-url')
 
 function Script (props) {
+
   File.apply(this, arguments)
 
   /**
@@ -134,17 +135,18 @@ function Script (props) {
 
     let child = exec(script, {
       env: options.env || {},
-      maxBuffer: 1024, //agentConfig.scripts.max_buffer
+      maxBuffer: agentConfig.scripts.max_buffer
     })
 
-    let timeoutId = setTimeout(function () {
+    const killChild = () => {
       debug('killing child script ("%s")', script)
       killed = true
       kill(child.pid, 'SIGKILL', function (err) {
         if (err) debug(err)
         else debug('kill send')
       })
-    }, execTimeout)
+    }
+    let timeoutId = setTimeout(killChild, execTimeout)
 
     this.once('end', function () {
       clearTimeout(timeoutId)
@@ -163,6 +165,8 @@ function Script (props) {
     child.on('close', function (code, signal) {
       debug('child emit close with %j', arguments)
 
+      if (signal==='SIGTERM') { killed = true }
+
       var exec_diff = process.hrtime(execStart)
       debug('times %j.', exec_diff)
 
@@ -179,16 +183,16 @@ function Script (props) {
         log: partials.log.join('')
       })
 
-      self.emit('end', Object.assign({},
-        _output.toObject(), {
-          signal: signal,
-          killed: Boolean(killed),
+      self.emit('end',
+        Object.assign({}, _output.toObject(), {
+          signal,
+          killed,
           times: {
             seconds: exec_diff[0],
             nanoseconds: exec_diff[1]
           }
-        }
-      ))
+        })
+      )
     })
 
     child.on('error', function (err) {

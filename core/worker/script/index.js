@@ -82,6 +82,7 @@ module.exports = AbstractWorker.extend({
         const data = Object.assign({}, result)
 
         let jsonLastline, payload, output = null, state = null 
+
         try {
           // try to parse lastline string as JSON output
           jsonLastline = JSON.parse(result.lastline)
