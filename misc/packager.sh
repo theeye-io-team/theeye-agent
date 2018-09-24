@@ -26,8 +26,10 @@ if [ ! -f "runBinary.sh" ]; then
 fi
 
 cp -r $bin $target
-cp -r misc $target
 cp -r runBinary.sh $target
+cp -r misc/etc $target/misc
+cp misc/theeye.conf $target/misc
+cp misc/uninstall.sh $target/misc
 
 echo "adding version to package"
 
