@@ -10,7 +10,13 @@ RUN npm install -g supervisor
 RUN npm install googleapis@27 --save
 # Install Convert and jq
 RUN apt-get update 
-RUN apt-get install -y jq imagemagick
+RUN apt-get install -y jq imagemagick locales locales-all
+
+# change locales to UTF-8
+ENV LANGUAGE en_US:en 
+ENV LANG en_US.UTF-8  
+ENV LC_ALL en_US.UTF-8
+
 #Set working Directory
 WORKDIR ${destDir}
 # Bundle app source
@@ -24,4 +30,6 @@ RUN chmod -R 1777 ${destDir}/.tmp
 #No Port Exposition actually need it. EXPOSE 6080
 #Env variables.
 #By default run prod, If development is requiered This command would be overriden by docker-compose up
+
+# Set the locale
 CMD [ "/src/theeye-agent/run.sh" ]
