@@ -10,12 +10,18 @@ RUN npm install -g supervisor
 RUN npm install googleapis@27 --save
 # Install Convert and jq
 RUN apt-get update 
-RUN apt-get install -y jq imagemagick locales locales-all
+RUN apt-get install -y jq imagemagick locales
 
-# change locales to UTF-8
-ENV LANGUAGE en_US:en 
-ENV LANG en_US.UTF-8  
+# uncomment chosen locale to enable it's generation
+RUN sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen  
+# generate chosen locale
+RUN locale-gen en_US.UTF-8
+# set system-wide locale settings
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
+# verify modified configuration
+RUN dpkg-reconfigure --frontend noninteractive locales  
 
 #Set working Directory
 WORKDIR ${destDir}
