@@ -1,12 +1,12 @@
 'use strict'
 
-var Script = require('../../lib/script')
-var AbstractWorker = require('../abstract')
-var join = require('path').join
-var scriptsConfig = require('config').scripts
+const Script = require('../../lib/script')
+const AbstractWorker = require('../abstract')
+const join = require('path').join
+const scriptsConfig = require('config').scripts
 
 module.exports = AbstractWorker.extend({
-  initialize: function () {
+  initialize () {
     //var directory = process.env.THEEYE_AGENT_SCRIPT_PATH
     var directory = scriptsConfig.path
     var config = this.config.script
@@ -15,13 +15,14 @@ module.exports = AbstractWorker.extend({
       args: config.arguments || [],
       runas: config.runas,
       env: config.env,
+      timeout: config.timeout,
       md5: config.md5,
       dirname: directory,
       basename: config.filename,
       path: join(directory, config.filename)
     })
   },
-  checkScript: function (next) {
+  checkScript (next) {
     var self = this
 
     this.script.checkAccess(function (err) {
@@ -48,7 +49,7 @@ module.exports = AbstractWorker.extend({
       }
     })
   },
-  downloadScript: function (done) {
+  downloadScript (done) {
     var self = this
     this.debug.log('getting script %s', this.script.id)
     var stream = this.connection.scriptDownloadStream(this.script.id)
@@ -63,7 +64,7 @@ module.exports = AbstractWorker.extend({
       done()
     })
   },
-  getData: function (next) {
+  getData (next) {
     var self = this
 
     this.checkScript(function (error) {
@@ -124,6 +125,6 @@ module.exports = AbstractWorker.extend({
   }
 })
 
-function isObject (value) {
+const isObject = (value) => {
   return Object.prototype.toString.call(value) === '[object Object]'
 }

@@ -20,14 +20,14 @@ module.exports = {
       only_json_response: true, // server response header application/json is mandatory. ignore response body if not JSON
       gzip: true,
       proxy: process.env.http_proxy || undefined,
-      timeout: 5,
+      timeout: 5000, // 5 secs
       tunnel: false
     }
   },
   version: undefined,
   scripts: {
     path: ( __dirname + '/../downloads' ),
-    execution_timeout: 10 * 60 * 1000, // 10 minutes in milliseconds
+    timeout: 10 * 60 * 1000, // 10 minutes
     max_buffer: 1024 * 200 // kb to bytes
   },
   binaries: {

@@ -3,7 +3,6 @@
 var exec = require('child_process').exec
 var debug = require('debug')('eye:lib:script')
 var kill = require('tree-kill')
-var agentConfig = require('config')
 var DEFAULT_EXECUTION_TIMEOUT = 10 * 60 * 1000
 var File = require('../file')
 var ScriptOutput = require('./output')
@@ -13,6 +12,8 @@ var crypto = require('crypto')
 var path = require('path')
 var shellescape = require('shell-escape')
 var isDataUrl = require('valid-data-url')
+
+const scriptsConfig = require('config').scripts
 
 function Script (props) {
 
@@ -58,7 +59,7 @@ function Script (props) {
         parsed = []
         args.forEach((arg, idx) => {
           if (isDataUrl(arg)) {
-            let filename = base64str2file(arg, agentConfig.scripts.path)
+            let filename = base64str2file(arg, scriptsConfig.path)
             parsed.push(filename)
           } else {
             // escape spaces both for linux and windows
@@ -76,141 +77,143 @@ function Script (props) {
     return parsed
   }
 
+  var _env = props.env
+  var _timeout = props.timeout
   var _runas = props.runas
   var _args
   var _output = null
 
   Object.defineProperty(this, 'args', {
-    get: function () { return _args },
-    set: function (args) {
+    get () { return _args },
+    set (args) {
       _args = prepareArguments(args)
       return this
     },
     enumerable: true
   })
   Object.defineProperty(this, 'runas', {
-    get: function () { return _runas },
+    get () { return _runas },
     enumerable: true
   })
   Object.defineProperty(this, 'output', {
-    get: function () { return _output },
+    get () { return _output },
+    set (out) {
+      _output = out
+      return this
+    },
+    enumerable: true
+  })
+  Object.defineProperty(this, 'timeout', {
+    get () { return _timeout },
+    enumerable: true
+  })
+  Object.defineProperty(this, 'env', {
+    get () { return _env },
     enumerable: true
   })
 
   _args = prepareArguments(props.args)
-
-  this.run = function (end) {
-    var partial = this.path + ' ' + this.args
-
-    var formatted
-    var runas = this.runas
-    var regex = /%script%/
-    // var regex = /['|"]?%script%['|"]?/
-
-    if (runas && regex.test(runas) === true) {
-      formatted = runas.replace(regex, partial)
-      // formatted = runas.replace(regex, '"' + partial + '"')
-    } else {
-      formatted = partial
-    }
-
-    this.once('end', end)
-
-    return this.execScript(formatted)
-  }
-
-  this.execScript = function (script, options) {
-    debug('running script "%s"', script)
-
-    options || (options = {})
-    const self = this
-    let killed = false
-    let partials = { stdout: [], stderr: [], log: [] }
-    let execStart = process.hrtime()
-
-    let execTimeout = (agentConfig.scripts && agentConfig.scripts.execution_timeout) || undefined
-    if (!execTimeout) {
-      execTimeout = (options.timeout || DEFAULT_EXECUTION_TIMEOUT)
-    }
-
-    let child = exec(script, {
-      env: options.env || {},
-      maxBuffer: agentConfig.scripts.max_buffer
-    })
-
-    const killChild = () => {
-      debug('killing child script ("%s")', script)
-      killed = true
-      kill(child.pid, 'SIGKILL', function (err) {
-        if (err) debug(err)
-        else debug('kill send')
-      })
-    }
-    let timeoutId = setTimeout(killChild, execTimeout)
-
-    this.once('end', function () {
-      clearTimeout(timeoutId)
-    })
-
-    child.stdout.on('data', function (data) {
-      partials.stdout.push(data)
-      partials.log.push(data)
-    })
-
-    child.stderr.on('data', function (data) {
-      partials.stderr.push(data)
-      partials.log.push(data)
-    })
-
-    child.on('close', function (code, signal) {
-      debug('child emit close with %j', arguments)
-
-      if (signal==='SIGTERM') { killed = true }
-
-      var exec_diff = process.hrtime(execStart)
-      debug('times %j.', exec_diff)
-
-      if (exec_diff[0] === 0) {
-        debug('script end after %s msecs.', exec_diff[1] / 1e6)
-      } else {
-        debug('script end after %s secs', exec_diff[0])
-      }
-
-      _output = new ScriptOutput({
-        code: code,
-        stdout: partials.stdout.join(''),
-        stderr: partials.stderr.join(''),
-        log: partials.log.join('')
-      })
-
-      self.emit('end',
-        Object.assign({}, _output.toObject(), {
-          signal,
-          killed,
-          times: {
-            seconds: exec_diff[0],
-            nanoseconds: exec_diff[1]
-          }
-        })
-      )
-    })
-
-    child.on('error', function (err) {
-      debug('child emit error with %j', err)
-    })
-
-    child.on('disconnect', function () {
-      debug('script emit disconnect')
-    })
-
-    child.on('message', function () {
-      debug('child emit message with %j', arguments)
-    })
-
-    return self
-  }
 }
 
 util.inherits(Script, File)
+
+Script.prototype.run = function (end) {
+  var partial = this.path + ' ' + this.args
+
+  var formatted
+  var runas = this.runas
+  var regex = /%script%/
+  // var regex = /['|"]?%script%['|"]?/
+
+  if (runas && regex.test(runas) === true) {
+    formatted = runas.replace(regex, partial)
+    // formatted = runas.replace(regex, '"' + partial + '"')
+  } else {
+    formatted = partial
+  }
+
+  this.once('end', end)
+
+  return this.execScript(formatted)
+}
+
+Script.prototype.execScript = function (script, options) {
+  debug('running script "%s"', script)
+
+  options || (options = {})
+  const self = this
+  let partials = { stdout: [], stderr: [], log: [] }
+  let execStart = process.hrtime()
+
+  let execTimeout = this.timeout
+  if (!execTimeout) {
+    execTimeout = (
+      scriptsConfig.timeout ||
+      DEFAULT_EXECUTION_TIMEOUT
+    )
+  }
+
+  let child = exec(script, {
+    env: this.env || {},
+    maxBuffer: scriptsConfig.max_buffer,
+    timeout: execTimeout,
+    encoding: 'utf8'
+  })
+
+  child.stdout.on('data', function (data) {
+    partials.stdout.push(data)
+    partials.log.push(data)
+  })
+
+  child.stderr.on('data', function (data) {
+    partials.stderr.push(data)
+    partials.log.push(data)
+  })
+
+  child.on('close', function (code, signal) {
+    debug('child emit close with %j', arguments)
+
+    var exec_diff = process.hrtime(execStart)
+    debug('times %j.', exec_diff)
+
+    if (exec_diff[0] === 0) {
+      debug('script end after %s msecs.', exec_diff[1] / 1e6)
+    } else {
+      debug('script end after %s secs', exec_diff[0])
+    }
+
+    this.output = new ScriptOutput({
+      code: code,
+      stdout: partials.stdout.join(''),
+      stderr: partials.stderr.join(''),
+      log: partials.log.join('')
+    })
+
+    self.emit('end',
+      Object.assign({}, this.output.toObject(), {
+        signal,
+        killed: (signal==='SIGTERM'||child.killed),
+        times: {
+          seconds: exec_diff[0],
+          nanoseconds: exec_diff[1]
+        }
+      })
+    )
+  })
+
+  child.on('error', function (err) {
+    debug('child emit error with %j', err)
+  })
+
+  child.on('disconnect', function () {
+    debug('script emit disconnect')
+  })
+
+  child.on('message', function () {
+    debug('child emit message with %j', arguments)
+  })
+
+  return self
+}
 
 module.exports = Script

@@ -70,7 +70,7 @@ JobFactory.ScraperJob = function(specs, options) {
 //
 // script job
 //
-JobFactory.ScriptJob = function(specs, options) {
+JobFactory.ScriptJob = function (specs, options) {
   var connection = options.connection
 
   this.id = specs.id
@@ -78,13 +78,6 @@ JobFactory.ScriptJob = function(specs, options) {
   this.options = options
 
   function process (done) {
-    let wfSum
-    try {
-      wfSum = JSON.stringify(specs.workflow_summary)
-    } catch (e) {
-      wfSum = ''
-    }
-
     // prepare config
     //let event_data = specs.event_data || {}
     var config = {
@@ -96,10 +89,9 @@ JobFactory.ScriptJob = function(specs, options) {
         md5: specs.script.md5,
         arguments: specs.task_arguments_values,
         runas: specs.script_runas,
-        env: {
-          // IMPORTANTE. use empty string for passing empty vars into diff programming languages.
-          THEEYE_WORKFLOW_SUMMARY: wfSum // the workflow results
-        }
+        timeout: specs.timeout,
+        // IMPORTANT. use empty string for passing empty vars into diff programming languages.
+        env: Object.assign({}, specs.env)
       }
     }
 

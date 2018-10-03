@@ -247,7 +247,10 @@ function File (props) {
     // keep by default execution mode
     debug('creating file %s..', this.path);
 
-    var writable = fs.createWriteStream(this.path, { mode:'0755' });
+    var writable = fs.createWriteStream(this.path, {
+      mode:'0755',
+      encoding: 'utf8'
+    })
 
     function done (err) {
       if (!cbCalled) {

@@ -1,16 +1,16 @@
 'use strict';
 
-var request = require('request');
-var url = require('url');
-var format = require('util').format;
-var AbstractWorker = require('../abstract');
-var Constants = require('../../constants');
-var agentConfig = require('config')
+const request = require('request');
+const url = require('url');
+const format = require('util').format;
+const AbstractWorker = require('../abstract');
+const Constants = require('../../constants');
+const agentConfig = require('config')
+const scraperConfig = agentConfig.workers.scraper
 
 const EventConstants = require('../../constants/events')
 
 function setupRequestObject (config) {
-  let defaultConfig = agentConfig.workers.scraper
   let version = process.env.THEEYE_AGENT_VERSION
   let headers = Object.assign({}, config.headers, {
     'User-Agent': 'TheEyeAgent/' + version.trim()
@@ -21,11 +21,11 @@ function setupRequestObject (config) {
   }
 
   let wrapper = request.defaults({
-    strictSSL: config.strictSSL || defaultConfig.strictSSL,
-    proxy: config.proxy || defaultConfig.proxy,
-    tunnel: config.tunnel || defaultConfig.tunnel,
-    timeout: parseInt(config.timeout || defaultConfig.timeout),
-    gzip: config.gzip || defaultConfig.gzip,
+    strictSSL: config.strictSSL || scraperConfig.strictSSL,
+    proxy: config.proxy || scraperConfig.proxy,
+    tunnel: config.tunnel || scraperConfig.tunnel,
+    timeout: parseInt(config.timeout || scraperConfig.timeout),
+    gzip: config.gzip || scraperConfig.gzip,
     url: config.url,
     method: config.method,
     json: false, // cannot change this. response should be always string
