@@ -1,7 +1,7 @@
 #!/bin/bash
 
 root="$PWD"
-target="theeye-agent/"
+target="theeye-agent"
 bin="bin"
 
 if [ ! -d "$target" ]; then
@@ -25,11 +25,12 @@ if [ ! -f "runBinary.sh" ]; then
   exit 1
 fi
 
+mkdir $target/misc
 cp -r $bin $target
-cp -r runBinary.sh $target
-cp -r misc/etc $target/misc
-cp misc/theeye.conf $target/misc
-cp misc/uninstall.sh $target/misc
+cp -r runBinary.sh $target/
+cp -r misc/etc $target/misc/etc
+cp misc/theeye.conf $target/misc/
+cp misc/uninstall.sh $target/misc/
 
 echo "adding version to package"
 
@@ -43,6 +44,6 @@ tar -czf theeye-agent64-$release.tar.gz $target
 
 echo "removing temporal files"
 
-rm -rf $target
+#rm -rf $target
 
 echo "success"
