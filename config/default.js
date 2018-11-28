@@ -58,7 +58,7 @@ module.exports = {
   supervisor: {},
   request: {
     proxy: proxy,
-    tunnel: Boolean(proxy) // tunnel required when using proxy
+    tunnel: Boolean(proxy), // tunnel required when using proxy
     json: true,
     gzip: true,
     timeout: 15000
