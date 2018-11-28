@@ -1,3 +1,5 @@
+var proxy = (process.env.https_proxy || process.env.http_proxy)
+
 module.exports = {
   server: false,
   /**
@@ -19,9 +21,9 @@ module.exports = {
       register_body: false,
       only_json_response: true, // server response header application/json is mandatory. ignore response body if not JSON
       gzip: true,
-      proxy: process.env.http_proxy || undefined,
       timeout: 5000, // 5 secs
-      tunnel: false
+      proxy: proxy,
+      tunnel: Boolean(proxy) // tunnel required when using proxy
     }
   },
   version: undefined,
@@ -55,8 +57,8 @@ module.exports = {
    */
   supervisor: {},
   request: {
-    proxy: (process.env.https_proxy || process.env.http_proxy),
-    tunnel: false,
+    proxy: proxy,
+    tunnel: Boolean(proxy) // tunnel required when using proxy
     json: true,
     gzip: true,
     timeout: 15000
