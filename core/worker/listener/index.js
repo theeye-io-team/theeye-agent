@@ -41,25 +41,31 @@ module.exports = AbstractWorker.extend({
    * @param Job data
    * @return null
    */
-  processJob: function (jobData) {
-    var connection = this.connection
-    var debug = this.debug
-
-    var options = {
+  processJob: function (jobData, done) {
+    const connection = this.connection
+    const debug = this.debug
+    const options = {
       connection: connection,
       listener: this
     }
 
     /**
      *
-     * parse job jobData
+     * process job jobData
      *
      */
-    var job = JobsFactory.create(jobData, options)
-    job.getResults(function (err, result) {
-      if (err) debug.error('%o',err)
-      connection.submitJobResult(job.id, err||result, function(err){
-        if (err) debug.error('%o',err)
+    const job = JobsFactory.create(jobData, options)
+    job.getResults((err, result) => {
+      if (err) {
+        debug.error('%o', err)
+      }
+
+      let payload = (err || result)
+      connection.submitJobResult(job.id, payload, (err) => {
+        if (err) {
+          debug.error('%o', err)
+        }
+        done(err)
       })
     })
   },
@@ -69,24 +75,28 @@ module.exports = AbstractWorker.extend({
    * @return null
    */
   keepAlive: function () {
-    var self = this;
-    var resource = this.supervisor_resource;
+    var resource = this.supervisor_resource
+    var multitasking = this.config.multitasking
 
-    this.debug.log('querying jobs...');
-    this.getJob(function(error,job){
-      if (error) {
-        self.debug.error('supervisor response error');
-        self.debug.error(error);
+    this.debug.log('fetching jobs')
+    this.getJob((err, job) => {
+      if (err) {
+        this.debug.error('supervisor response error')
+        this.debug.error(err)
+        this.rest()
       } else {
         if (job) {
-          self.processJob(job);
+          this.processJob(job, () => this.rest(0))
         } else {
-          self.debug.log('no job to process');
+          this.debug.log('no job to process')
+          this.rest()
         }
       }
-    });
 
-    this.sleep();
+      if (multitasking !== false) {
+        this.rest()
+      }
+    })
   },
   getJob: function (done) {
     this.connection.fetch({

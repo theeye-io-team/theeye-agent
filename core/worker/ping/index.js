@@ -15,6 +15,6 @@ module.exports = AbstractWorker.extend({
       },
       success: function (body) {}
     })
-    this.sleep();
+    this.rest();
   }
 })
