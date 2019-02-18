@@ -89,11 +89,15 @@ function App () {
   function startListener () {
     var config = localConfig.workers.listener || {}
     if (!self.listener && config.enabled!==false) {
-      var worker = new ListenerWorker(_connection, {
-        resource_id: _host_resource_id,
-        type: WorkerConstants.Listener.type,
-        looptime: config.looptime || WorkerConstants.Listener.looptime
-      })
+
+      const worker = new ListenerWorker(
+        _connection, Object.assign({}, config, {
+          resource_id: _host_resource_id,
+          type: WorkerConstants.Listener.type,
+          looptime: (config.looptime || WorkerConstants.Listener.looptime)
+        })
+      )
+
       worker.run()
       worker.on('config:outdated',function(){
         updateWorkers()

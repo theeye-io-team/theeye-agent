@@ -35,7 +35,7 @@ _.extend(MonitorWorker.prototype, EventEmitter.prototype, {
 	getId : function() {
 		return null ;
 	},
-	keepAlive : function() {
+	keepAlive: function() {
 		var self = this;
 		this.debug.log(
 			'worker "%s" awake customer "%s"', 
@@ -66,51 +66,51 @@ _.extend(MonitorWorker.prototype, EventEmitter.prototype, {
 			}
 		});
 
-		this.sleep();
+		this.rest();
 	},
 	submitWork: function(data,next) {
 		this.connection.updateResource(
 			this.config.resource_id, data, next
 		);
 	},
-	run : function() {
+	run: function() {
 		this.debug.log('running worker "%s"', this.name);
 		this.keepAlive();
 	},
-	getData : function() {
+	getData: function() {
 		this.debug.error("Abstract method!");
 		throw new Error("Abstract method!");
 	},
-	sleep : function() {
-		if(!this.enable) return;
+	rest: function (msecs) {
+		if (!this.enable) {
+      return
+    }
+
+    let time = msecs || this.config.looptime
 
 		this.debug.log(
-			'worker "%s" slept for "%d" seconds', 
+			'worker "%s" will sleep "%d" seconds', 
 			this.name,
-			this.config.looptime/1000
-		);
+			(time / 1000)
+		)
 
-		var self = this;
-		this.timeout = setTimeout(
-			function(){
-				return self.keepAlive();
-			},
-			this.config.looptime
-		);
+    this.timeout = setTimeout(() => {
+      return this.keepAlive()
+    }, time)
 	},
-	setConfig : function(config) {
+	setConfig: function(config) {
 		this.config = config;
 		return this;
 	},
-	getConfig : function() {
+	getConfig: function() {
 		return this.config;
 	},
-	stop : function() {
+	stop: function() {
 		this.enable = false;
 		clearTimeout(this.timeout);
 		this.debug.log('worker stopped.');
-	},
-});
+	}
+})
 
 // copied the Backbone extend method
 MonitorWorker.extend = function(protoProps, staticProps) {

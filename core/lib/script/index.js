@@ -192,7 +192,7 @@ Script.prototype.execScript = function (script, options) {
     self.emit('end',
       Object.assign({}, this.output.toObject(), {
         signal,
-        killed: (signal==='SIGTERM'||child.killed),
+        killed: (signal === 'SIGTERM' || child.killed),
         times: {
           seconds: exec_diff[0],
           nanoseconds: exec_diff[1]

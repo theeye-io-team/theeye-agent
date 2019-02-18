@@ -81,38 +81,41 @@ module.exports = AbstractWorker.extend({
 
       self.script.run(function (result) {
         const data = Object.assign({}, result)
-
         let jsonLastline, payload, output = null, state = null 
 
-        try {
-          // try to parse lastline string as JSON output
-          jsonLastline = JSON.parse(result.lastline)
+        if (result.killed) {
+          state = 'killed'
+        } else {
+          try {
+            // try to parse lastline string as JSON output
+            jsonLastline = JSON.parse(result.lastline)
 
-          // looking for state and output
-          if (isObject(jsonLastline)) {
-            if (jsonLastline.state) {
-              state = jsonLastline.state
+            // looking for state and output
+            if (isObject(jsonLastline)) {
+              if (jsonLastline.state) {
+                state = jsonLastline.state
+              } else {
+                state = null
+              }
+              output = (jsonLastline.output || jsonLastline.data || jsonLastline)
+            } else if (Array.isArray(jsonLastline)) {
+              state = undefined // undefined
+              output = jsonLastline
+            } else if (typeof jsonLastline === 'string') {
+              state = jsonLastline
+              output = jsonLastline
             } else {
-              state = null
+              self.debug.log('unhandled ' + jsonLastline)
+              // ???
             }
-            output = (jsonLastline.output || jsonLastline.data || jsonLastline)
-          } else if (Array.isArray(jsonLastline)) {
-            state = undefined // undefined
-            output = jsonLastline
-          } else if (typeof jsonLastline === 'string') {
-            state = jsonLastline
-            output = jsonLastline
-          } else {
-            self.debug.log('unhandled ' + jsonLastline)
-            // ???
-          }
 
-          data.output = output // force data.output
-        } catch (e) {
-          // if it is not a JSON
-          self.debug.log('failed to parse lastline as JSON')
-          self.debug.log(e.message)
-          state = result.lastline // a string
+            data.output = output // force data.output
+          } catch (e) {
+            // if it is not a JSON
+            self.debug.log('failed to parse lastline as JSON')
+            self.debug.log(e.message)
+            state = result.lastline // a string
+          }
         }
 
         payload = { state, data }

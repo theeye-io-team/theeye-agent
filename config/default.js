@@ -1,4 +1,7 @@
-var proxy = (process.env.https_proxy || process.env.http_proxy)
+const proxy = (process.env.https_proxy || process.env.http_proxy)
+
+// process only one job at the same time. disable multi tasking capability
+const MULTITASKING = process.env.THEEYE_AGENT_MULTITASKING === 'false' ? false : true
 
 module.exports = {
   server: false,
@@ -7,15 +10,21 @@ module.exports = {
    * this worker provide information and status of the agent to the api
    */
   workers: {
+    // enable/disable jobs runner
     enabled: true,
+    // jobs runner settings
     listener: {
       type: 'listener',
-      looptime: 15000
+      looptime: 15000,
+      
+      multitasking: MULTITASKING // process only one job at the same time. disable multi jobs processing capability
     },
+    // host keep alive settings
     ping: {
       type: 'ping',
-      looptime: 5000
+      looptime: 10000
     },
+    // web request job settings
     scraper: {
       strictSSL: false,
       register_body: false,
