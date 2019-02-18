@@ -32,7 +32,7 @@
   },
   "engine": "node >= 0.12",
   "devDependencies": {
-    "nodemon": "~1.19.0"
+    "nodemon": "~1.9.2"
   },
   "os": [
     "win32",
