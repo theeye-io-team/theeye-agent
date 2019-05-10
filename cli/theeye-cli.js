@@ -1,12 +1,10 @@
 #!/usr/bin/env node
 
-"use strict";
-
 var program = require('commander');
 var colors = require('colors');
 
 program
-  .version('0.0.1')
+  .version('0.1.0')
   .option('-a, --action [create|get|update|patch|remove]', 'Resource action')
   .option('-r, --resource [name]', 'Remote resource name')
   .option('-p, --path [path]', 'Full remote resource path')
@@ -15,26 +13,23 @@ program
   .parse(process.argv);
 
 function make_green(txt) {
-  return colors.green(txt);
+  return colors.green(txt)
 }
 
 if (!process.argv.slice(2).length) {
-  program.outputHelp(make_green);
-  process.exit();
+  program.help(make_green)
 }
 
 if (!program.action) {
-  console.log('');
-  console.log('action is requred');
-  program.outputHelp(make_green);
-  process.exit();
+  console.log('')
+  console.log('action is requred')
+  program.help(make_green)
 }
 
 if (!program.resource&&!program.path) {
-  console.log('');
-  console.log('resource or path is requred');
-  program.outputHelp(make_green);
-  process.exit();
+  console.log('')
+  console.log('resource or path is requred')
+  program.help(make_green)
 }
 
 require('../core/environment')(function(){
