@@ -10,6 +10,6 @@
   "license": "MIT",
   "dependencies": {
     "colors": "1.1.2",
-    "commander": "0.0.1"
+    "commander": "~2.20.0"
   }
 }

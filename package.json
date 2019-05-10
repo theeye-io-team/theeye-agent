@@ -10,17 +10,16 @@
   },
   "dependencies": {
     "config": "1.25.1",
-    "debug": "2.3.2",
+    "debug": "~4.1.1",
     "ip": "0.3.3",
-    "lodash": "4.17.5",
     "md5": "2.1.0",
     "mkdirp": "0.5.1",
-    "ngrok": "2.2.25",
-    "request": "2.74.0",
+    "ngrok": "~3.1.1",
+    "request": "~2.88.0",
     "shell-escape": "0.2.0",
-    "theeye-node-stat": "0.3",
-    "theeye-ps-aux": "0.3.4",
-    "theeye-ps-node": "0.1.1",
+    "theeye-node-stat": "~0.3.2",
+    "theeye-ps-aux": "~0.3.4",
+    "theeye-ps-node": "~0.1.1",
     "tree-kill": "1.1.0",
     "underscore": "1.8.3",
     "valid-data-url": "0.1.6"
@@ -36,7 +35,7 @@
   },
   "engine": "node >= 0.12",
   "devDependencies": {
-    "nodemon": "~1.9.2"
+    "nodemon": "~1.19.0"
   },
   "os": [
     "win32",
