@@ -372,20 +372,24 @@ TheEyeClient.prototype = {
    *
    *
    */
-  submitJobResult : function(jobId,result,next) {
+  submitJobResult: function(jobId, result, next) {
     this.performRequest({
       method: 'PUT',
       url: '/:customer/job/' + jobId,
-      body: {result:result}
-    }, function(error,response){
+      body: { result }
+    }, function (error, response) {
       if (error) {
         logger.error('unable to update job')
-        if (next) next(error)
+        if (next) {
+          next(error)
+        }
       } else {
         logger.debug('job updated')
-        if (next) next(null,response)
+        if (next) {
+          next(null,response)
+        }
       }
-    });
+    })
   },
   /**
    *

@@ -112,4 +112,4 @@ JobFactory.ScriptJob = function (specs, options) {
  * Integration Jobs
  *
  */
-JobFactory.NgrokIntegrationJob = require('./integrations/ngrok')
+//JobFactory.NgrokIntegrationJob = require('./integrations/ngrok')

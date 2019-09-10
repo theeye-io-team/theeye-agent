@@ -1,6 +1,7 @@
 var debug = require('debug')('eye:agent:listener:job:integrations:ngrok')
 var Constants = require('../../../../constants');
-var ngrok = require('../../../../lib/ngrok')
+//var ngrok = require('../../../../lib/ngrok')
+var ngrok = require('ngrok')
 var config = require('config')
 
 const OPERATION_START = 'start'

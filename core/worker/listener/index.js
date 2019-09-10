@@ -70,7 +70,7 @@ module.exports = AbstractWorker.extend({
     })
   },
   /**
-   * the procedure to be performed on each worker cicle.
+   * the steps to be performed on each worker cicle.
    * @param Function next
    * @return null
    */
