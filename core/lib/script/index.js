@@ -77,7 +77,13 @@ function Script (props) {
     return parsed
   }
 
-  var _env = props.env
+  var _env
+  if (props.blank_env === true) {
+    _env = (props.env || {})
+  } else {
+    _env = Object.assign({}, process.env, props.env)
+  }
+
   var _timeout = props.timeout
   var _runas = props.runas
   var _args

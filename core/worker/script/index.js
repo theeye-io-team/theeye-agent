@@ -15,6 +15,7 @@ module.exports = AbstractWorker.extend({
       args: config.arguments || [],
       runas: config.runas,
       env: config.env,
+      blank_env: config.blank_env,
       timeout: config.timeout,
       md5: config.md5,
       dirname: directory,

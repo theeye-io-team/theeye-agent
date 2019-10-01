@@ -16,15 +16,13 @@
     "mkdirp": "0.5.1",
     "request": "~2.88.0",
     "shell-escape": "0.2.0",
+    "theeye-node-stat": "github:theeye-io/node-stat",
+    "theeye-ps-aux": "~0.3.4",
+    "theeye-ps-node": "github:theeye-io/ps-node",
     "tree-kill": "1.1.0",
     "underscore": "1.8.3",
-    "valid-data-url": "0.1.6",
-    "theeye-ps-aux": "~0.3.4",
-    "theeye-node-stat": "github:theeye-io/node-stat",
-    "theeye-ps-node": "github:theeye-io/ps-node"
-  },
-  "optionalDependencies": {
-    "userid": "github:theeye-io/node-userid"
+    "userid": "^0.3.1",
+    "valid-data-url": "0.1.6"
   },
   "scripts": {
     "core": "node `pwd`/core/main.js",
