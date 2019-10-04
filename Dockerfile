@@ -7,7 +7,7 @@ curl jq imagemagick locales nodejs npm \
 
 #Install MailBot Dependencies.
 #mbsync deps
-RUN apt update -qqq && apt install -y ripmime poppler-utils isync rename 
+RUN apt update -qqq && apt install -y ripmime poppler-utils isync rename tzdata mpack
 
 
 WORKDIR /
