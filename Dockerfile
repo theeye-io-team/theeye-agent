@@ -5,6 +5,11 @@ RUN apt update && apt install -y \
 curl jq imagemagick locales nodejs npm \
 && rm -rf /var/lib/apt/lists/*
 
+#Install MailBot Dependencies.
+#mbsync deps
+RUN apt update -qqq && apt install -y ripmime poppler-utils isync rename 
+
+
 WORKDIR /
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
