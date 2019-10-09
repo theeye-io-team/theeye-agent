@@ -2,7 +2,7 @@
 
 var exec = require('child_process').exec
 var debug = require('debug')('eye:lib:script')
-var kill = require('tree-kill')
+//var kill = require('tree-kill')
 var DEFAULT_EXECUTION_TIMEOUT = 10 * 60 * 1000
 var File = require('../file')
 var ScriptOutput = require('./output')
@@ -162,7 +162,7 @@ Script.prototype.execScript = function (script, options) {
   let child = exec(script, {
     env: this.env || {},
     maxBuffer: scriptsConfig.max_buffer,
-    timeout: execTimeout,
+    timeout: execTimeout, // kill
     encoding: 'utf8'
   })
 

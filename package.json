@@ -19,7 +19,6 @@
     "theeye-node-stat": "github:theeye-io/node-stat",
     "theeye-ps-aux": "github:theeye-io/ps-aux",
     "theeye-ps-node": "github:theeye-io/ps-node",
-    "tree-kill": "1.1.0",
     "underscore": "1.8.3",
     "valid-data-url": "0.1.6",
     "theeye-ps-aux": "~0.3.4",
