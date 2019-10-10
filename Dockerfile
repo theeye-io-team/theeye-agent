@@ -1,6 +1,7 @@
 FROM ubuntu
 
 MAINTAINER jailbirt@gmail.com
+ARG DEBIAN_FRONTEND=noninteractive
 RUN apt update && apt install -y \
 curl jq imagemagick locales nodejs npm \
 && rm -rf /var/lib/apt/lists/*
