@@ -10,7 +10,7 @@ var util = require('util')
 var fs = require('fs')
 var crypto = require('crypto')
 var path = require('path')
-var shellescape = require('shell-escape')
+var shellescape = require('../shellescape')
 var isDataUrl = require('valid-data-url')
 
 const scriptsConfig = require('config').scripts
