@@ -53,9 +53,6 @@ cp node_modules/userid/build/Release/userid.node $target
 cp node_modules/ref/build/Release/binding.node $target
 cp node_modules/ffi/build/Release/ffi_bindings.node $target
 
-# copy binaries from integrations
-cp node_modules/ngrok/bin/ngrok $target
-
 echo "copying configs"
 # copy configs
 if [ ! -d "$target/config" ]; then

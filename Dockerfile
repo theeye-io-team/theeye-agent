@@ -22,7 +22,7 @@ ENV LC_ALL en_US.UTF-8
 RUN dpkg-reconfigure --frontend noninteractive locales  
 
 #PreInstall Theeye Agent.
-RUN  /usr/bin/curl -s "https://s3.amazonaws.com/theeye.agent/linux/setup.sh"|bash -s
+RUN /usr/bin/curl -s "https://s3.amazonaws.com/theeye.agent/linux/setup.sh" | bash -s
 RUN chmod 666 /etc/theeye/theeye.conf
 
 ENTRYPOINT ["/docker-entrypoint.sh"]

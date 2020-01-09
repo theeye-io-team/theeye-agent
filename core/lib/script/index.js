@@ -2,7 +2,7 @@
 
 var exec = require('child_process').exec
 var debug = require('debug')('eye:lib:script')
-var kill = require('tree-kill')
+//var kill = require('tree-kill')
 var DEFAULT_EXECUTION_TIMEOUT = 10 * 60 * 1000
 var File = require('../file')
 var ScriptOutput = require('./output')
@@ -10,7 +10,7 @@ var util = require('util')
 var fs = require('fs')
 var crypto = require('crypto')
 var path = require('path')
-var shellescape = require('shell-escape')
+var shellescape = require('../shellescape')
 var isDataUrl = require('valid-data-url')
 
 const scriptsConfig = require('config').scripts
@@ -77,7 +77,13 @@ function Script (props) {
     return parsed
   }
 
-  var _env = props.env
+  var _env
+  if (props.blank_env === true) {
+    _env = (props.env || {})
+  } else {
+    _env = Object.assign({}, process.env, props.env)
+  }
+
   var _timeout = props.timeout
   var _runas = props.runas
   var _args
@@ -156,7 +162,7 @@ Script.prototype.execScript = function (script, options) {
   let child = exec(script, {
     env: this.env || {},
     maxBuffer: scriptsConfig.max_buffer,
-    timeout: execTimeout,
+    timeout: execTimeout, // kill
     encoding: 'utf8'
   })
 

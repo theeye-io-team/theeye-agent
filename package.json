@@ -1,5 +1,5 @@
 {
-  "version": "0.15.1",
+  "version": "0.15.2",
   "name": "TheEye-Agent",
   "description": "TheEye Agent - TheEye Client",
   "author": "Facugon <facugon@interactar.com>",
@@ -14,18 +14,16 @@
     "ip": "0.3.3",
     "md5": "2.1.0",
     "mkdirp": "0.5.1",
-    "ngrok": "~3.1.1",
     "request": "~2.88.0",
-    "shell-escape": "0.2.0",
-    "theeye-node-stat": "~0.3.2",
+    "theeye-node-stat": "github:theeye-io/node-stat",
     "theeye-ps-aux": "~0.3.4",
-    "theeye-ps-node": "~0.1.1",
-    "tree-kill": "1.1.0",
+    "theeye-ps-node": "github:theeye-io/ps-node",
     "underscore": "1.8.3",
     "valid-data-url": "0.1.6"
   },
   "optionalDependencies": {
-    "userid": "git+https://github.com/theeye-io-team/node-userid.git#0.2.2"
+    "userid": "0.3.1",
+    "valid-data-url": "0.1.6"
   },
   "scripts": {
     "core": "node `pwd`/core/main.js",

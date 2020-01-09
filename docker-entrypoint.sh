@@ -3,7 +3,7 @@
 #/usr/bin/curl -s "https://s3.amazonaws.com/theeye.agent/linux/setup.sh" | bash -s  "$THEEYE_SUPERVISOR_CLIENT_ID" "$THEEYE_SUPERVISOR_CLIENT_SECRET" "$THEEYE_SUPERVISOR_CLIENT_CUSTOMER"
 
 if [ -z "$THEEYE_SUPERVISOR_API_URL" ];then
-THEEYE_SUPERVISOR_API_URL="https://supervisor.theeye.io"
+  THEEYE_SUPERVISOR_API_URL="https://supervisor.theeye.io"
 fi
 
 sed -i "s/THEEYE_SUPERVISOR_CLIENT_ID=''/THEEYE_SUPERVISOR_CLIENT_ID=$THEEYE_SUPERVISOR_CLIENT_ID/g" /etc/theeye/theeye.conf

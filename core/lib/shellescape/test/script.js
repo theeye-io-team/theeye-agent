@@ -1,0 +1,10 @@
+
+console.log('==============')
+console.log('argument 1 is:')
+console.log(process.argv[2])
+console.log('==============')
+console.log('argument 2 is:')
+console.log(process.argv[3])
+console.log('==============')
+console.log('argument 3 is:')
+console.log(process.argv[4])
