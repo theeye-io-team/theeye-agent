@@ -3,12 +3,16 @@ FROM ubuntu
 MAINTAINER jailbirt@gmail.com
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
+# Install Puppeteer under /node_modules so it's available system-wide
+COPY misc/puppeteer/package.json /
+COPY misc/puppeteer/package-lock.json /
 
 WORKDIR /
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
+
 # Install Puppeteer under /node_modules so it's available system-wide
 ADD ./misc/puppeteer/package.json ./misc/puppeteer/package-lock.json /
 
