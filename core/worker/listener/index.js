@@ -87,6 +87,7 @@ module.exports = AbstractWorker.extend({
       } else {
         if (job) {
           this.processJob(job, () => {
+            // when multitasking fetch job when finishing in progress
             if (multitasking === false) { this.rest(0) }
           })
           // rest and then fetch the next job
