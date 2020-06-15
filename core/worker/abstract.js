@@ -1,13 +1,9 @@
-'use strict';
 
-var util = require('util');
-var debug = require('debug');
-var _ = require('underscore');
-var EventEmitter = require('events').EventEmitter;
-var Constants = require('../constants');
+const debug = require('debug')
+const EventEmitter = require('events').EventEmitter
+const Constants = require('../constants')
 
-
-var MonitorWorker = function (connection,config) {
+const MonitorWorker = function (connection,config) {
   if (this.constructor === MonitorWorker) {
     throw new Error("Can't instantiate an abstract class!");
   }
@@ -30,7 +26,7 @@ var MonitorWorker = function (connection,config) {
   return this;
 }
 
-_.extend(MonitorWorker.prototype, EventEmitter.prototype, {
+Object.assign(MonitorWorker.prototype, EventEmitter.prototype, {
 	initialize: function() { },
 	getId : function() {
 		return null ;
@@ -61,7 +57,7 @@ _.extend(MonitorWorker.prototype, EventEmitter.prototype, {
 				self.debug.log('stopping worker due to errors.');
 				self.stop();
 			} else {
-				data.monitor_name = self.name ;
+				//data.monitor_name = self.name ;
 				self.submitWork(data);
 			}
 		});
@@ -114,31 +110,35 @@ _.extend(MonitorWorker.prototype, EventEmitter.prototype, {
 
 // copied the Backbone extend method
 MonitorWorker.extend = function(protoProps, staticProps) {
-	var parent = this;
-	var child;
+	var parent = this
+	var child
 
 	// The constructor function for the new subclass is either defined by you
 	// (the "constructor" property in your `extend` definition), or defaulted
 	// by us to simply call the parent constructor.
-	if (protoProps && _.has(protoProps, 'constructor')) {
-		child = protoProps.constructor;
+	if (protoProps && protoProps.hasOwnProperty('constructor')) {
+		child = protoProps.constructor
 	} else {
-		child = function(){ return parent.apply(this, arguments); };
+		child = function(){ return parent.apply(this, arguments) }
 	}
 
 	// Add static properties to the constructor function, if supplied.
-	_.extend(child, parent, staticProps);
+	Object.assign(child, parent, staticProps)
 
 	// Set the prototype chain to inherit from `parent`, without calling
 	// `parent`'s constructor function and add the prototype properties.
-	child.prototype = _.create(parent.prototype, protoProps);
-	child.prototype.constructor = child;
+  let defineProps = {}
+  for (let prop in protoProps) {
+    defineProps[prop] = { value: protoProps[prop] }
+  }
+	child.prototype = Object.create(parent.prototype, defineProps)
+	child.prototype.constructor = child
 
 	// Set a convenience property in case the parent's prototype is needed
 	// later.
-	child.__super__ = parent.prototype;
+	child.__super__ = parent.prototype
 
-	return child;
-};
+	return child
+}
 
-module.exports = MonitorWorker;
+module.exports = MonitorWorker

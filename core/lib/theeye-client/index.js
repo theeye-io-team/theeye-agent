@@ -10,7 +10,6 @@ var path = require('path');
 var util = require('util');
 var request = require('request');
 var debug = require('debug');
-var _ = require('underscore');
 
 var logger = {
   'debug': debug('eye:client:debug'),
@@ -65,19 +64,19 @@ TheEyeClient.prototype = {
 
     options.request||(options.request={});
 
-    var defaults = _.extend({},{
+    let defaults = Object.assign({}, {
       tunnel: false,
       timeout: 5000,
       json: true,
       gzip: true,
       baseUrl: connection.api_url
-    },options.request);
+    }, options.request)
 
-    defaults.headers = _.extend({ 'User-Agent': CLIENT_USER_AGENT },options.request.headers),
+    defaults.headers = Object.assign({ 'User-Agent': CLIENT_USER_AGENT }, options.request.headers)
 
-    logger.debug('request options set to %j', defaults);
+    logger.debug('request options set to %j', defaults)
 
-    connection.request = request.defaults(defaults);
+    connection.request = request.defaults(defaults)
   },
   /**
    *

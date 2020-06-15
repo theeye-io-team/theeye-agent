@@ -12,14 +12,11 @@
     "config": "1.25.1",
     "debug": "~4.1.1",
     "ip": "0.3.3",
-    "md5": "2.1.0",
     "mkdirp": "0.5.1",
     "request": "~2.88.0",
     "theeye-node-stat": "github:theeye-io/node-stat",
     "theeye-ps-aux": "~0.3.4",
-    "theeye-ps-node": "github:theeye-io/ps-node",
-    "underscore": "1.8.3",
-    "valid-data-url": "0.1.6"
+    "theeye-ps-node": "github:theeye-io/ps-node"
   },
   "optionalDependencies": {
     "userid": "0.3.1",

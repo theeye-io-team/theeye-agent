@@ -1,8 +1,7 @@
-'use strict';
 
-var AbstractWorker = require('../abstract');
-var File = require('../../lib/file');
-var Constants = require('../../constants');
+const AbstractWorker = require('../abstract')
+const File = require('../../lib/file')
+const Constants = require('../../constants')
 
 const EventConstants = require('../../constants/events')
 
@@ -177,32 +176,32 @@ module.exports = AbstractWorker.extend({
   },
   getData: function (next) {
     if (!this.file) {
-      var err = this.error;
+      var err = this.error
       if (!err) {
-        err = new Error('EFILE: file was not initialized. worker failed');
+        err = new Error('EFILE: file was not initialized. worker failed')
       }
-      return next(err);
+      return next(err)
     }
 
-    var self = this;
-    this.debug.log('checking file stats');
+    var self = this
+    this.debug.log('checking file stats')
     this.file.checkStats(function (err,stats) {
       if (err) {
-        self.processStatsError(err,next);
+        self.processStatsError(err,next)
       } else {
         self.file.checkMd5(function(err){
           if (err) {
-            self.processMd5Error(err,next);
+            self.processMd5Error(err,next)
           } else {
-            self.debug.log('file is ok');
+            self.debug.log('file is ok')
             next(null,{
               state: Constants.SUCCESS_STATE,
               data: { stats: stats } 
-            });
+            })
           }
-        });
+        })
       }
-    });
+    })
   },
   downloadFile: function (next) {
 		var self = this
