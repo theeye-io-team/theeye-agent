@@ -12,15 +12,15 @@
     "config": "1.25.1",
     "debug": "~4.1.1",
     "ip": "0.3.3",
-    "mkdirp": "0.5.1",
+    "mkdirp": "~1.0.4",
     "request": "~2.88.0",
     "theeye-node-stat": "github:theeye-io/node-stat",
     "theeye-ps-aux": "~0.3.4",
-    "theeye-ps-node": "github:theeye-io/ps-node"
+    "theeye-ps-node": "github:theeye-io/ps-node",
+    "valid-data-url": "~0.1.6"
   },
   "optionalDependencies": {
-    "userid": "0.3.1",
-    "valid-data-url": "0.1.6"
+    "userid": "0.3.1"
   },
   "scripts": {
     "core": "node `pwd`/core/main.js",
@@ -28,9 +28,6 @@
     "start": "/bin/bash ./run.sh"
   },
   "engine": "node >= 0.12",
-  "devDependencies": {
-    "nodemon": "~1.9.2"
-  },
   "os": [
     "win32",
     "win64",
