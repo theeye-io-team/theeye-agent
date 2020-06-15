@@ -1,27 +1,26 @@
-'use strict';
 
-var EventEmitter = require('events').EventEmitter;
-var join = require('path').join;
-var md5 = require('md5');
-var fs = require('fs');
-var util = require('util');
-var mkdirp = require('mkdirp');
-var debug = require('debug')('eye:lib:file');
+const EventEmitter = require('events').EventEmitter
+const join = require('path').join
+const fs = require('fs')
+const crypto = require('crypto')
+const util = require('util')
+const mkdirp = require('mkdirp')
+const debug = require('debug')('eye:lib:file')
 
 function noid () {
-  return null;
+  return null
 }
 
-var getuid = process.getuid||noid;
-var getgid = process.getgid||noid;
+let getuid = (process.getuid||noid)
+let getgid = (process.getgid||noid)
 
 /**
  * convert the returned stat.mode to the unix octal form
  * @return string
  */
 function statModeToOctalString (mode) {
-  var permString = '0' + (mode & parseInt('0777',8)).toString(8);
-  return permString;
+  var permString = '0' + (mode & parseInt('0777',8)).toString(8)
+  return permString
 }
 
 /**
@@ -55,36 +54,35 @@ function parseUnixId (id) {
 }
 
 function File (props) {
-
-  EventEmitter.call(this);
+  EventEmitter.call(this)
 
   /**
    * @name _id
    * @type string
    * @private
    */
-  var _id;
+  var _id
 
   /**
    * @name _md5
    * @type string
    * @private
    */
-  var _md5;
+  var _md5
 
   /**
    * @name _basename
    * @type string
    * @private
    */
-  var _basename;
+  var _basename
 
   /**
    * @name _dirname
    * @type string
    * @private
    */
-  var _dirname;
+  var _dirname
 
   /**
    * the full path
@@ -92,36 +90,36 @@ function File (props) {
    * @type string
    * @private
    */
-  var _path;
+  var _path
 
   /**
    * @name _mode
    * @type string permissions in Unix octal format
    * @private
    */
-  var _mode;
+  var _mode
 
   /**
    * @name _uid
    * @type integer unsigned integer
    * @private
    */
-  var _uid;
+  var _uid
 
   /**
    * @name _gid
    * @type integer unsigned integer
    * @private
    */
-  var _gid;
+  var _gid
 
-  _id = props.id;
-  _md5 = props.md5;
-  _dirname = props.dirname;
-  _basename = props.basename;
+  _id = props.id
+  _md5 = props.md5
+  _dirname = props.dirname
+  _basename = props.basename
   // path = dirname + basename
   // https://nodejs.org/api/path.html
-  _path = props.path;
+  _path = props.path
 
   if (!_path) throw new Error('EPATH: path is required');
   if (!_basename) throw new Error('EBASE: basename is required');
@@ -177,20 +175,17 @@ function File (props) {
   });
 
   this.checkMd5 = function (next) {
-    try {
-      var buf = fs.readFileSync(this.path);
-      var currmd5 = md5(buf);
-      debug('checking file md5 "%s" againts "%s"', currmd5, this.md5);
-      if (currmd5!=this.md5) {
-        var err = new Error('EMD5: file md5 sum mismatch');
-        err.code = 'EMD5';
-        next(err);
-      } else {
-        next();
-      }
-    } catch(e) {
-      return next(e);
-    }
+    md5(this.path)
+      .then(currmd5 => {
+        debug('checking file md5 "%s" againts "%s"', currmd5, this.md5)
+        if (currmd5 !== this.md5) {
+          var err = new Error('EMD5: file checksum mismatch')
+          err.code = 'EMD5'
+          next(err)
+        } else {
+          next()
+        }
+      }).catch(next)
   }
 
   this.checkAccess = function (next) {
@@ -238,36 +233,6 @@ function File (props) {
 
       next(null,stat);
     });
-  }
-
-  this.createFile = function (readable, next) {
-    const self = this
-    let cbCalled = false
-
-    // keep by default execution mode
-    debug('creating file %s..', this.path);
-
-    var writable = fs.createWriteStream(this.path, {
-      mode:'0755',
-      encoding: 'utf8'
-    })
-
-    function done (err) {
-      if (!cbCalled) {
-        readable.destroy()
-        writable.end()
-        next(err)
-        cbCalled = true
-      }
-    }
-
-    writable.on('error', done)
-    readable.on('error', done)
-    readable
-      .pipe(writable)
-      .on('finish',function(){
-        self.setAccess(done)
-      })
   }
 
   this.setAccess = function (done) {
@@ -325,18 +290,70 @@ function File (props) {
 
   this.save = function (stream, next) {
     var self = this
+
     if (!fs.existsSync(this.dirname)) {
       mkdirp(this.dirname, function (err) {
         if (err) { return next(err) }
-        else self.createFile(stream, next)
+        createFile(stream, next)
       })
     } else {
-      self.createFile(stream, next)
+      createFile(stream, next)
     }
     return this
   }
+
+  // private method
+  const createFile = (function(readable, next){
+    const self = this
+    let cbCalled = false
+
+    // keep by default execution mode
+    debug('creating file %s..', this.path);
+
+    var writable = fs.createWriteStream(this.path, { mode:'0755', encoding: 'utf8' })
+
+    function done (err) {
+      if (!cbCalled) {
+        readable.destroy()
+        writable.end()
+        next(err)
+        cbCalled = true
+      }
+    }
+
+    writable.on('error', done)
+    readable.on('error', done)
+    readable
+      .pipe(writable)
+      .on('finish',function(){
+        md5(this.path)
+          .then(checksum => {
+            _md5 = checksum
+            self.setAccess(done)
+          })
+          .catch(done)
+      })
+  }).bind(this)
 }
 
-util.inherits(File, EventEmitter);
+const md5 = (path, next) => {
+  return new Promise( (resolve, reject) => {
+    let hash = crypto.createHash('md5')
+    let stream = fs.createReadStream(path)
+
+    stream.on('data', function (data) {
+      hash.update(data, 'utf8')
+    })
+
+    stream.on('end', function () {
+      let checksum = hash.digest('hex')
+      resolve(checksum)
+    })
+
+    stream.on('error', reject)
+  })
+}
+
+util.inherits(File, EventEmitter)
 
 module.exports = File;
