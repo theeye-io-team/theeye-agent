@@ -1,9 +1,7 @@
-'use strict';
 
 //var config = require('config');
-var fs = require('fs');
-var path = require('path');
-var md5 = require('md5');
+const fs = require('fs');
+const path = require('path');
 var Script = require('../../lib/script');
 var AbstractWorker = require('../abstract');
 var JobsFactory = require('./job')
