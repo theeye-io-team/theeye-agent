@@ -292,10 +292,11 @@ function File (props) {
     var self = this
 
     if (!fs.existsSync(this.dirname)) {
-      mkdirp(this.dirname, function (err) {
-        if (err) { return next(err) }
-        createFile(stream, next)
-      })
+      mkdirp(this.dirname)
+        .then(function(){
+          createFile(stream, next)
+        })
+        .catch(next)
     } else {
       createFile(stream, next)
     }
