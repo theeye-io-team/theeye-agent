@@ -35,6 +35,9 @@ module.exports = {
     }
   },
   version: undefined,
+  logs: {
+    path: ( __dirname + '/../logs' )
+  },
   scripts: {
     path: ( __dirname + '/../downloads' ),
     timeout: 10 * 60 * 1000, // 10 minutes

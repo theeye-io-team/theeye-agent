@@ -1,5 +1,4 @@
-'use strict';
-var path = require('path');
+
 require('./environment')(function(){
   var main ='eye:agent:main:error';
   var debug = require('debug')(main);

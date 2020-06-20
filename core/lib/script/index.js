@@ -2,7 +2,6 @@
 
 var exec = require('child_process').exec
 var debug = require('debug')('eye:lib:script')
-//var kill = require('tree-kill')
 var DEFAULT_EXECUTION_TIMEOUT = 10 * 60 * 1000
 var File = require('../file')
 var ScriptOutput = require('./output')
@@ -88,6 +87,7 @@ function Script (props) {
   var _runas = props.runas
   var _args
   var _output = null
+  var _logging_path = props.logging_path
 
   Object.defineProperty(this, 'args', {
     get () { return _args },
@@ -99,6 +99,10 @@ function Script (props) {
   })
   Object.defineProperty(this, 'runas', {
     get () { return _runas },
+    enumerable: true
+  })
+  Object.defineProperty(this, 'logging_path', {
+    get () { return _logging_path },
     enumerable: true
   })
   Object.defineProperty(this, 'output', {
@@ -143,10 +147,9 @@ Script.prototype.run = function (end) {
   return this.execScript(formatted)
 }
 
-Script.prototype.execScript = function (script, options) {
+Script.prototype.execScript = function (script) {
   debug('running script "%s"', script)
 
-  options || (options = {})
   const self = this
   let partials = { stdout: [], stderr: [], log: [] }
   let execStart = process.hrtime()
@@ -166,6 +169,15 @@ Script.prototype.execScript = function (script, options) {
     encoding: 'utf8'
   })
 
+  if (this.logging_path) {
+    let writeLogStream = fs.createWriteStream(this.logging_path)
+    child.stdout.pipe(writeLogStream)
+    child.stderr.pipe(writeLogStream)
+    child.on('close', (code, signal) => {
+      writeLogStream.end()
+    })
+  }
+
   child.stdout.on('data', function (data) {
     partials.stdout.push(data)
     partials.log.push(data)
@@ -178,6 +190,7 @@ Script.prototype.execScript = function (script, options) {
 
   child.on('close', function (code, signal) {
     debug('child emit close with %j', arguments)
+
 
     var exec_diff = process.hrtime(execStart)
     debug('times %j.', exec_diff)
@@ -219,7 +232,7 @@ Script.prototype.execScript = function (script, options) {
     debug('child emit message with %j', arguments)
   })
 
-  return self
+  return child
 }
 
 module.exports = Script
