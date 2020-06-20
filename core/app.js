@@ -1,8 +1,6 @@
-'use strict';
 
 var ip = require('ip');
 var os = require('os');
-var util = require('util');
 var debug = require('debug')('eye:agent:app');
 var TheEyeClient = require('./lib/theeye-client');
 var hostname = require('./lib/hostname');

@@ -4,12 +4,20 @@ const Script = require('../../lib/script')
 const AbstractWorker = require('../abstract')
 const join = require('path').join
 const scriptsConfig = require('config').scripts
+const logsConfig = require('config').logs
 
 module.exports = AbstractWorker.extend({
   initialize () {
     //var directory = process.env.THEEYE_AGENT_SCRIPT_PATH
-    var directory = scriptsConfig.path
-    var config = this.config.script
+    let directory = scriptsConfig.path
+    let date = new Date()
+    let config = this.config.script
+
+    let logging_path
+    if (this.config.script.logging === true) {
+      logging_path = `${logsConfig.path}/script_${config.id}_${config.filename}_${date.toISOString()}.log`
+    }
+
     this.script = new Script({
       id: config.id,
       args: config.arguments || [],
@@ -20,7 +28,8 @@ module.exports = AbstractWorker.extend({
       md5: config.md5,
       dirname: directory,
       basename: config.filename,
-      path: join(directory, config.filename)
+      path: join(directory, config.filename),
+      logging_path
     })
   },
   checkScript (next) {

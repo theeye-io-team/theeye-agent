@@ -91,7 +91,8 @@ JobFactory.ScriptJob = function (specs, options) {
         runas: specs.script_runas,
         timeout: specs.timeout,
         // IMPORTANT. use empty string for passing empty vars into diff programming languages.
-        env: Object.assign({}, specs.env)
+        env: Object.assign({}, specs.env),
+        logging: specs.logging
       }
     }
 
