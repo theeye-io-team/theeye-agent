@@ -1,0 +1,32 @@
+FROM ubuntu:20.04
+MAINTAINER jailbirt@gmail.com
+
+# ambiente
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+WORKDIR /
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+
+# prerequicitos
+RUN chmod -v +x /docker-entrypoint.sh \
+     # uncomment the chosen locale to enable it's generation
+     && sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen   \
+     # generate chosen locale
+     && locale-gen \
+RUN apt update && apt install -y --no-install-recommends curl wget
+
+# install NodeJS
+RUN apt update && apt install -y --no-install-recommends jq imagemagick locales gnupg\
+     && curl -sL https://deb.nodesource.com/setup_10.x | bash - \
+     && apt-get install -y nodejs \
+     && npm install
+# install Theeye Agent
+RUN /usr/bin/curl -s "https://s3.amazonaws.com/theeye.agent/linux/setup.sh"|bash -s \
+     && chmod 666 /etc/theeye/theeye.conf
+
+#CleanUpLibs
+RUN rm -rf /var/lib/apt/lists/*
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["/opt/theeye-agent/runBinary.sh"]
