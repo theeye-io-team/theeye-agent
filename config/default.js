@@ -11,7 +11,7 @@ module.exports = {
    */
   workers: {
     // enable/disable jobs runner
-    enabled: true,
+    enable: true,
     // jobs runner settings
     listener: {
       type: 'listener',

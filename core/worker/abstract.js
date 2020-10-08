@@ -3,17 +3,17 @@ const debug = require('debug')
 const EventEmitter = require('events').EventEmitter
 const Constants = require('../constants')
 
-const MonitorWorker = function (connection,config) {
+const MonitorWorker = function (app, connection, config) {
   if (this.constructor === MonitorWorker) {
     throw new Error("Can't instantiate an abstract class!");
   }
 
-  EventEmitter.call(this);
+  EventEmitter.call(this)
 
-  this.config = config;
-  this.name = (config.name||config.type);
-  this.connection = connection;
-  this.enable = true;
+  this.app = app
+  this.config = config
+  this.name = (config.name || config.type)
+  this.connection = connection
 
   var part = this.config.type + (this.name ? (':' + this.name) : '');
   var log = 'eye:agent:worker:' + part;
@@ -70,8 +70,9 @@ Object.assign(MonitorWorker.prototype, EventEmitter.prototype, {
     );
   },
   run: function() {
-    this.debug.log('running worker "%s"', this.name);
-    this.keepAlive();
+    this.enable = true
+    this.debug.log('running worker "%s"', this.name)
+    this.keepAlive()
   },
   getData: function() {
     this.debug.error("Abstract method!");
