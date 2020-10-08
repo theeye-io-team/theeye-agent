@@ -24,17 +24,17 @@ module.exports.create = function (attribs, options) {
 // agent config update job
 //
 JobFactory.AgentUpdateJob = function(specs, options){
-  var listener = options.listener
+  const app = options.app
 
   this.id = specs.id
   this.specs = specs
   this.options = options
 
   function process (done) {
-    listener.once('config:updated', function (result) {
+    app.once('config:updated', function (result) {
       done(null, result)
     })
-    listener.emit('config:outdated')
+    app.emit('config:outdated')
   }
 
   this.getResults = function (next) { process(next) }

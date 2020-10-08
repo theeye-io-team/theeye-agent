@@ -44,7 +44,7 @@ module.exports = AbstractWorker.extend({
     const debug = this.debug
     const options = {
       connection: connection,
-      listener: this
+      app: this.app
     }
 
     /**
