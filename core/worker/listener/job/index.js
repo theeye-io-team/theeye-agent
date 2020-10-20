@@ -30,14 +30,12 @@ JobFactory.AgentUpdateJob = function(specs, options){
   this.specs = specs
   this.options = options
 
-  function process (done) {
+  this.getResults = function (done) {
     app.once('config:updated', function (result) {
       done(null, result)
     })
     app.emit('config:outdated')
   }
-
-  this.getResults = function (next) { process(next) }
 
   return this
 }
@@ -52,17 +50,15 @@ JobFactory.ScraperJob = function(specs, options) {
   this.specs = specs
   this.options = options
 
-  function process (done) {
+  this.getResults = function (done) {
     // prepare config
     var config = Object.assign(specs.task, { type: 'scraper' })
     // invoke worker
-    var scraper = WorkersFactory.spawn(config, connection)
+    var scraper = WorkersFactory.spawn(options.app, config, connection)
     scraper.getData(function(err,result){
       return done(null,result);
     });
   }
-
-  this.getResults = function (next) { process(next) }
 
   return this
 }
@@ -77,7 +73,7 @@ JobFactory.ScriptJob = function (specs, options) {
   this.specs = specs
   this.options = options
 
-  function process (done) {
+  this.getResults = function (done) {
     // prepare config
     //let event_data = specs.event_data || {}
     var config = {
@@ -97,13 +93,11 @@ JobFactory.ScriptJob = function (specs, options) {
     }
 
     // invoke worker
-    var script = WorkersFactory.spawn(config, connection)
+    var script = WorkersFactory.spawn(options.app, config, connection)
     script.getData(function(err,result){
       return done(null,result);
-    });
+    })
   }
-
-  this.getResults = function (next) { process(next) }
 
   return this;
 }
