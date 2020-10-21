@@ -61,3 +61,8 @@ docker run --rm -dit --name theeye-agent-build -v ${PWD}/bin:/output theeye/agen
 It will create the directory `./bin`
 
 
+## Docker Version
+
+```
+docker run theeye/agent:$(git describe) cat /src/theeye/agent/bin/release | grep Agent.Version
+```

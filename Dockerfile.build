@@ -2,7 +2,6 @@ FROM node:10
 MAINTAINER Facundo Gonzalez <facugon@theeye.io>
 
 ENV destDir /src/theeye/agent
-
 RUN mkdir -p ${destDir}
 WORKDIR ${destDir}
 COPY . ${destDir}
@@ -14,3 +13,4 @@ RUN apt update && apt install -y build-essential \
       && bash ./misc/compiler.sh \
       && bash ./misc/packager.sh
 
+CMD ["bin/theeye-agent"]
