@@ -6,8 +6,19 @@ RUN mkdir -p ${destDir}
 WORKDIR ${destDir}
 COPY . ${destDir}
 
-RUN apt update && apt install -y build-essential \
-      && npm install -g pkg \
+# Locales and base tools
+RUN apt-get update && apt-get install -y jq imagemagick locales build-essential \
+      && sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \ 
+      && locale-gen en_US.UTF-8
+
+# set system-wide locale settings
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+# verify modified configuration
+RUN dpkg-reconfigure --frontend noninteractive locales  
+
+RUN npm install -g pkg \
       && cd ${destDir} \
       && ls -l . \
       && bash ./misc/compiler.sh \
