@@ -52,7 +52,7 @@ git clone git@github.com:theeye-io/theeye-agent.git ${wd}
 
 cd ${wd}
 
-docker build . -f Dockerfile.build --tag theeye/agent:$(git describe)
+docker build . -f Dockerfile.slim --tag theeye/agent:$(git describe)
 
 docker run --rm -dit --name theeye-agent-build -v ${PWD}/bin:/output theeye/agent:$(git describe) cp -r /src/theeye/agent/bin/. /output
 
