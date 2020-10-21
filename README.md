@@ -42,3 +42,22 @@ For developing you may use dockerfile_sources wich install theeye-agent's source
 -----
 
 
+## Docker Build
+
+```shell
+
+wd='./theeye-agent'
+
+git clone git@github.com:theeye-io/theeye-agent.git ${wd}
+
+cd ${wd}
+
+docker build . -f Dockerfile.build --tag theeye/agent:$(git describe)
+
+docker run --rm -dit --name theeye-agent-build -v ${PWD}/bin:/output theeye/agent:$(git describe) cp -r /src/theeye/agent/bin/. /output
+
+```
+
+It will create the directory `./bin`
+
+

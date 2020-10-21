@@ -9,11 +9,11 @@ command -v pkg >/dev/null 2>&1 || { echo >&2 "pkg is required but it's not insta
 
 root="$PWD"
 target="bin"
-node_version="node6-linux"
-release="$target/release"
+node_version="node10-linux-x64"
+release="${target}/release"
 
-if [ -d "$target" ]; then
-  rm -rf $target
+if [ -d "${target}" ]; then
+  rm -rf ${target}
 fi
 
 if [ -d "node_modules" ]; then
@@ -25,8 +25,8 @@ command -v npm >/dev/null 2>&1 || { echo >&2 "npm is required but it's not insta
 
 npm install --production
 
-echo "creating $target"
-mkdir $target
+echo "creating ${target}"
+mkdir ${target}
 
 if [ ! -d "node_modules" ]; then
   echo "running npm --production"
@@ -45,38 +45,38 @@ cd $root
 
 pkg -v 
 echo "running pkg"
-pkg --targets $node_version --output $target/theeye-agent --debug core/main.js
+pkg --targets $node_version --output ${target}/theeye-agent --debug core/main.js
 
 # copy bindings
 echo "copying bindings"
-cp node_modules/userid/build/Release/userid.node $target
-cp node_modules/ref/build/Release/binding.node $target
-cp node_modules/ffi/build/Release/ffi_bindings.node $target
+cp node_modules/userid/build/Release/userid.node ${target}
+cp node_modules/ref/build/Release/binding.node ${target}
+cp node_modules/ffi/build/Release/ffi_bindings.node ${target}
 
 echo "copying configs"
 # copy configs
-if [ ! -d "$target/config" ]; then
-  echo "creating $target/config"
-  mkdir $target/config
+if [ ! -d "${target}/config" ]; then
+  echo "creating ${target}/config"
+  mkdir ${target}/config
 fi
 
-cp config/default.js $target/config
-cp config/production.js $target/config
+cp config/default.js ${target}/config
+cp config/production.js ${target}/config
 
-if [ -z "$NODE_ENV" ]; then
+if [ -z "${NODE_ENV}" ]; then
   NODE_ENV=''
 else
-  echo "copying $NODE_ENV config"
-  cp config/$NODE_ENV.js $target/config
+  echo "copying ${NODE_ENV} config"
+  cp config/${NODE_ENV}.js ${target}/config
 fi
 
 echo -e "Agent Version \t\t$(git describe)" >> $release
-echo -e "NODE_ENV config \t\t$NODE_ENV" >> $release
-echo -e "Node Version \t\t$node_version" >> $release
+echo -e "NODE_ENV config \t\t${NODE_ENV}" >> $release
+echo -e "Node Version \t\t${node_version}" >> $release
 echo -e "NPM Version \t\t$(npm --version)" >> $release
 echo -e "PKG Version \t\t$(pkg --version)" >> $release
 
 echo "summary"
-cat $target/release
+cat ${target}/release
 
 echo "success"
