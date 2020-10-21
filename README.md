@@ -42,7 +42,7 @@ For developing you may use dockerfile_sources wich install theeye-agent's source
 -----
 
 
-## Docker Build
+## Docker Build Binary Agent
 
 ```shell
 
@@ -60,9 +60,27 @@ docker run --rm -dit --name theeye-agent-build -v ${PWD}/bin:/output theeye/agen
 
 It will create the directory `./bin`
 
+## Docker Build (with binary agent included and puppeteer)
+
+```
+docker build . --tag theeye/agent:$(git describe)
+```
 
 ## Docker Version
 
 ```
 docker run theeye/agent:$(git describe) cat /src/theeye/agent/bin/release | grep Agent.Version
+```
+
+## RUN From Docker
+
+```bash
+docker run \
+   -e DEBUG="*eye*" \
+   -e NODE_ENV="production" \
+   -e THEEYE_SUPERVISOR_CLIENT_ID="client id" \
+   -e THEEYE_SUPERVISOR_CLIENT_SECRET="client secret" \
+   -e THEEYE_SUPERVISOR_CLIENT_CUSTOMER="customer name" \
+   -e THEEYE_SUPERVISOR_API_URL="https://supervisor.theeye.io" \
+   -e THEEYE_CLIENT_HOSTNAME="agent name" theeye/agent:$(git describe)
 ```
