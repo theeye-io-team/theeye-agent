@@ -2,16 +2,15 @@ FROM node:10
 MAINTAINER Javier Ailbirt <jailbirt@gmail.com>
 MAINTAINER Facundo Gonzalez <facugon@theeye.io>
 
-#COPY docker-entrypoint.sh /docker-entrypoint.sh
-
-ENV destDir /src/theeye/agent
+ENV destDir=/src/theeye/agent
 RUN mkdir -p ${destDir}
 WORKDIR ${destDir}
 COPY . ${destDir}
 
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US.UTF-8
-ENV LC_ALL en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV THEEYE_AGENT_SCRIPT_PATH=${destDir}/downloads
 
 # puppeteer extras
 RUN apt update && apt install -y --no-install-recommends \
@@ -26,7 +25,7 @@ RUN apt update && apt install -y --no-install-recommends \
     && apt-get install -y google-chrome-stable --no-install-recommends \
      && wget --quiet https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh -O /usr/sbin/wait-for-it.sh \
      && chmod +x /usr/sbin/wait-for-it.sh \
-     && cd ./downloads && npm install puppeteer@2.0.0 \
+     && mkdir ${destDir}/downloads && cd ${destDir}/downloads && npm install puppeteer@2.0.0 \
      #&& chmod -v +x /docker-entrypoint.sh \
      # CleanUpLibs
      && rm -rf /var/lib/apt/lists/*
@@ -39,5 +38,4 @@ RUN apt update && apt install -y build-essential \
       && bash ./misc/compiler.sh \
       && bash ./misc/packager.sh
 
-#ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["bin/theeye-agent"]
