@@ -10,7 +10,6 @@ COPY . ${destDir}
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
-ENV THEEYE_AGENT_SCRIPT_PATH=${destDir}/downloads
 
 # puppeteer extras
 RUN apt update && apt install -y --no-install-recommends \
