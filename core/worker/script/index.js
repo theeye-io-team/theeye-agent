@@ -14,7 +14,7 @@ module.exports = AbstractWorker.extend({
     let config = this.config.script
 
     let logging_path
-    if (this.config.script.logging === true) {
+    if (this.config.script.logging === true || logsConfig.global === true) {
       logging_path = `${logsConfig.path}/script_${config.id}_${config.filename}_${date.toISOString()}.log`
     }
 

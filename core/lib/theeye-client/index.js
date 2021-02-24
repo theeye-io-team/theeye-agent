@@ -195,22 +195,22 @@ TheEyeClient.prototype = {
   performRequest : function(options, doneFn){
     try {
       doneFn||(doneFn=function(){});
-      var connection = this;
-      var hostname = this.hostname;
-      var customer = this.client_customer;
+      const connection = this
+      const hostname = this.hostnameFn()
+      const customer = this.client_customer
 
-      var prepareUri = function(options){
-        var uri = options.uri||options.url;
+      const prepareUri = function(options){
+        let uri = options.uri||options.url;
         uri = uri.replace(':hostname',hostname);
         uri = uri.replace(':customer',customer);
         return uri;
       }
 
-      var prepareQueryString = function(options){
+      const prepareQueryString = function(options){
         // add customer to the qs if not present elsewhere
-        var qs = options.qs||{};
-        var uri = options.uri||options.url;
-        var customer = qs.customer || /:customer/.test(uri) !== false;
+        const qs = options.qs||{};
+        const uri = options.uri||options.url;
+        const customer = qs.customer || /:customer/.test(uri) !== false;
         if(!customer) {
           if( connection.client_customer ) {
             qs.customer = connection.client_customer;
@@ -394,7 +394,7 @@ TheEyeClient.prototype = {
    *
    *
    */
-  getAgentConfig: function(hostname, next) {
+  getAgentConfig: function(next) {
     this.performRequest({
       method:'get',
       url:  '/:customer/agent/:hostname/config'

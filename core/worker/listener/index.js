@@ -102,7 +102,7 @@ module.exports = AbstractWorker.extend({
       route: '/:customer/job',
       query: {
         process_next: 1,
-        hostname: this.connection.hostname
+        hostname: this.connection.hostnameFn()
       },
       failure: function(err){
         done(err)

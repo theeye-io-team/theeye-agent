@@ -3,7 +3,7 @@ const ip = require('ip')
 const os = require('os')
 const debug = require('debug')('eye:agent:app')
 const TheEyeClient = require('./lib/theeye-client')
-const hostname = require('./lib/hostname')
+const hostnameFn = require('./lib/hostname')
 const Worker = require('./worker')
 const ListenerWorker = require('./worker/listener')
 const PingWorker = require('./worker/ping')
@@ -19,9 +19,9 @@ function App () {
 
   this.on('config:outdated', () => updateWorkers())
 
-  var connection = localConfig.supervisor||{};
-  connection.hostname = hostname;
-  connection.request = localConfig.request;
+  var connection = localConfig.supervisor || {}
+  connection.hostnameFn = hostnameFn
+  connection.request = localConfig.request
 
   var _connection = new TheEyeClient(connection);
   var _host_id;
@@ -43,7 +43,7 @@ function App () {
         version: process.env.THEEYE_AGENT_VERSION,
         info: {
           platform: os.platform(),
-          hostname: hostname,
+          hostname: hostnameFn(),
           arch: os.arch(),
           os_name: os.type(),
           os_version: os.release(),
@@ -156,7 +156,7 @@ function App () {
 
   function getConfig (next) {
     debug('obtaining agent config')
-    _connection.getAgentConfig(hostname, next)
+    _connection.getAgentConfig(next)
   }
 
   function reconfigureWorkers (next) {
