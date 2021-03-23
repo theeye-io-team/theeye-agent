@@ -1,13 +1,15 @@
 FROM node:10
 MAINTAINER Facundo Gonzalez <facugon@theeye.io>
 
+ARG DEBIAN_FRONTEND=noninteractive
 ENV destDir /src/theeye/agent
 RUN mkdir -p ${destDir}
 WORKDIR ${destDir}
 COPY . ${destDir}
 
 # Locales and base tools
-RUN apt-get update && apt-get install -y jq imagemagick locales build-essential \
+RUN apt-get update \
+      && apt-get install -y jq curl imagemagick locales build-essential ripmime poppler-utils isync rename tzdata mpack \
       && sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \ 
       && locale-gen en_US.UTF-8
 
