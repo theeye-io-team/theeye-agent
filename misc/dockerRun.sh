@@ -5,7 +5,7 @@ clientHostname=${THEEYE_CLIENT_HOSTNAME}
 apiUrl="https://supervisor.theeye.io"
 debug="*eye*"
 name="${clientCustomer}"
-image="theeye-agent:slim"
+image="${1}"
 
 docker run  --memory=512m -e NODE_ENV='production' \
   -e THEEYE_SUPERVISOR_CLIENT_ID="${clientId}" \

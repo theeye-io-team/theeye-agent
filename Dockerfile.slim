@@ -1,4 +1,4 @@
-FROM node:10
+FROM ubuntu
 MAINTAINER Facundo Gonzalez <facugon@theeye.io>
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -8,8 +8,8 @@ WORKDIR ${destDir}
 COPY . ${destDir}
 
 # Locales and base tools
-RUN apt-get update \
-      && apt-get install -y jq curl imagemagick locales build-essential ripmime poppler-utils isync rename tzdata mpack \
+RUN apt-get update -qqq \
+      && apt-get install -y jq curl imagemagick locales build-essential ripmime poppler-utils isync rename tzdata mpack mutt git \
       && sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \ 
       && locale-gen en_US.UTF-8
 
@@ -20,10 +20,14 @@ ENV LC_ALL en_US.UTF-8
 # verify modified configuration
 RUN dpkg-reconfigure --frontend noninteractive locales  
 
-RUN npm install -g pkg \
+RUN curl -fsSL https://deb.nodesource.com/setup_10.x | bash - \
+      && apt-get install -y nodejs gcc g++ make
+
+RUN npm install -g pkg n \
       && cd ${destDir} \
       && ls -l . \
       && bash ./misc/compiler.sh \
-      && bash ./misc/packager.sh
+      && bash ./misc/packager.sh \
+      && n 14
 
 CMD ["bin/theeye-agent"]

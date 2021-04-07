@@ -6,11 +6,14 @@
 # Everything below will go to the file 'run_enclose.out':
 
 command -v pkg >/dev/null 2>&1 || { echo >&2 "pkg is required but it's not installed."; echo "failure"; exit 2; }
+command -v npm >/dev/null 2>&1 || { echo >&2 "npm is required but it's not installed."; echo "failure"; exit 1; }
 
-root="$PWD"
+root="${PWD}"
 target="bin"
 node_version="node10-linux-x64"
 release="${target}/release"
+
+echo "current working directory is ${root}"
 
 if [ -d "${target}" ]; then
   rm -rf ${target}
@@ -18,40 +21,35 @@ fi
 
 if [ -d "node_modules" ]; then
   echo "rebuilding node_modules"
-  rm -rf "$PWD/node_modules"
+  rm -rf "${root}/node_modules"
 fi
-
-command -v npm >/dev/null 2>&1 || { echo >&2 "npm is required but it's not installed."; echo "failure"; exit 1; }
-
-npm install --production
 
 echo "creating ${target}"
 mkdir ${target}
 
-if [ ! -d "node_modules" ]; then
-  echo "running npm --production"
-  npm install
-fi
-
-#cd $root/node_modules/config
-
 echo "running npm version $(npm --version)"
+npm install
 
-# add extra dependencies - not used by the agent anyway. but just to avoid errors and warnings
+echo "adding extra dependencies"
+# add extra dependencies - not used by the agent anyway - just to avoid errors and warnings
 npm install hjson toml cson properties x2js
 
-# run enclose
+# run pkg
 cd $root
 
-pkg -v 
-echo "running pkg"
-pkg --targets $node_version --output ${target}/theeye-agent --debug core/main.js
+echo "running pkg " $(pkg -v) 
+pkg --targets ${node_version} --output ${target}/theeye-agent --debug ${root}/core/main.js
 
 # copy bindings
 echo "copying bindings"
-cp node_modules/userid/build/Release/userid.node ${target}
-cp node_modules/ref/build/Release/binding.node ${target}
-cp node_modules/ffi/build/Release/ffi_bindings.node ${target}
+ls -l ${root}/node_modules/userid/build
+cp ${root}/node_modules/userid/build/Release/userid.node ${target}
+
+ls -l ${root}/node_modules/ref/build
+cp ${root}/node_modules/ref/build/Release/binding.node ${target}
+
+ls -l ${root}/node_modules/ffi/build
+cp ${root}/node_modules/ffi/build/Release/ffi_bindings.node ${target}
 
 echo "copying configs"
 # copy configs
@@ -60,14 +58,14 @@ if [ ! -d "${target}/config" ]; then
   mkdir ${target}/config
 fi
 
-cp config/default.js ${target}/config
-cp config/production.js ${target}/config
+cp ${root}/config/default.js ${target}/config
+cp ${root}/config/production.js ${target}/config
 
 if [ -z "${NODE_ENV}" ]; then
   NODE_ENV=''
 else
   echo "copying ${NODE_ENV} config"
-  cp config/${NODE_ENV}.js ${target}/config
+  cp ${root}/config/${NODE_ENV}.js ${target}/config
 fi
 
 echo -e "Agent Version \t\t$(git describe)" >> $release
