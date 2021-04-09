@@ -66,7 +66,9 @@ module.exports = {
    * THEEYE_SUPERVISOR_CLIENT_SECRET
    * THEEYE_SUPERVISOR_CLIENT_CUSTOMER
    */
-  supervisor: {},
+  supervisor: {
+    api_url: process.env.THEEYE_SUPERVISOR_API_URL || "https://supervisor.theeye.io"
+  },
   request: {
     proxy: proxy,
     tunnel: Boolean(proxy), // tunnel required when using proxy
