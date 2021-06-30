@@ -5,9 +5,9 @@
  * @summary parse job data
  *
  */
-var WorkersFactory = require('../../index')
-
-var JobFactory = { }
+const WorkersFactory = require('../../index')
+const JobFactory = { }
+const logsConfig = require('config').logs
 
 module.exports.create = function (attribs, options) {
   var type = attribs._type
@@ -74,6 +74,13 @@ JobFactory.ScriptJob = function (specs, options) {
   this.specs = specs
   this.options = options
 
+  let logging_path = undefined
+  if (specs.script.execution_logging_enabled === true) {
+    let dirname = (specs.script.execution_logging_dirname || logsConfig.path) 
+    let filename = (specs.script_execution_logging_filename || `script_${config.id}_${config.filename}`)
+    logging_path = `${dirname}/${filename}_${date.toISOString()}.log`
+  }
+
   this.getResults = function (done) {
     // prepare config
     //let event_data = specs.event_data || {}
@@ -89,7 +96,7 @@ JobFactory.ScriptJob = function (specs, options) {
         timeout: specs.timeout,
         // IMPORTANT. use empty string for passing empty vars into diff programming languages.
         env: Object.assign({}, specs.env),
-        logging: specs.logging
+        logging_path
       }
     }
 

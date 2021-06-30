@@ -45,15 +45,22 @@ function createScriptsPath () {
 
 function createLogsPath () {
   let path = (process.env.THEEYE_AGENT_LOGS_PATH || config.logs && config.logs.path)
-  if (!path) { path = process.cwd() + '/../logs' }
+  if (!path) {
+    debug('Logs path is not set')
+    return
+  }
 
-  if (!config.logs) { config.logs = {} }
+  if (!config.logs) {
+    config.logs = {}
+  }
+
   config.logs.path = path 
   logger.log('Logs path is %s', config.logs.path)
 
   if (!fs.existsSync(path)) {
     fs.mkdirSync(path, '0755')
   }
+
   return path
 }
 

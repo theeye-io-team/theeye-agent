@@ -49,7 +49,7 @@ module.exports = {
   },
   version: undefined,
   logs: {
-    path: ( __dirname + '/../logs' )
+    //path: ( __dirname + '/../logs' )
   },
   scripts: {
     path: ( __dirname + '/../downloads' ),
