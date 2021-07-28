@@ -1,6 +1,6 @@
 'use strict'
 
-var exec = require('child_process').exec
+const exec = require('child_process').exec
 var debug = require('debug')('eye:lib:script')
 var DEFAULT_EXECUTION_TIMEOUT = 10 * 60 * 1000
 var File = require('../file')
