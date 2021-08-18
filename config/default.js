@@ -15,7 +15,7 @@ module.exports = {
     // jobs runner settings
     listener: {
       type: 'listener',
-      looptime: 15000,
+      looptime: 10000,
       multitasking: MULTITASKING // process only one job at the same time. disable multi jobs processing capability
     },
     // host keep alive settings

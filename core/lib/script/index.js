@@ -60,8 +60,10 @@ function Script (props) {
           if (isDataUrl(arg)) {
             let filename = base64str2file(arg, scriptsConfig.path)
             parsed.push(filename)
-          } else {
+          } else if (arg === null || arg === undefined) {
             // escape spaces both for linux and windows
+            parsed.push("")
+          } else {
             parsed.push(arg)
           }
         })
