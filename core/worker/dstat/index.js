@@ -1,6 +1,6 @@
 'use strict';
 
-var NStat = require('theeye-node-stat');
+var NodeStat = require('theeye-node-stat');
 var AbstractWorker = require('../abstract');
 var FAILURE_STATE = 'failure';
 var NORMAL_STATE = 'normal';
@@ -12,14 +12,16 @@ var Worker = module.exports = AbstractWorker.extend({
   getData: function(next) {
     var self = this;
 
+    let nodestat
     try {
-      var nodestat = new NStat();
+      nodestat = new NodeStat();
     } catch (e) {
       self.debug.error('worker failure.', e);
       return next( new Error('worker failure') );
     }
 
-    nodestat.get('stat','mem','net','load','disk',
+    nodestat.get(
+      'stat','mem','net','load','disk',
       function(error, data) {
         if(error) {
           self.debug.error('unable to get data');
@@ -27,7 +29,7 @@ var Worker = module.exports = AbstractWorker.extend({
           return next(new Error('unable to get data'));
         } else {
           var loadArray = data.load;
-          var stats = {
+          var dstat = {
             cpu_used: (100 - data.stat.cpu.total.idle),
             cpu_user: data.stat.cpu.total.user,
             cpu_system: data.stat.cpu.total.system,
@@ -40,13 +42,13 @@ var Worker = module.exports = AbstractWorker.extend({
             mem_total: data.mem.total,
             cacheTotal: data.mem.swaptotal,
             cacheFree: data.mem.swapfree,
-            net: data.net,
+            //net: data.net,
             disk: data.disk
           }
 
           self.connection.create({
             route: '/:customer/dstat/:hostname',
-            body: {dstat:stats},
+            body: {dstat},
             success: function(body){ },
             failure: function(err){ self.debug.error(err) }
           });
