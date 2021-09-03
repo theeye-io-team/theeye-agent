@@ -2,52 +2,24 @@
 const AbstractWorker = require('../abstract')
 const File = require('../../lib/file')
 const Constants = require('../../constants')
-
 const EventConstants = require('../../constants/events')
-
 const os = require('os')
-var userid
-if (os.platform() != 'win32') {
-  userid = require('userid')
-} else {
-  userid = {
-    uid: () => null,
-    gid: () => null
-  }
-}
 
 module.exports = AbstractWorker.extend({
   initialize: function () {
     var config = this.config
     var file = config.file
     var mode = config.permissions
-    var uid = null
-    var gid = null
 
-    if (this.config.os_username) {
-      try {
-        uid = userid.uid(this.config.os_username)
-      } catch (e) {
-        this.debug.error(e)
-      }
-    }
-    if (this.config.os_groupname) {
-      try {
-        gid = userid.gid(this.config.os_groupname)
-      } catch (e) {
-        this.debug.error(e)
-      }
-    }
-
-    var specs = {
+    const specs = {
       id: file.id,
       md5: file.md5,
       basename: config.basename,
       dirname: config.dirname,
       path: config.path,
       mode: mode,
-      uid: uid,
-      gid: gid
+      uid: null,
+      gid: null
     }
 
     try {
