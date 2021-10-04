@@ -10,7 +10,7 @@ command -v npm >/dev/null 2>&1 || { echo >&2 "npm is required but it's not insta
 
 root="${PWD}"
 target="bin"
-node_version="node10-linux-x64"
+node_version="node14-linux-x64"
 release="${target}/release"
 
 echo "current working directory is ${root}"
