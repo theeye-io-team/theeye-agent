@@ -42,14 +42,18 @@ pkg --targets ${node_version} --output ${target}/theeye-agent --debug ${root}/co
 
 # copy bindings
 echo "copying bindings"
-ls -l ${root}/node_modules/userid/build
-cp ${root}/node_modules/userid/build/Release/userid.node ${target}
+#ls -l ${root}/node_modules/userid/build
+#cp ${root}/node_modules/userid/build/Release/userid.node ${target}
+#
+#ls -l ${root}/node_modules/ref/build
+#cp ${root}/node_modules/ref/build/Release/binding.node ${target}
+#
+#ls -l ${root}/node_modules/ffi/build
+#cp ${root}/node_modules/ffi/build/Release/ffi_bindings.node ${target}
 
-ls -l ${root}/node_modules/ref/build
-cp ${root}/node_modules/ref/build/Release/binding.node ${target}
-
-ls -l ${root}/node_modules/ffi/build
-cp ${root}/node_modules/ffi/build/Release/ffi_bindings.node ${target}
+echo "Diskusage"
+ls -l ${root}/node_modules/diskusage/build/Release/
+cp ${root}/node_modules/diskusage/build/Release/diskusage.node ${target}
 
 echo "copying configs"
 # copy configs
