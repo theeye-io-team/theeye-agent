@@ -15,3 +15,4 @@ run_enclose.out
 *.tgz
 agents-scripts
 logs
+theeye-agent/

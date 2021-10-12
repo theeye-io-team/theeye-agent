@@ -11,20 +11,20 @@
   },
   "dependencies": {
     "config": "1.25.1",
-    "cson": "^7.20.0",
+    "cson": "~7.20.0",
     "debug": "~4.1.1",
-    "hjson": "^3.2.2",
+    "hjson": "~3.2.2",
     "ip": "0.3.3",
     "mkdirp": "~1.0.4",
     "nodemon": "~2.0.4",
-    "properties": "^1.2.1",
+    "properties": "~1.2.1",
     "request": "~2.88.0",
     "theeye-node-stat": "github:theeye-io/node-stat",
     "theeye-ps-aux": "~0.3.4",
     "theeye-ps-node": "github:theeye-io/ps-node",
-    "toml": "^3.0.0",
+    "toml": "~3.0.0",
     "valid-data-url": "~0.1.6",
-    "x2js": "^3.4.2"
+    "x2js": "~3.4.2"
   },
   "scripts": {
     "core": "node `pwd`/core/main.js",
