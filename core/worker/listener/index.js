@@ -39,81 +39,84 @@ module.exports = AbstractWorker.extend({
    * @param Job data
    * @return null
    */
-  processJob: function (jobData, done) {
-    const connection = this.connection
-    const debug = this.debug
-    const options = {
-      connection: connection,
-      app: this.app
-    }
-
-    /**
-     *
-     * process job jobData
-     *
-     */
-    const job = JobsFactory.create(jobData, options)
-    job.getResults((err, result) => {
-      if (err) {
-        debug.error('%o', err)
-      }
-
-      let payload = (err || result)
-      connection.submitJobResult(job.id, payload, (err) => {
-        if (err) {
-          debug.error('%o', err)
-        }
-        done(err)
-      })
-    })
-  },
   /**
    * the steps to be performed on each worker cicle.
    * @param Function next
    * @return null
    */
-  keepAlive: function () {
-    var resource = this.supervisor_resource
-    var multitasking = this.config.multitasking
+  keepAlive () {
+    const resource = this.supervisor_resource
+    const multitasking = this.config.multitasking
 
     this.debug.log('fetching jobs')
-    this.getJob((err, job) => {
-      if (err) {
+    this
+      .getJob()
+      .catch(err => {
         this.debug.error('supervisor response error')
         this.debug.error(err)
         this.rest()
-      } else {
-        if (job) {
-          this.processJob(job, () => {
-            // when multitasking fetch job when finishing in progress
-            if (multitasking === false) { this.rest(0) }
-          })
-          // rest and then fetch the next job
-          if (multitasking !== false) { this.rest() }
-        } else {
+      })
+      .then(job => {
+        if (!job) {
           this.debug.log('no job to process')
           this.rest()
+          return
         }
-      }
+
+        this
+          .executeJob(job)
+          .then(({ result, payload }) => {
+            this.rest(0)
+          })
+
+        if (multitasking !== false) {
+          this.debug.log('multitasking disabled')
+          this.rest()
+        }
+      })
+  },
+  getJob () {
+    return new Promise( (resolve, reject) => {
+      this.connection.fetch({
+        route: '/:customer/job',
+        query: {
+          process_next: 1,
+          hostname: this.connection.hostnameFn()
+        },
+        failure: reject,
+        success: body => {
+          if (Array.isArray(body.jobs) && body.jobs.length > 0) {
+            resolve(body.jobs[0])
+          } else {
+            resolve()
+          }
+        }
+      })
     })
   },
-  getJob: function (done) {
-    this.connection.fetch({
-      route: '/:customer/job',
-      query: {
-        process_next: 1,
-        hostname: this.connection.hostnameFn()
-      },
-      failure: function(err){
-        done(err)
-      },
-      success: function(body){
-        if (Array.isArray(body.jobs) && body.jobs.length > 0) {
-          done(null, body.jobs[0])
-        } else {
-          done()
-        }
-      }
+  /**
+   * @return {Promise}
+   */
+  executeJob (jobData) {
+    return new Promise((resolve, reject) => {
+      const connection = this.connection
+      const debug = this.debug
+      const options = { connection, app: this.app }
+
+      /**
+       *
+       * process job jobData
+       *
+       */
+      const job = JobsFactory.create(jobData, options)
+      job.getResults((err, result) => {
+        if (err) { debug.error('%o', err) }
+        const payload = (err || result)
+        connection.submitJobResult(job.id, payload, (err, result) => {
+          if (err) { debug.error('%o', err) }
+          resolve({ payload, result })
+        })
+      })
     })
   }
 })
