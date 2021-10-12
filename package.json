@@ -1,5 +1,5 @@
 {
-  "version": "0.16.1",
+  "version": "1.0.0",
   "name": "TheEye-Agent",
   "description": "TheEye Agent - TheEye Client",
   "author": "Facugon <facugon@interactar.com>",
@@ -31,7 +31,7 @@
     "inspect": "node --inspect-brk `pwd`/core/main.js",
     "start": "/bin/bash ./run.sh"
   },
-  "engine": "node >= 0.12",
+  "engine": "node >= 14",
   "os": [
     "win32",
     "win64",
