@@ -31,6 +31,16 @@ Object.assign(MonitorWorker.prototype, EventEmitter.prototype, {
   getId : function() {
     return null ;
   },
+  submitWork: function(data,next) {
+    this.connection.updateResource(
+      this.config.resource_id, data, next
+    );
+  },
+  run () {
+    this.enable = true
+    this.debug.log('running worker "%s"', this.name)
+    this.keepAlive()
+  },
   keepAlive: function() {
     var self = this;
     this.debug.log(
@@ -64,36 +74,18 @@ Object.assign(MonitorWorker.prototype, EventEmitter.prototype, {
 
     this.rest();
   },
-  submitWork: function(data,next) {
-    this.connection.updateResource(
-      this.config.resource_id, data, next
-    );
-  },
-  run: function() {
-    this.enable = true
-    this.debug.log('running worker "%s"', this.name)
-    this.keepAlive()
+  rest (msecs) {
+    if (!this.enable) { return }
+
+    let time = (typeof msecs === 'number') ? msecs : this.config.looptime
+
+    this.debug.log('worker "%s" is sleeping for "%d" seconds', this.name, (time/1000))
+
+    this.timeout = setTimeout(() => this.keepAlive(), time)
   },
   getData: function() {
     this.debug.error("Abstract method!");
     throw new Error("Abstract method!");
-  },
-  rest: function (msecs) {
-    if (!this.enable) {
-      return
-    }
-
-    let time = msecs || this.config.looptime
-
-    this.debug.log(
-      'worker "%s" will sleep "%d" seconds', 
-      this.name,
-      (time / 1000)
-    )
-
-    this.timeout = setTimeout(() => {
-      return this.keepAlive()
-    }, time)
   },
   setConfig: function(config) {
     this.config = config;
