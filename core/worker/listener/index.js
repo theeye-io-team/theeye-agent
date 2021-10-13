@@ -47,11 +47,11 @@ module.exports = AbstractWorker.extend({
     try {
       this.debug.log(`Jobs in progress ${this.running_queue}`)
       this.executeJobs()
-      this.rest()
     } catch (err) {
       this.debug.error(err)
-      return this.rest()
     }
+
+    this.rest()
   },
   async executeJobs () {
     const { multitasking_limit, multitasking, task_id } = this.config
