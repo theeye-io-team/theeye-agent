@@ -44,6 +44,6 @@ tar -czf theeye-agent64-$release.tar.gz $target
 
 echo "removing temporal files"
 
-#rm -rf $target
+rm -rf $target
 
 echo "success"

@@ -39,68 +39,63 @@ module.exports = AbstractWorker.extend({
     });
   },
   /**
-   * process the job received from the supervisor
-   * @param Job data
-   * @return null
-   */
-  /**
    * the steps to be performed on each worker cicle.
    * @param Function next
    * @return null
    */
   keepAlive () {
-    const resource = this.supervisor_resource
-    const { multitasking_limit, multitasking } = this.config
-
-    this.debug.log('fetching jobs')
-    this
-      .getJob()
-      .catch(err => {
-        this.debug.error('supervisor response error')
-        this.debug.error(err)
-        this.rest()
-      })
-      .then(job => {
-        if (!job) {
-          this.debug.log('no job to process')
-          this.rest()
-          return
-        }
-
-        this.running_queue++
-        this
-          .executeJob(job)
-          .catch(err => err)
-          .then(() => {
-            this.running_queue--
-            if (multitasking === false) {
-              // when not multitasking only rest after compliting a job
-              this.rest(0)
-            }
-          })
-
-        // parallel execution
-        if (multitasking !== false) {
-          let msecs
-          if (this.running_queue < multitasking_limit) {
-            msecs = 0
-          }
-          this.rest(msecs)
-        }
-      })
+    try {
+      this.debug.log(`Jobs in progress ${this.running_queue}`)
+      this.executeJobs()
+      this.rest()
+    } catch (err) {
+      this.debug.error(err)
+      return this.rest()
+    }
   },
-  getJob () {
+  async executeJobs () {
+    const { multitasking_limit, multitasking, task_id } = this.config
+    let limit
+    if (multitasking === false) {
+      limit = (1 - this.running_queue)
+    } else {
+      limit = (multitasking_limit - this.running_queue)
+    }
+
+    if (limit <= 0) { return }
+
+    this.debug.log(`Fetching ${limit} jobs MAX`)
+    const jobs = await this.getJobs({ task_id, limit })
+    if (!jobs || !Array.isArray(jobs) || jobs.length === 0) {
+      this.debug.log('no job to process')
+      return
+    }
+
+    for (let job of jobs) {
+      this.running_queue++
+      this
+        .executeJob(job)
+        .catch(err => err)
+        .then(() => {
+          this.running_queue--
+          this.executeJobs()
+        })
+    }
+  },
+  getJobs (query) {
+    const { task_id = undefined, limit = 1 } = query
     return new Promise( (resolve, reject) => {
       this.connection.fetch({
         route: '/:customer/job',
         query: {
-          process_next: 1,
-          hostname: this.connection.hostnameFn()
+          hostname: this.connection.hostnameFn(),
+          limit,
+          task_id
         },
         failure: reject,
         success: body => {
           if (Array.isArray(body.jobs) && body.jobs.length > 0) {
-            resolve(body.jobs[0])
+            resolve(body.jobs)
           } else {
             resolve()
           }
