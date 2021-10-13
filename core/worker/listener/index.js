@@ -12,6 +12,10 @@ var JobsFactory = require('./job')
  *
  */
 module.exports = AbstractWorker.extend({
+  initialize () {
+    this.config.multitasking_limit || (this.config.multitasking_limit = 1)
+    this.running_queue = 0
+  },
   jobs: {},
   type: 'listener',
   /**
@@ -46,7 +50,7 @@ module.exports = AbstractWorker.extend({
    */
   keepAlive () {
     const resource = this.supervisor_resource
-    const multitasking = this.config.multitasking
+    const { multitasking_limit, multitasking } = this.config
 
     this.debug.log('fetching jobs')
     this
@@ -63,15 +67,25 @@ module.exports = AbstractWorker.extend({
           return
         }
 
+        this.running_queue++
         this
           .executeJob(job)
-          .then(({ result, payload }) => {
-            this.rest(0)
+          .catch(err => err)
+          .then(() => {
+            this.running_queue--
+            if (multitasking === false) {
+              // when not multitasking only rest after compliting a job
+              this.rest(0)
+            }
           })
 
+        // parallel execution
         if (multitasking !== false) {
-          this.debug.log('multitasking disabled')
-          this.rest()
+          let msecs
+          if (this.running_queue < multitasking_limit) {
+            msecs = 0
+          }
+          this.rest(msecs)
         }
       })
   },
