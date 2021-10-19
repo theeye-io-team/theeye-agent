@@ -7,7 +7,7 @@ const hostnameFn = require('./lib/hostname')
 const Worker = require('./worker')
 const ListenerWorker = require('./worker/listener')
 const PingWorker = require('./worker/ping')
-const localConfig = require('config')
+const appConfig = require('config')
 const WorkerConstants = require('./constants/worker')
 
 const EventEmitter = require('events').EventEmitter
@@ -15,13 +15,15 @@ const EventEmitter = require('events').EventEmitter
 function App () {
   const app = this
 
+  app.config = appConfig
+
   EventEmitter.call(this)
 
   this.on('config:outdated', () => updateWorkers())
 
-  var connection = localConfig.supervisor || {}
+  var connection = appConfig.supervisor || {}
   connection.hostnameFn = hostnameFn
-  connection.request = localConfig.request
+  connection.request = appConfig.request
 
   var _connection = new TheEyeClient(connection);
   var _host_id;
@@ -91,7 +93,7 @@ function App () {
   }
 
   function listenerConfigure (config) {
-    config = (config || localConfig.workers.listener || {})
+    config = (config || appConfig.workers.listener || {})
     if (!app.listener && config.enable !== false) {
       const worker = new ListenerWorker(app, _connection,
         Object.assign({}, config, {
@@ -112,7 +114,7 @@ function App () {
   }
 
   function pingConfigure (config) {
-    config = (config || localConfig.workers.ping || {})
+    config = (config || appConfig.workers.ping || {})
     if (!app.ping && config.enable !== false) {
       const worker = new PingWorker(app, _connection, {
         resource_id: _host_resource_id,
@@ -138,7 +140,7 @@ function App () {
 
   function startWorkers (workersConfig) {
     //if (
-    //  localConfig.workers.enable === false ||
+    //  appConfig.workers.enable === false ||
     //  process.env.THEEYE_AGENT_WORKERS_DISABLED === 'true'
     //) {
     //  return debug('WARNING: Workers disabled')

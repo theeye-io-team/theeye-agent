@@ -1,5 +1,5 @@
 
-//var config = require('config');
+const appConfig = require('config')
 const fs = require('fs');
 const path = require('path');
 var Script = require('../../lib/script');
@@ -13,7 +13,7 @@ var JobsFactory = require('./job')
  */
 module.exports = AbstractWorker.extend({
   initialize () {
-    this.config.multitasking_limit || (this.config.multitasking_limit = 5)
+    this.config.multitasking_limit || (this.config.multitasking_limit = this.app.worker.listener.multitasking_limit)
     this.running_queue = []
   },
   jobs: {},
