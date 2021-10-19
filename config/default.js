@@ -16,7 +16,8 @@ module.exports = {
     listener: {
       type: 'listener',
       looptime: 10000,
-      multitasking: MULTITASKING // process only one job at the same time. disable multi jobs processing capability
+      multitasking: MULTITASKING, // process only one job at the same time. disable multi jobs processing capability
+      multitasking_limit: 10
     },
     // host keep alive settings
     ping: {

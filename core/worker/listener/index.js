@@ -1,5 +1,5 @@
 
-//var config = require('config');
+const appConfig = require('config')
 const fs = require('fs');
 const path = require('path');
 var Script = require('../../lib/script');
@@ -13,8 +13,8 @@ var JobsFactory = require('./job')
  */
 module.exports = AbstractWorker.extend({
   initialize () {
-    this.config.multitasking_limit || (this.config.multitasking_limit = 1)
-    this.running_queue = 0
+    this.config.multitasking_limit || (this.config.multitasking_limit = this.app.worker.listener.multitasking_limit)
+    this.running_queue = []
   },
   jobs: {},
   type: 'listener',
@@ -45,7 +45,7 @@ module.exports = AbstractWorker.extend({
    */
   keepAlive () {
     try {
-      this.debug.log(`Jobs in progress ${this.running_queue}`)
+      this.debug.log(`Jobs in progress ${this.running_queue.map(queue => queue.length)}`)
       this.executeJobs()
     } catch (err) {
       this.debug.error(err)
@@ -55,29 +55,46 @@ module.exports = AbstractWorker.extend({
   },
   async executeJobs () {
     const { multitasking_limit, multitasking, task_id } = this.config
+
+    if (this.running_queue[task_id] === undefined) {
+      this.running_queue[task_id] = []
+    }
+
+    const taskQueue = this.running_queue[task_id]
+
     let limit
     if (multitasking === false) {
-      limit = (1 - this.running_queue)
+      limit = (1 - taskQueue.length)
     } else {
-      limit = (multitasking_limit - this.running_queue)
+      limit = (multitasking_limit - taskQueue.length)
     }
 
     if (limit <= 0) { return }
 
     this.debug.log(`Fetching ${limit} jobs MAX`)
     const jobs = await this.getJobs({ task_id, limit })
+
     if (!jobs || !Array.isArray(jobs) || jobs.length === 0) {
       this.debug.log('no job to process')
       return
     }
 
     for (let job of jobs) {
-      this.running_queue++
+      taskQueue.push(job)
       this
         .executeJob(job)
         .catch(err => err)
         .then(() => {
-          this.running_queue--
+          let index = 0, found = false
+          while (index < taskQueue.length && !found) {
+            const elem = taskQueue[index]
+            if (elem.id === job.id) {
+              taskQueue.splice(index, 1)
+              found = true
+            }
+            index++
+          }
+
           this.executeJobs()
         })
     }
