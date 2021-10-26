@@ -26,17 +26,20 @@ function Script (props) {
    */
   const base64str2file = (str, basename) => {
     try {
-      var regex = /^data:.+\/(.+);base64,(.*)$/
-      var matches = str.match(regex)
-      let id = crypto.randomBytes(20).toString('hex')
+      if (!str.includes(';base64,')) {
+        return null
+      }
 
+      const [ header, data ] = str.split(';base64,')
+      const regex = /^data:.+\/(.+)/
+      const matches = header.match(regex) 
       if (!matches) { return null }
 
-      var ext = matches[1]
-      var data = matches[2]
-      var buffer = new Buffer(data, 'base64')
+      const ext = matches[1]
+      const buffer = new Buffer(data, 'base64')
 
-      let filename = path.join(basename, id + '.' + ext)
+      const id = crypto.randomBytes(20).toString('hex')
+      const filename = path.join(basename, id + '.' + ext)
       fs.writeFileSync(filename, buffer)
 
       return filename
