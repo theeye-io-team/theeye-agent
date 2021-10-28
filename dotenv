@@ -1,0 +1,10 @@
+THEEYE_SUPERVISOR_CLIENT_ID=''
+THEEYE_SUPERVISOR_CLIENT_SECRET=''
+THEEYE_SUPERVISOR_CLIENT_CUSTOMER=''
+THEEYE_AGENT_SCRIPT_PATH='/opt/theeye-agent/scripts'
+THEEYE_AGENT_DEBUG='eye:*:error'
+THEEYE_SUPERVISOR_API_URL='https://supervisor.theeye.io'
+NODE_ENV='production'
+http_proxy=''
+https_proxy=''
+THEEYE_AGENT_VERSION=v0.15.2
