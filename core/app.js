@@ -139,12 +139,12 @@ function App () {
   }
 
   function startWorkers (workersConfig) {
-    //if (
-    //  appConfig.workers.enable === false ||
-    //  process.env.THEEYE_AGENT_WORKERS_DISABLED === 'true'
-    //) {
-    //  return debug('WARNING: Workers disabled')
-    //}
+    if (
+      appConfig.workers.enable === false ||
+      process.env.THEEYE_AGENT_WORKERS_DISABLED === 'true'
+    ) {
+      return debug('WARNING: Workers disabled')
+    }
 
     debug('intializing workers')
     workersConfig.forEach(function(config) {

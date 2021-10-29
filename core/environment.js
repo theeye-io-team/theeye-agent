@@ -1,8 +1,10 @@
 
-var fs = require('fs')
-var config = require('config')
-var debug = require('debug')('eye::environment')
-var exec = require('child_process').exec
+require('dotenv').config()
+
+const fs = require('fs')
+const config = require('config')
+const debug = require('debug')('eye::environment')
+const exec = require('child_process').exec
 require('./lib/extend-error')
 
 module.exports = function (next) {
