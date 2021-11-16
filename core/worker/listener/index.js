@@ -72,7 +72,12 @@ module.exports = AbstractWorker.extend({
     if (limit <= 0) { return }
 
     this.debug.log(`Fetching ${limit} jobs MAX`)
-    const jobs = await this.getJobs({ task_id, limit })
+    let jobs
+    if (task_id === undefined)  {
+      jobs = await this.getJobs()
+    } else {
+      jobs = await this.getJobsByTask({ task_id, limit })
+    }
 
     if (!jobs || !Array.isArray(jobs) || jobs.length === 0) {
       this.debug.log('no job to process')
@@ -99,15 +104,38 @@ module.exports = AbstractWorker.extend({
         })
     }
   },
-  getJobs (query) {
-    const { task_id = undefined, limit = 1 } = query
+  getJobsByTask (input) {
+    const { task_id = undefined, limit = 1 } = input
+    const url = `/task/${task_id}/job/queue`
+    const query = {
+      hostname: this.connection.hostnameFn(),
+      limit
+    }
+
+    return new Promise( (resolve, reject) => {
+      this.connection.fetch({
+        route: url,
+        query,
+        failure: reject,
+        success: jobs => {
+          if (Array.isArray(jobs) && jobs.length > 0) {
+            resolve(jobs)
+          } else {
+            resolve()
+          }
+        }
+      })
+    })
+  },
+  /**
+   * old endpoint
+   */
+  getJobs () {
     return new Promise( (resolve, reject) => {
       this.connection.fetch({
         route: '/:customer/job',
         query: {
-          hostname: this.connection.hostnameFn(),
-          limit,
-          task_id
+          hostname: this.connection.hostnameFn()
         },
         failure: reject,
         success: body => {
