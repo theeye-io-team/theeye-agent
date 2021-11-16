@@ -21,22 +21,23 @@ function App () {
 
   this.on('config:outdated', () => updateWorkers())
 
-  var connection = appConfig.supervisor || {}
+  const connection = appConfig.supervisor || {}
   connection.hostnameFn = hostnameFn
   connection.request = appConfig.request
 
-  var _connection = new TheEyeClient(connection);
-  var _host_id;
-  var _host_resource_id;
-  var _workers = [];
+  const _connection = new TheEyeClient(connection)
+  const _workers = []
 
-  Object.defineProperty(this,'connection',{
-    get:function(){ return _connection; }
-  });
+  // let _hostId
+  let _hostResourceId
 
-  Object.defineProperty(this,'workers',{
-    get:function(){ return _workers; }
-  });
+  Object.defineProperty(this, 'connection', {
+    get: function () { return _connection }
+  })
+
+  Object.defineProperty(this, 'workers', {
+    get: function () { return _workers }
+  })
 
   function registerAgent (next) {
     _connection.create({
@@ -54,42 +55,42 @@ function App () {
         }
       },
       success: function (response) {
-        _host_id = response.host_id;
-        _host_resource_id = response.resource_id;
-        debug(response);
-        next(null);
+        // _hostId = response.host_id
+        _hostResourceId = response.resource_id
+        debug(response)
+        next(null)
       },
       failure: function (err) {
-        debug(err);
-        next(err);
+        debug(err)
+        next(err)
       }
-    });
+    })
   }
 
   function connectSupervisor (next) {
-    _connection.refreshToken(function (error,token) {
+    _connection.refreshToken(function (error, token) {
       if (error) {
-        debug('unable to get an access token');
-        debug(error);
-        next(error);
+        debug('unable to get an access token')
+        debug(error)
+        next(error)
       } else {
         registerAgent(next)
       }
-    });
+    })
   }
 
   // every 30 seconds retry;
-  var interval = 30 * 1000;
-  var attempts = 0;
+  const interval = 30 * 1000
+  // let attempts = 0
   function tryConnectSupervisor (nextFn) {
-    attempts++;
-    connectSupervisor(function(error){
-      if (!error) return nextFn();
-      debug('connection failed. trying again in "%s" seconds', interval/1000);
-      var timeout = setTimeout(function(){
-        tryConnectSupervisor(nextFn);
-      }, interval);
-    });
+    // attempts++
+    connectSupervisor(function (error) {
+      if (!error) return nextFn()
+      debug('connection failed. trying again in "%s" seconds', interval / 1000)
+      setTimeout(function () {
+        tryConnectSupervisor(nextFn)
+      }, interval)
+    })
   }
 
   function listenerConfigure (config) {
@@ -97,7 +98,7 @@ function App () {
     if (!app.listener && config.enable !== false) {
       const worker = new ListenerWorker(app, _connection,
         Object.assign({}, config, {
-          resource_id: _host_resource_id,
+          resource_id: _hostResourceId,
           type: WorkerConstants.Listener.type,
           looptime: (config.looptime || WorkerConstants.Listener.looptime)
         })
@@ -117,7 +118,7 @@ function App () {
     config = (config || appConfig.workers.ping || {})
     if (!app.ping && config.enable !== false) {
       const worker = new PingWorker(app, _connection, {
-        resource_id: _host_resource_id,
+        resource_id: _hostResourceId,
         type: WorkerConstants.Ping.type,
         looptime: config.looptime || WorkerConstants.Ping.looptime
       })
@@ -147,23 +148,20 @@ function App () {
     }
 
     debug('intializing workers')
-    workersConfig.forEach(function(config) {
+    workersConfig.forEach(function (config) {
       const worker = Worker.spawn(app, config, _connection)
-      if (worker!==null) {
+      if (worker !== null) {
         worker.run()
         _workers.push(worker)
       }
     })
   }
 
-  function getConfig (next) {
-    debug('obtaining agent config')
-    _connection.getAgentConfig(next)
-  }
-
   function reconfigureWorkers (next) {
-    getConfig((err, remoteConfig) => {
-      var result = {
+    _connection.getAgentConfig((err, remoteConfig) => {
+      if (err) { return next(err) }
+
+      const result = {
         data: { message: null },
         state: ''
       }
@@ -188,23 +186,25 @@ function App () {
 
   function updateWorkers () {
     debug('stopping current resource workers')
-    _workers.forEach(function(worker,index){
+    _workers.forEach(function (worker, index) {
       worker.stop()
       delete _workers[index]
       _workers[index] = null
     })
 
-    _workers = [] // destroy workers.
+    _workers.splice(0, _workers.length) // destroy workers.
 
     debug('updating workers configuration')
-    reconfigureWorkers(function(err, result){
+    reconfigureWorkers(function (err, result) {
+      if (err) { return debug(err) }
       app.emit('config:updated', result)
       debug('workers configuration updated')
     })
   }
 
   function configureWorkers (next) {
-    getConfig((err, configs) => {
+    _connection.getAgentConfig((err, configs) => {
+      if (err) { return next(err) }
       startWorkers(configs.workers)
       startCoreWorkers()
     })
@@ -212,18 +212,18 @@ function App () {
 
   this.start = function (next) {
     next || (next = () => {})
-    tryConnectSupervisor(function(){
+    tryConnectSupervisor(function () {
       configureWorkers(next)
     })
   }
 
-  this.startCLI = function(next){
-    tryConnectSupervisor(function(){
+  this.startCLI = function (next) {
+    tryConnectSupervisor(function () {
       next()
     })
   }
 
-  return this;
+  return this
 }
 
 Object.assign(App.prototype, EventEmitter.prototype)
