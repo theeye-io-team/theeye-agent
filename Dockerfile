@@ -1,4 +1,4 @@
-FROM node:10
+FROM node:14
 MAINTAINER Javier Ailbirt <jailbirt@gmail.com>
 MAINTAINER Facundo Gonzalez <facugon@theeye.io>
 
