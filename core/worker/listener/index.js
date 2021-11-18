@@ -60,13 +60,13 @@ module.exports = AbstractWorker.extend({
       this.running_queue[task_id] = []
     }
 
-    const taskQueue = this.running_queue[task_id]
+    const runningJobsQueue = this.running_queue[task_id]
 
     let limit
     if (multitasking === false) {
-      limit = (1 - taskQueue.length)
+      limit = (1 - runningJobsQueue.length)
     } else {
-      limit = (multitasking_limit - taskQueue.length)
+      limit = (multitasking_limit - runningJobsQueue.length)
     }
 
     if (limit <= 0) { return }
@@ -85,23 +85,34 @@ module.exports = AbstractWorker.extend({
     }
 
     for (let job of jobs) {
-      taskQueue.push(job)
-      this
-        .executeJob(job)
-        .catch(err => err)
-        .then(() => {
-          let index = 0, found = false
-          while (index < taskQueue.length && !found) {
-            const elem = taskQueue[index]
-            if (elem.id === job.id) {
-              taskQueue.splice(index, 1)
-              found = true
-            }
-            index++
-          }
+      if (!job || !job.id) {
+        this.debug.error('Invalid job received')
+      } else {
+        runningJobsQueue.push(job)
 
-          this.executeJobs()
-        })
+        this
+          .executeJob(job)
+          .catch(err => err)
+          .then(result => {
+            if (result instanceof Error) {
+              this.debug.error(result)
+            }
+
+            // @TODO we need to ensure that the queue is cleaned correctly.
+            let index = 0
+            let found = false
+            while (index < runningJobsQueue.length && !found) {
+              const elem = runningJobsQueue[index]
+              if (elem.id === job.id) {
+                runningJobsQueue.splice(index, 1)
+                found = true
+              }
+              index++
+            }
+
+            this.executeJobs() // continue recursion
+          })
+      }
     }
   },
   getJobsByTask (input) {

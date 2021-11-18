@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM node:14
 MAINTAINER Facundo Gonzalez <facugon@theeye.io>
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -9,7 +9,7 @@ COPY . ${destDir}
 
 # Locales and base tools
 RUN apt-get update -qqq \
-      && apt-get install -y jq curl imagemagick locales build-essential ripmime poppler-utils isync rename tzdata mpack mutt git \
+      && apt-get install -y gcc g++ make jq curl imagemagick locales build-essential ripmime poppler-utils isync rename tzdata mpack mutt git \
       && sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \ 
       && locale-gen en_US.UTF-8
 
@@ -17,11 +17,9 @@ RUN apt-get update -qqq \
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
+
 # verify modified configuration
 RUN dpkg-reconfigure --frontend noninteractive locales  
-
-RUN curl -fsSL https://deb.nodesource.com/setup_10.x | bash - \
-      && apt-get install -y nodejs gcc g++ make
 
 RUN npm install -g pkg n \
       && cd ${destDir} \
