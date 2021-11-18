@@ -24,7 +24,7 @@ RUN apt update && apt install -y --no-install-recommends \
     && apt-get install -y google-chrome-stable --no-install-recommends \
      && wget --quiet https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh -O /usr/sbin/wait-for-it.sh \
      && chmod +x /usr/sbin/wait-for-it.sh \
-     && mkdir ${destDir}/downloads && cd ${destDir}/downloads && npm install puppeteer@2.0.0 \
+     && mkdir ${destDir}/downloads && cd ${destDir}/downloads && npm install puppeteer \
      #&& chmod -v +x /docker-entrypoint.sh \
      # CleanUpLibs
      && rm -rf /var/lib/apt/lists/*
