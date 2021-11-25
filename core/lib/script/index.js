@@ -1,45 +1,53 @@
-'use strict'
-
+const util = require('util')
+const fs = require('fs')
+const crypto = require('crypto')
+const path = require('path')
+const isDataUrl = require('valid-data-url')
 const exec = require('child_process').exec
-var debug = require('debug')('eye:lib:script')
-var DEFAULT_EXECUTION_TIMEOUT = 10 * 60 * 1000
-var File = require('../file')
-var ScriptOutput = require('./output')
-var util = require('util')
-var fs = require('fs')
-var crypto = require('crypto')
-var path = require('path')
-var shellescape = require('../shellescape')
-var isDataUrl = require('valid-data-url')
-
 const scriptsConfig = require('config').scripts
+const debug = require('debug')('eye:lib:script')
+const mime = require('mime-types')
+
+const DEFAULT_EXECUTION_TIMEOUT = 10 * 60 * 1000
+const File = require('../file')
+const ScriptOutput = require('./output')
+const shellescape = require('../shellescape')
 
 function Script (props) {
 
   File.apply(this, arguments)
 
   /**
-   * Save base64 string into file content
+   * Save dataurl encoded strings into files
+   *
    * @param {String} string content
    * @param {String} basename target path to drop the file
    * @return {String} returns the name with the extension
+   *
    */
-  const base64str2file = (str, basename) => {
+  const base64str2file = (content, basename) => {
     try {
-      if (!str.includes(';base64,')) {
+      if (!content.includes(';base64,')) {
         return null
       }
 
-      const [ header, data ] = str.split(';base64,')
-      const regex = /^data:.+\/(.+)/
-      const matches = header.match(regex) 
-      if (!matches) { return null }
+      //
+      // References.
+      //
+      // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs#syntax
+      //
+      // data:[<mediatype>][;base64],<data>
+      //
 
-      const ext = matches[1]
+      const [ header, data ] = content.split(';base64,')
+      const [ word, contentType ] = header.split(':')
+      if (!contentType) { return null }
+
+      const ext = mime.extension(contentType) || 'unk'
       const buffer = new Buffer(data, 'base64')
 
       const id = crypto.randomBytes(20).toString('hex')
-      const filename = path.join(basename, id + '.' + ext)
+      const filename = path.join(basename, `${id}.${ext}`)
       fs.writeFileSync(filename, buffer)
 
       return filename
@@ -61,7 +69,7 @@ function Script (props) {
         parsed = []
         args.forEach((arg, idx) => {
           if (isDataUrl(arg)) {
-            let filename = base64str2file(arg, scriptsConfig.path)
+            const filename = base64str2file(arg, scriptsConfig.path)
             parsed.push(filename)
           } else if (arg === null || arg === undefined) {
             // escape spaces both for linux and windows
