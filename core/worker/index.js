@@ -1,15 +1,23 @@
-'use strict';
 
-var debug = require('debug');
+const debug = require('debug');
 
-var logger = {
+const logger = {
   log: debug('eye:agent:worker'),
   error: debug('eye:agent:worker:error')
 }
 
-var Workers = {
-  //dstat: require('./dstat'),
-  dstat: {},
+const os = require('os')
+const platform = os.platform()
+
+if (/win/.test(platform)) { // win32 & win64
+  logger.error('Windows dstat is unsopported in this version')
+  dstat = {}
+} else {
+  dstat = require('./dstat')
+}
+
+const Workers = {
+  dstat,
   listener: require('./listener'),
   process: require('./process'),
   psaux: require('./psaux'),
