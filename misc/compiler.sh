@@ -23,8 +23,6 @@ else
 	node_version="node14-linux-x64"
 fi
 
-exit
-
 echo "current working directory is ${root}"
 
 if [ -d "${target}" ]; then
