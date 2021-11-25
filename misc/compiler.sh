@@ -14,7 +14,7 @@ root="${PWD}"
 target="bin"
 release="${target}/release"
 
-if [[ "${os}" -eq 'win' ]]
+if [[ "${os}" == 'win' ]]
 then
 	echo "Windows build"
 	node_version="node14-win-x64"
@@ -22,6 +22,8 @@ else
 	echo "Linux build"
 	node_version="node14-linux-x64"
 fi
+
+exit
 
 echo "current working directory is ${root}"
 
