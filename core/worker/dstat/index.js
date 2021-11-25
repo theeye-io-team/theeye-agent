@@ -1,13 +1,12 @@
-'use strict';
 
-var NodeStat = require('theeye-node-stat');
-var AbstractWorker = require('../abstract');
-var FAILURE_STATE = 'failure';
-var NORMAL_STATE = 'normal';
+const NodeStat = require('theeye-node-stat');
+const AbstractWorker = require('../abstract');
+const FAILURE_STATE = 'failure';
+const NORMAL_STATE = 'normal';
 
 const EventConstants = require('../../constants/events')
 
-var Worker = module.exports = AbstractWorker.extend({
+const Worker = module.exports = AbstractWorker.extend({
   type: 'dstat',
   getData: function(next) {
     var self = this;
