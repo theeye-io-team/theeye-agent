@@ -8,10 +8,20 @@
 command -v pkg >/dev/null 2>&1 || { echo >&2 "pkg is required but it's not installed."; echo "failure"; exit 2; }
 command -v npm >/dev/null 2>&1 || { echo >&2 "npm is required but it's not installed."; echo "failure"; exit 1; }
 
+os="${1}"
+
 root="${PWD}"
 target="bin"
-node_version="node14-linux-x64"
 release="${target}/release"
+
+if [[ "${os}" -eq 'win' ]]
+then
+	echo "Windows build"
+	node_version="node14-win-x64"
+else
+	echo "Linux build"
+	node_version="node14-linux-x64"
+fi
 
 echo "current working directory is ${root}"
 

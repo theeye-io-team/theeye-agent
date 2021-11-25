@@ -8,7 +8,8 @@ var logger = {
 }
 
 var Workers = {
-  dstat: require('./dstat'),
+  //dstat: require('./dstat'),
+  dstat: {},
   listener: require('./listener'),
   process: require('./process'),
   psaux: require('./psaux'),
