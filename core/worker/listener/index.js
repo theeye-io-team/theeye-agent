@@ -1,10 +1,9 @@
 
-const appConfig = require('config')
-const fs = require('fs');
-const path = require('path');
-var Script = require('../../lib/script');
-var AbstractWorker = require('../abstract');
-var JobsFactory = require('./job')
+const fs = require('fs')
+const path = require('path')
+const Script = require('../../lib/script')
+const AbstractWorker = require('../abstract')
+const JobsFactory = require('./job')
 
 /**
  *
@@ -13,7 +12,12 @@ var JobsFactory = require('./job')
  */
 module.exports = AbstractWorker.extend({
   initialize () {
-    this.config.multitasking_limit || (this.config.multitasking_limit = this.app.worker.listener.multitasking_limit)
+    // Set the default configuration
+    const ListenerConfig = (this.app.config.workers?.listener || {multitasking_limit:1})
+    if (!this.config.multitasking_limit) {
+      this.config.multitasking_limit = (ListenerConfig.multitasking_limit || 1)
+    }
+
     this.running_queue = []
   },
   jobs: {},
@@ -54,7 +58,7 @@ module.exports = AbstractWorker.extend({
     this.rest()
   },
   async executeJobs () {
-    const { multitasking_limit, multitasking, task_id } = this.config
+    const { multitasking_limit = 1, multitasking = false, task_id } = this.config
 
     if (this.running_queue[task_id] === undefined) {
       this.running_queue[task_id] = []
