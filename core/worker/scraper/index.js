@@ -1,12 +1,12 @@
-'use strict';
 
 const request = require('request');
 const url = require('url');
 const format = require('util').format;
 const AbstractWorker = require('../abstract');
 const Constants = require('../../constants');
-const agentConfig = require('config')
-const scraperConfig = agentConfig.workers.scraper
+
+const AgentConfig = require('config')
+const ScraperConfig = (AgentConfig.workers?.scraper || {})
 
 const EventConstants = require('../../constants/events')
 
@@ -16,16 +16,16 @@ function setupRequestObject (config) {
     'User-Agent': 'TheEyeAgent/' + version.trim()
   })
 
-  if (config.json===true) {
+  if (config.json === true) {
     headers['Content-Type'] = 'application/json'
   }
 
   let wrapper = request.defaults({
-    strictSSL: config.strictSSL || scraperConfig.strictSSL,
-    proxy: config.proxy || scraperConfig.proxy,
-    tunnel: config.tunnel || scraperConfig.tunnel,
-    timeout: parseInt(config.timeout || scraperConfig.timeout),
-    gzip: config.gzip || scraperConfig.gzip,
+    strictSSL: config.strictSSL || ScraperConfig.strictSSL,
+    proxy: config.proxy || ScraperConfig.proxy,
+    tunnel: config.tunnel || ScraperConfig.tunnel,
+    timeout: parseInt(config.timeout || ScraperConfig.timeout),
+    gzip: config.gzip || ScraperConfig.gzip,
     url: config.url,
     method: config.method,
     json: false, // cannot change this. response should be always string
@@ -79,21 +79,22 @@ module.exports = AbstractWorker.extend({
             return false
           }
 
-          let registerBody = (
-            agentConfig.workers.scraper.register_body === true ||
+          const REGISTER_BODY = (
+            ScraperConfig.register_body === true ||
             config.register_body === true ||
             process.env.THEEYE_AGENT_SCRAPER_REGISTER_BODY === 'true'
           )
 
-          if (registerBody === true) {
-            let contentHeader = data.response.headers['content-type']
+          if (REGISTER_BODY === true) {
+            const contentHeader = data.response.headers['content-type']
             if (
               /application.json/.test(contentHeader) === true ||
-              agentConfig.workers.scraper.only_json_response !== true
+              ScraperConfig.only_json_response !== true
             ) {
               return true
             }
           }
+
           return false
         }
 

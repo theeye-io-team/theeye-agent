@@ -93,8 +93,8 @@ function App () {
     })
   }
 
-  function listenerConfigure (config) {
-    config = (config || appConfig.workers.listener || {})
+  const listenerConfigure = (config) => {
+    config = (config || appConfig.workers?.listener || {})
     if (!app.listener && config.enable !== false) {
       const worker = new ListenerWorker(app, _connection,
         Object.assign({}, config, {
@@ -114,13 +114,13 @@ function App () {
     }
   }
 
-  function pingConfigure (config) {
-    config = (config || appConfig.workers.ping || {})
+  const pingConfigure = (config) => {
+    config = (config || appConfig.workers?.ping || {})
     if (!app.ping && config.enable !== false) {
       const worker = new PingWorker(app, _connection, {
         resource_id: _hostResourceId,
         type: WorkerConstants.Ping.type,
-        looptime: config.looptime || WorkerConstants.Ping.looptime
+        looptime: (config.looptime || WorkerConstants.Ping.looptime)
       })
       worker.run()
       app.ping = worker
@@ -141,7 +141,7 @@ function App () {
 
   function startWorkers (workersConfig) {
     if (
-      appConfig.workers.enable === false ||
+      appConfig.workers?.enable === false ||
       process.env.THEEYE_AGENT_WORKERS_DISABLED === 'true'
     ) {
       return debug('WARNING: Workers disabled')
