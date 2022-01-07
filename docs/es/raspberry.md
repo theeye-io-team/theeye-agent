@@ -51,16 +51,13 @@ Primero, inicie sesión en la [aplicación web de TheEye](https://app.theeye.io)
 > NOTA:
 > * El navegador automáticamente comunicará al servidor de TheEye qué usuario tiene la sesión abierta usando un *Token de Autenticación al Portador*. [Más información](/theeye-supervisor/#/es/auth ":ignore")
 
-Luego, cree el archivo de configuración en `/etc/theeye`
+Luego, copie el directorio `/theeye-agent/misc/etc` en `/etc`. Esto también creará los servicios para ejecutar el Agente al encender la Raspberry Pi
 
-<!--FIXME: No es más fácil copiar 'theeye-agent/misc/etc' en '/etc'?-->
 ```bash
-mkdir /etc/theeye
-cp /opt/theeye-agent/misc/theeye.conf /etc/theeye
-nano /etc/theeye/theeye.conf
+cp -R /opt/theeye-agent/misc/etc/ /etc/
 ```
 
-Los siguientes parámetros deben ser reemplazados por los provistos en el archivo `credentials.json`
+Con su editor de texto favorito, edite el archivo `/etc/theeye/theeye.conf`. Los siguientes parámetros deben ser reemplazados por los provistos en el archivo `credentials.json`
 
 * `THEEYE_SUPERVISOR_CLIENT_ID`  
 * `THEEYE_SUPERVISOR_CLIENT_SECRET`  
@@ -69,16 +66,6 @@ Los siguientes parámetros deben ser reemplazados por los provistos en el archiv
 
 <!--TODO: Esto no tiene sentido...-->
 Modificar los otros parámetros no es necesario. [Más información](/)
-
-## Configuración del servicio
-
-
-Al finalizar la instalación, se debe configurar el Agente como un servicio del sistema para que se inicie cada vez que se encienda la Raspberry Pi.
-
-<!--FIXME: No es más fácil copiar 'theeye-agent/misc/etc' en '/etc'?-->
-Cree el archivo `/etc/systemd/system/theeye-agent.service`. Copie y pegue los contenidos de este archivo:[theeye-agent.service](/examples/etc_systemd_system_theeye-agent.service ":ignore")
-
-Cree el archivo `/etc/init.d/theeye-agent`. Copie y pegue los contenidos de este archivo: [theeye-agent](/examples/etc_init.d_theeye-agent ":ignore")
 
 Luego reinicie la Raspberry Pi
 
