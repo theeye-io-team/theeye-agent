@@ -18,9 +18,8 @@
     ```bash
     cd /opt/theeye-agent
     source /etc/theeye/theeye.conf && DEBUG=*eye* ./bin/theeye-agent
-    ```    
-    * from sources       
-    
+    ```
+    * from sources
     ```bash
     cd /opt/theeye-agent
     source /etc/theeye/theeye.conf && DEBUG=*eye* npm run core

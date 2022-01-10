@@ -5,7 +5,7 @@
 - Debug
   - [Unix](/debug-unix.md)
   - [Windows](/debug-windows.md)
-- [Raspberry](/raspberry.md)
+- [Raspberry Pi](/raspberry.md)
 - Services in Linux
   - [Example init.d](/examples/etc_init.d_theeye-agent ":ignore")
   - [Example systemd](/examples/etc_systemd_system_theeye-agent.service ":ignore")
