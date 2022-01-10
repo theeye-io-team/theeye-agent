@@ -64,7 +64,6 @@ Con su editor de texto favorito, edite el archivo `/etc/theeye/theeye.conf`. Los
 * `THEEYE_SUPERVISOR_CLIENT_CUSTOMER`  
 * `THEEYE_SUPERVISOR_API_URL`
 
-<!--TODO: Esto no tiene sentido...-->
 Modificar los otros parámetros no es necesario. [Más información](/)
 
 Luego reinicie la Raspberry Pi
