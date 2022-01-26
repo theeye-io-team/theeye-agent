@@ -21,11 +21,10 @@ ENV LC_ALL en_US.UTF-8
 # verify modified configuration
 RUN dpkg-reconfigure --frontend noninteractive locales  
 
-RUN npm install -g pkg n \
+RUN npm install -g pkg \
       && cd ${destDir} \
       && ls -l . \
       && bash ./misc/compiler.sh \
-      && bash ./misc/packager.sh \
-      && n 14
+      && bash ./misc/packager.sh
 
 CMD ["bin/theeye-agent"]
