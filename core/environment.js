@@ -4,29 +4,30 @@ require('dotenv').config()
 const fs = require('fs')
 const config = require('config')
 const debug = require('debug')('eye::environment')
-const exec = require('child_process').exec
+const util = require('util')
+const exec = util.promisify(require('child_process').exec)
+
 require('./lib/extend-error')
 
-module.exports = function (next) {
+module.exports = async function (next) {
   try {
-    var env = process.env.NODE_ENV
-
-    if (!env) {
-      debug('no env set')
+    if (!process.env.NODE_ENV) {
+      debug('NODE_ENV not set')
       process.exit()
     }
 
     createScriptsPath()
     createLogsPath()
-  } catch (err) {
-    return next (err)
-  }
 
-  detectAgentVersion(function(err, version){
+    const version = await detectAgentVersion()
     process.env.THEEYE_AGENT_VERSION = version
     debug('agent version is %s', process.env.THEEYE_AGENT_VERSION)
-    next(err)
-  })
+
+    next(null)
+  } catch (err) {
+    debug(err)
+    return next(err)
+  }
 }
 
 function createScriptsPath () {
@@ -58,20 +59,21 @@ function createLogsPath () {
   return path
 }
 
-function detectAgentVersion (next) {
-  var version = process.env.THEEYE_AGENT_VERSION
+async function detectAgentVersion () {
+  const version = process.env.THEEYE_AGENT_VERSION
   if (version) {
-    return next(null,version)
+    debug('using environment variable')
+    return version
   }
   if (config.version) {
-    return next(null,version)
+    debug('using configuration file')
+    return config.version
   }
   // 
   // else try to get version from agent path using git
   //
-  var cmd = 'cd ' + process.cwd() + ' && git describe'
-  exec(cmd,{},function(error,stdout,stderr){
-    version = (error||stderr) ? 'unknown' : stdout.trim()
-    next(null,version)
-  })
+  debug('using git describe')
+  const cmd = 'cd ' + process.cwd() + ' && git describe'
+  const { stdout, stderr } = await exec(cmd, {})
+  return (stderr ? 'unknown' : stdout.trim())
 }
