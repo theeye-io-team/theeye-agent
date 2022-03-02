@@ -1,6 +1,6 @@
 # OUTDATED .
 
-[![theeye.io](/images/logo-theeye-theOeye-logo2.png)](https://theeye.io/en/index.html)
+[![theeye.io}(/en/images/logo-theeye-theOeye-logo2.png)](https://theeye.io/en/index.html)
 
 To compile the agent use the [Compiler Script](https://github.com/interactar/theeye-agent/blob/master/misc/compiler.sh)
 To pack the agent use the [Packager Script](https://github.com/interactar/theeye-agent/blob/master/misc/packager.sh)

@@ -1,138 +1,85 @@
-# Raspberry
+# Instalación en la Raspberry Pi
 
 [![theeye.io](/images/logo-theeye-theOeye-logo2.png)](https://theeye.io/en/index.html)
 
-To get the theeye agent to work on Raspberry, you need to install node and download the source code from github.
+Para instalar el Agente de TheEye en una Raspberry Pi, es necesario instalar Node.js y descargar el código fuente desde la repo de GitHub.
 
-## Installation of Node JS
+## Instalación de Node.js
 
-*All the commands are being executed as if it were root.
+> NOTA:
+> * Se asume que la distribuición instalada es [Raspberry Pi OS](https://www.raspberrypi.com/software/operating-systems/)
 
-The list of commands in order would be the following
+1. Agregue el repositorio de NodeSource a su sistema. Esto le permitirá instalar Node.js usando `apt-get`
+   ```bash
+    curl -sL https://deb.nodesource.com/setup_lts.x | sudo bash -
+    ```
+2. Actualice los ficheros de su sistema. 
+    ```bash
+    sudo apt-get update && sudo apt-get -y full-upgrade
+    ```
+3. Instale Node.js desde `apt-get`
+    > NOTA: 
+    > * También son necesarios los paquetes `git` y `build-essential`, puede aprovechar este paso para descargarlos si no los tiene
+    ```bash
+    sudo apt-get -y install nodejs git build-essential
+    ```
 
-1. First install node. 
+## Instalación del Agente
 
-2. Get root
-
-```bash
-sudo su -
-```
-
-3. It is convenient to update the raspberry system
-
-```bash
-apt full-upgrade -y
-```
-
-4. Download and configure node to be installed
-
-```bash
-curl -sL https://deb.nodesource.com/setup_8.x | bash -
-```
-
-5. Install with apt
-
-The build-essential package is necessary for the installation of some npm packages to work. Git we will need it later to download the source code of the agent.
-
-```bash
-apt-get install -y nodejs
-apt-get install -y build-essential git
-```
-
-With this, node must be installed.
-
-6. Verify node installation
-
-```text
-$ npm -v
-6.4.1
-$ node -v
-v8.14.0
-```
-## Agent installation
-
-For this we need to install the git command. We are going to install the agent in the directory `/opt/theeye-agent`
+Usando git, vamos a instalar el Agente clonando su repositorio en `/opt/theeye-agent/`
 
 ```bash
 cd /opt
-git clone https://github.com/theeye-io/theeye-agent.git
+git clone https://github.com/theeye-io-team/theeye-agent
 cd ./theeye-agent
 ```
 
-We run the installer to download the dependencies
+Al finalizar, podemos instalar las librerías necesarias
 
-```text
+```bash
 npm install
 ```
 
-With this the agent is already installed and ready to work.
+Terminado ese comando, el Agente estará listo para configurarse
 
-### Create agent configuration file
+## Configurar el Agente 
 
-First you have to enter the web interface of theeye [app.theeye.io](https://app.theeye.io) and then enter the following link to obtain the access credentials.
+Para configurar el Agente, crearemos un archivo de configuración, en el cual se declararán las credenciales para este.
 
-[link a credentials.json](https://app.theeye.io/api/agent/credentials)
+Primero, inicie sesión en la [aplicación web de TheEye](https://app.theeye.io), luego diríjase a "[app.theeye.io/api/agent/credentials](https://app.theeye.io/api/agent/credentials)" para descargar el archivo `credentials.json`. Este archivo tiene las credenciales necesarias para vincular el Agente con su organización. Tenga el archivo a mano, ya que luego tendrá que copiar información de este.
 
-This file contains the credentials that the agent needs to be able to connect to the system and function.
+> NOTA:
+> * El navegador automáticamente comunicará al servidor de TheEye qué usuario tiene la sesión abierta usando un *Token de Autenticación al Portador*. [Más información](/theeye-supervisor/#/es/auth ":ignore")
 
-Create agent configuration file
+Luego, copie el directorio `/theeye-agent/misc/etc` en `/etc`. Esto también creará los servicios para ejecutar el Agente al encender la Raspberry Pi
 
-```text
-mkdir /etc/theeye
-cp /opt/theeye-agent/misc/theeye.conf /etc/theeye
-vim /etc/theeye/theeye.conf
+```bash
+cp -R /opt/theeye-agent/misc/etc/ /etc/
 ```
 
-Modify the contents of the file or replace it with the following:
+Con su editor de texto favorito, edite el archivo `/etc/theeye/theeye.conf`. Los siguientes parámetros deben ser reemplazados por los provistos en el archivo `credentials.json`
 
-```text
-#!/bin/bash
-set -a
-THEEYE_SUPERVISOR_CLIENT_ID=''
-THEEYE_SUPERVISOR_CLIENT_SECRET=''
-THEEYE_SUPERVISOR_CLIENT_CUSTOMER=''
-THEEYE_SUPERVISOR_API_URL=''
-THEEYE_AGENT_DEBUG='*eye:error*'
-THEEYE_AGENT_BINARIES_PATH='/opt/theeye-agent/bin'
-THEEYE_AGENT_SCRIPT_PATH='/opt/theeye-agent/scripts'
-THEEYE_CLIENT_HOSTNAME='raspberry'
-NODE_ENV='production'
-http_proxy=''
-https_proxy=''
-```
+* `THEEYE_SUPERVISOR_CLIENT_ID`  
+* `THEEYE_SUPERVISOR_CLIENT_SECRET`  
+* `THEEYE_SUPERVISOR_CLIENT_CUSTOMER`  
+* `THEEYE_SUPERVISOR_API_URL`
 
-The values indicated below must be extracted from the credentials file and replaced in `theeye.conf`
+Modificar los otros parámetros no es necesario. [Más información](/)
 
-> THEEYE\_SUPERVISOR\_CLIENT\_ID  
-> THEEYE\_SUPERVISOR\_CLIENT\_SECRET  
-> THEEYE\_SUPERVISOR\_CLIENT\_CUSTOMER  
-> THEEYE\_SUPERVISOR\_API\_URL
+Luego reinicie la Raspberry Pi
 
-The rest of the values do not need to be modified. For more information see [Installation Manual of the Agent](/)
-
-## Service configuration
-
-Once installed, we need to setup a system service which will start the agent every time you turn the Raspberry on and off.
-
-Create the file `/etc/systemd/system/theeye-agent.service`. Copy and paste the contents of the following file [etc\_systemd\_system\_theeye-agent.service](/examples/etc_systemd_system_theeye-agent.service)
-
-Create the file `/etc/init.d/theeye-agent` . Copy and paste the contents of the following file [etc\_init.d\_theeye-agent](/examples/etc_init.d_theeye-agent)
-
-## Final Step
-
-Restart the Raspberry
-
-```text
+```bash
 shutdown -R now
 ```
 
-If everything was configured correctly, the agent should start with the Raspberry and you can see the status in the interface.
+Si todo se configuró correctamente, el Agente debería iniciar con la Raspberry Pi y debería poder visualizar su estado en la interfaz web de TheEye.
 
 If the Raspberry does not report we can try the [manual start with debug](/debug/)
+Si su Agente no reporta a la interfaz, intente [iniciar el agente en modo debug}(/debug-unix)
 
-# Common problems
+# Problemas comunes
 
-1. If there was a problem with npm it is best, as root, to delete the directory `node_modules` and run the command again `npm install`.
+* Si hay problemas con npm, la mejor opcion es eliminar el directorio `node_modules` como root y volver a ejecutar `npm install`.
 
 ```bash
 sudo su -

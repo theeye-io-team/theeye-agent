@@ -1,72 +1,84 @@
-# TheEye Agent
+# Agente TheEye 
 
 [![theeye.io](/images/logo-theeye-theOeye-logo2.png)](https://theeye.io/en/index.html)
 
-An **Agent** is an autonomous software installed on an **Organization** **Host**, it is also known as Bot.
+Un **Agente** es un software autónoomo que se instala en un **Host de Organización**, es también conocido como Bot. 
 
-It main responsibility is to execute **Tasks** and complex **Workflows** and report the execution result back to the **orchestrator**.
+Su responsabilidad principal es ejecutar **Tareas** y **Workflows** complejos, y reportar sus resultados al **orquestrador**.
 
-It also report the **Host** status and health \(aka: **Health Monitor** or dstat\) to the **orchestrator**.
+También reporta el estado y métricas de uso del **Host** (aka: **Health Monitor** o dstat) al **orquestrador**
 
-The **Agent** works as interface and comunication between the Host and TheEye Core
+El **Agente** funciona como la interfaz de comunicación entre el **Host** y el núcleo de TheEye.
 
-The recommenden is to install and configure the Agent as Service/Daemon.
+Se recomienda instalar y configurar el Agente como un servicio o Daemon.
 
-## Getting started
+## Conseguir el instalador
 
-From the web panel ([settings -> installer](https://app.theeye.io/dashboard#installer)) you can download the binary agent and get the installation script for your host.
+Desde el panel web, diríjase a **Settings** ➔ **Installer**. Ahí puede descargar el binario del agente y su instalador para ejecutar en el **Host**. También estarán disponibles instrucciones de instalación en inglés, separadas por sistema operativo, las mismas están traducidas para su conveniencia, pero los links y comandos son especificos al usuario, por favor revise las instrucciones del panel web.
 
 ![settings](/images/Settings.jpg)
-
 
 ![full list for install](/images/TheEye-Agent-Full-list.jpg)
 
 
-## Linux Bot Installer
+### Instalador del Agente en Linux 
 
-At this moment the supported distributions by the instalation script are
+El Agente está probado y funcionando en las siguientes distribuiciones de Linux:
 
-The Bot is fully funtional in:
+- Redhat/Centos 6+
+- Ubuntu 12+
 
-    - Redhat/Centos 6+
-
-    - Ubuntu 12+
-
-
-NOTE: 
-
-    - The installation script assumes that root access is granted.
-    - It should works out of the box on every Linux with a kernel version 3.x+. For Linux with Kernel 2.x could require aditional actions.
+> NOTA: 
+> - El script de instalación asume que se le otorgó acceso de superusuario.
+> - Es probable que se pueda instalar el Agente en otras distribuiciones no documentadas, pero no es una funcionalidad directamente soportada.
+>   - Deberia funcionar diréctamente en cualquier distribuición de Linux con un kernel versión 3.x o superior.
+>   - Para distribuiciones de Linux con un Kernel versión 2.x podrían requerirse algunos pasos adicionales.
 
 
-### To install the Bot on Linux
+#### Instalar en Linux
 
-![linux install](/images/TheEye-Agent-Linux-Install.jpg)
+1. Abre una consola
+2. Eleve la consola con permisos root
+3. Copie y pegue el comando provisto en la guía de instalación
+4. Aguarde a ser notificado que la instalación terminó
+5. Revise su Dashboard, debería ver un indicador del Agente instalado
 
-***Manual Instalation from sources***
-Check the documentation.
+[Instalación manual desde el código fuente}(/binary_build.md)
 
-## Windows Bot Installer
+Si necesta depurar o contribuir con el desarrollo, revise la [guía de debug en Unix}(/debug-unix.md)
 
-NOTE: 
+### Instalador del Agente en Windows
 
-    - The installation script assumes that administrator access is granted
-    - Powershell V5.0 or greater is installed.
+> NOTA: 
+>   - El script de instalación asume que se ejecutó como administrador
+>   - Es necesario instalar Powershell versión 5.0 o superior.
 
-If you need to debug, develop or if you prefer the manual installation of the agent, keep reading.
+#### Instalar en Windows
 
-### To install the Bot on Windows
+1. Abrir CMD como administrador
+2. Copie y pegue el comando provisto en la guía de instalación
+3. Aguarde a que el instalador complete todas las acciones
+4. Revise su Dashboard, debería ver un indicador del Agente instalado
 
-![windows install](/images/TheEye-Agent-Windows-Install.jpg)
+Si necesta depurar o contribuir con el desarrollo, revise la [guía de debug en Windows}(/debug-windows.md)
 
-## Docker Bot Installer
+### Instalador del Agente en Docker 
 
-### To run a Docker version of the Bot
+#### Ejecutar el Agente como imagen de Docker
 
-![docker install](/images/TheEye-Agent-Docker-Install.jpg)
+1. Abre una consola
+2. Eleve la consola con permisos root
+3. Copie y pegue el comando provisto en la guía de instalación
+4. Aguarde a que el instalador complete todas las acciones
+5. Revise su Dashboard, debería ver un indicador del Agente instalado
+ 
 
-## AWS Bot Installer
+### Instalador de Agente en AWS
 
-### To install the AWS Bot
+#### Instalar en AWS
 
-![AWS install](/images/TheEye-Agent-AWS-Install.jpg)
+1. Abrir la consola de AWS
+2. Copie y pegue el `user-data` provisto en la guía de instalación
+3. Abra sus instancias
+4. Espere a que el agente comience a reportar
+5. Revise su Dashboard, debería ver un indicador del Agente instalado
