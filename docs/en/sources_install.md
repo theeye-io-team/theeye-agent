@@ -1,6 +1,6 @@
 # TheEye Bot
 
-[![theeye.io](/images/logo-theeye-theOeye-logo2.png)](https://theeye.io/en/index.html)
+[![theeye.io}(/en/images/logo-theeye-theOeye-logo2.png)](https://theeye.io/en/index.html)
 
 ## Manual Instalation from sources
 

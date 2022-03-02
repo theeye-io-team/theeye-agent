@@ -1,0 +1,11 @@
+- [Installation}(/en/)
+- [Source Code}(/en/sources_install.md)
+- [Binary build}(/en/binary_build.md)
+- [Setup}(/en/setup.md)
+- Debug
+  - [Unix}(/en/debug-unix.md)
+  - [Windows}(/en/debug-windows.md)
+- [Raspberry Pi}(/en/raspberry.md)
+- Services in Linux
+  - [Example init.d}(/en/examples/etc_init.d_theeye-agent ":ignore")
+  - [Example systemd}(/en/examples/etc_systemd_system_theeye-agent.service ":ignore")

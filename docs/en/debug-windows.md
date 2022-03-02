@@ -1,7 +1,7 @@
-# Debug en Windows
 
-[![theeye.io](/images/logo-theeye-theOeye-logo2.png)](https://theeye.io/en/index.html)
+# Agente
 
+## DEBUG Windows
 Para iniciar el agente de theeye en modo debug y ver los logs completos hay que iniciar el agente manualmente.
 
 El agente es un proceso automático que corre desatendido como servicio. Para iniciar el modo debug es necesario hacer desde CLI manualmente.
