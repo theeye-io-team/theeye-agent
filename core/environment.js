@@ -9,25 +9,18 @@ const exec = util.promisify(require('child_process').exec)
 
 require('./lib/extend-error')
 
-module.exports = async function (next) {
-  try {
-    if (!process.env.NODE_ENV) {
-      debug('NODE_ENV not set')
-      process.exit()
-    }
-
-    createScriptsPath()
-    createLogsPath()
-
-    const version = await detectAgentVersion()
-    process.env.THEEYE_AGENT_VERSION = version
-    debug('agent version is %s', process.env.THEEYE_AGENT_VERSION)
-
-    next(null)
-  } catch (err) {
-    debug(err)
-    return next(err)
+module.exports = async () => {
+  if (!process.env.NODE_ENV) {
+    debug('NODE_ENV not set')
+    process.exit()
   }
+
+  createScriptsPath()
+  createLogsPath()
+
+  const version = await detectAgentVersion()
+  process.env.THEEYE_AGENT_VERSION = version
+  debug('agent version is %s', process.env.THEEYE_AGENT_VERSION)
 }
 
 function createScriptsPath () {

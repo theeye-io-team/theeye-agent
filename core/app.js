@@ -1,5 +1,6 @@
 
-const ip = require('ip')
+const path = require('path')
+const fs = require('fs')
 const os = require('os')
 const debug = require('debug')('eye:agent:app')
 const TheEyeClient = require('./lib/theeye-client')
@@ -30,6 +31,22 @@ function App () {
 
   // let _hostId
   let _hostResourceId
+  let _connection_id
+
+  Object.defineProperty(this, 'connection_id', {
+    get: function () { return _connection_id },
+    set: function (cnnid) {
+      try {
+        const agentFile = path.join(process.cwd(), 'config', '.connection_id')
+        fs.writeFileSync(agentFile, cnnid || '')
+      } catch (err) {
+        debug(err)
+      }
+
+      process.env.THEEYE_AGENT_CONNECTION_ID = cnnid
+      _connection_id = cnnid
+    }
+  })
 
   Object.defineProperty(this, 'connection', {
     get: function () { return _connection }
@@ -39,24 +56,42 @@ function App () {
     get: function () { return _workers }
   })
 
+  const machineInfo = () => {
+    const user = os.userInfo()
+    const info = {
+      platform: os.platform(),
+      hostname: os.hostname(),
+      type: os.type(),
+      release: os.release(),
+      arch: os.arch(),
+      totalmem: os.totalmem(),
+      cpu: cpu(),
+      net: net(),
+      cwd: process.cwd(),
+      agent_version: process.env.THEEYE_AGENT_VERSION,
+      agent_username: user.username,
+      extras: {
+        user,
+        agent_pid: process.pid
+      }
+    }
+
+    return info
+  }
+
   function registerAgent (next) {
     _connection.create({
-      route: _connection.HOST + '/:hostname',
+      route: '/host',
       body: {
+        hostname: hostnameFn(),
         version: process.env.THEEYE_AGENT_VERSION,
-        info: {
-          platform: os.platform(),
-          hostname: hostnameFn(),
-          arch: os.arch(),
-          os_name: os.type(),
-          os_version: os.release(),
-          uptime: os.uptime(),
-          ip: ip.address()
-        }
+        info: machineInfo()
       },
       success: function (response) {
         // _hostId = response.host_id
         _hostResourceId = response.resource_id
+        app.connection_id = response.connection_id
+
         debug(response)
         next(null)
       },
@@ -224,6 +259,34 @@ function App () {
   }
 
   return this
+}
+
+const cpu = () => {
+  const cpus = os.cpus()
+  const info = []
+  for (let cpu of cpus) {
+    info.push({
+      model: cpu.model,
+      speed: cpu.speed
+    })
+  }
+  return info
+}
+
+const net = () => {
+  const info = []
+  const interfaces = os.networkInterfaces()
+  for (let name in interfaces) {
+    const iface = interfaces[name]
+    for (let v in iface) {
+      info.push({
+        name,
+        address: iface[v].address,
+        mac: iface[v].mac
+      })
+    }
+  }
+  return info
 }
 
 Object.assign(App.prototype, EventEmitter.prototype)
