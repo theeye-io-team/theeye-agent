@@ -16,17 +16,22 @@ const EventEmitter = require('events').EventEmitter
 function App () {
   const app = this
 
+  app.version = process.env.THEEYE_AGENT_VERSION
   app.config = appConfig
 
   EventEmitter.call(this)
 
   this.on('config:outdated', () => updateWorkers())
 
-  const connection = appConfig.supervisor || {}
-  connection.hostnameFn = hostnameFn
-  connection.request = appConfig.request
+  const connectionSetup = appConfig.supervisor || {}
+  connectionSetup.hostnameFn = hostnameFn
+  connectionSetup.request = appConfig.request
 
-  const _connection = new TheEyeClient(connection)
+  //const headers = (connectionSetup.request.headers || {})
+  //headers['accept-version'] = '~' + app.version.split('.')[0]
+  //connectionSetup.request.headers = headers
+
+  const _connection = new TheEyeClient(connectionSetup)
   const _workers = []
 
   // let _hostId
@@ -68,7 +73,7 @@ function App () {
       cpu: cpu(),
       net: net(),
       cwd: process.cwd(),
-      agent_version: process.env.THEEYE_AGENT_VERSION,
+      agent_version: app.version,
       agent_username: user.username,
       extras: {
         user,
@@ -84,7 +89,7 @@ function App () {
       route: '/host',
       body: {
         hostname: hostnameFn(),
-        version: process.env.THEEYE_AGENT_VERSION,
+        version: app.version,
         info: machineInfo()
       },
       success: function (response) {
