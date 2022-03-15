@@ -19,7 +19,10 @@ module.exports = async () => {
   createLogsPath()
 
   //const version = await detectAgentVersion()
-  process.env.THEEYE_AGENT_VERSION = VERSION
+  const version = VERSION
+  if (version) {
+    process.env.THEEYE_AGENT_VERSION = version
+  }
   debug('agent version is %s', process.env.THEEYE_AGENT_VERSION)
 }
 
