@@ -5,6 +5,7 @@ const config = require('config')
 const debug = require('debug')('eye::environment')
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
+const VERSION = require('./constants/version').VERSION
 
 require('./lib/extend-error')
 
@@ -18,8 +19,8 @@ module.exports = async () => {
   createLogsPath()
 
   //const version = await detectAgentVersion()
-  //process.env.THEEYE_AGENT_VERSION = version
-  //debug('agent version is %s', process.env.THEEYE_AGENT_VERSION)
+  process.env.THEEYE_AGENT_VERSION = VERSION
+  debug('agent version is %s', process.env.THEEYE_AGENT_VERSION)
 }
 
 function createScriptsPath () {
