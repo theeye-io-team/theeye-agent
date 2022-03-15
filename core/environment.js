@@ -17,9 +17,9 @@ module.exports = async () => {
   createScriptsPath()
   createLogsPath()
 
-  const version = await detectAgentVersion()
-  process.env.THEEYE_AGENT_VERSION = version
-  debug('agent version is %s', process.env.THEEYE_AGENT_VERSION)
+  //const version = await detectAgentVersion()
+  //process.env.THEEYE_AGENT_VERSION = version
+  //debug('agent version is %s', process.env.THEEYE_AGENT_VERSION)
 }
 
 function createScriptsPath () {
@@ -51,21 +51,21 @@ function createLogsPath () {
   return path
 }
 
-async function detectAgentVersion () {
-  const version = process.env.THEEYE_AGENT_VERSION
-  if (version) {
-    debug('using environment variable')
-    return version
-  }
-  if (config.version) {
-    debug('using configuration file')
-    return config.version
-  }
-  // 
-  // else try to get version from agent path using git
-  //
-  debug('using git describe')
-  const cmd = 'cd ' + process.cwd() + ' && git describe'
-  const { stdout, stderr } = await exec(cmd, {})
-  return (stderr ? 'unknown' : stdout.trim())
-}
+//async function detectAgentVersion () {
+//  const version = process.env.THEEYE_AGENT_VERSION
+//  if (version) {
+//    debug('using environment variable')
+//    return version
+//  }
+//  if (config.version) {
+//    debug('using configuration file')
+//    return config.version
+//  }
+//  // 
+//  // else try to get version from agent path using git
+//  //
+//  debug('using git describe')
+//  const cmd = 'cd ' + process.cwd() + ' && git describe'
+//  const { stdout, stderr } = await exec(cmd, {})
+//  return (stderr ? 'unknown' : stdout.trim())
+//}
