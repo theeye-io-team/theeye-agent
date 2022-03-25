@@ -5,6 +5,7 @@ const config = require('config')
 const debug = require('debug')('eye::environment')
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
+const VERSION_CONSTANT = require('./constants/version').VERSION
 
 require('./lib/extend-error')
 
@@ -17,9 +18,14 @@ module.exports = async () => {
   createScriptsPath()
   createLogsPath()
 
-  //const version = await detectAgentVersion()
-  //process.env.THEEYE_AGENT_VERSION = version
-  //debug('agent version is %s', process.env.THEEYE_AGENT_VERSION)
+  try {
+    version = await detectAgentVersion()
+
+    process.env.THEEYE_AGENT_VERSION = version
+    debug('agent version is %s', process.env.THEEYE_AGENT_VERSION)
+  } catch (err) {
+    debug('version cannot be detected')
+  }
 }
 
 function createScriptsPath () {
@@ -51,21 +57,29 @@ function createLogsPath () {
   return path
 }
 
-//async function detectAgentVersion () {
-//  const version = process.env.THEEYE_AGENT_VERSION
-//  if (version) {
-//    debug('using environment variable')
-//    return version
-//  }
-//  if (config.version) {
-//    debug('using configuration file')
-//    return config.version
-//  }
-//  // 
-//  // else try to get version from agent path using git
-//  //
-//  debug('using git describe')
-//  const cmd = 'cd ' + process.cwd() + ' && git describe'
-//  const { stdout, stderr } = await exec(cmd, {})
-//  return (stderr ? 'unknown' : stdout.trim())
-//}
+async function detectAgentVersion () {
+  let version = VERSION_CONSTANT
+  if (version) {
+    debug('compiled version is %s', version)
+    return version
+  }
+
+  version = process.env.THEEYE_AGENT_VERSION
+  if (version) {
+    debug('environment version is %s', version)
+    return version
+  }
+
+  if (config.version) {
+    debug('configured version is %s', version)
+    return config.version
+  }
+  // 
+  // else try to get version from agent path using git
+  //
+  const cmd = 'cd ' + process.cwd() + ' && git describe'
+  const { stdout, stderr } = await exec(cmd, {})
+  version = (stderr ? 'unknown' : stdout.trim())
+
+  debug('sources version is %s', version)
+}
