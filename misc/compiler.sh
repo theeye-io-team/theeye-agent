@@ -47,6 +47,15 @@ npm install hjson toml cson properties x2js
 # run pkg
 cd $root
 
+
+agent_version=$(git describe)
+echo "### BUILDING AGENT ${agent_version}"
+echo "adding agent version to the sources"
+cat <<VERSION_FILE > ${root}/core/constants/version.js
+exports.version = "${agent_version}"
+VERSION_FILE
+
+
 echo "running pkg " $(pkg -v) 
 pkg --targets ${node_version} --output ${target}/theeye-agent --debug ${root}/core/main.js
 
@@ -82,7 +91,7 @@ else
   cp ${root}/config/${NODE_ENV}.js ${target}/config
 fi
 
-echo -e "Agent Version \t\t$(git describe)" >> $release
+echo -e "Agent Version \t\t${agent_version}" >> $release
 echo -e "NODE_ENV config \t\t${NODE_ENV}" >> $release
 echo -e "Node Version \t\t${node_version}" >> $release
 echo -e "NPM Version \t\t$(npm --version)" >> $release

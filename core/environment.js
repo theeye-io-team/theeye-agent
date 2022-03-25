@@ -17,7 +17,7 @@ module.exports = async () => {
   createScriptsPath()
   createLogsPath()
 
-  const version = await detectAgentVersion()
+  const version = await detectAgentVersion().catch(err => 'version error')
   process.env.THEEYE_AGENT_VERSION = version
   debug('agent version is %s', process.env.THEEYE_AGENT_VERSION)
 }
@@ -52,20 +52,25 @@ function createLogsPath () {
 }
 
 async function detectAgentVersion () {
-  const version = process.env.THEEYE_AGENT_VERSION
+  let version = process.env.THEEYE_AGENT_VERSION
   if (version) {
-    debug('using environment variable')
+    debug('environment version is %s', version)
     return version
   }
-  if (config.version) {
-    debug('using configuration file')
-    return config.version
+
+  version = config.version
+  if (version) {
+    debug('configured version is %s', version)
+    return version
   }
+
   // 
   // else try to get version from agent path using git
   //
-  debug('using git describe')
-  const cmd = 'cd ' + process.cwd() + ' && git describe'
+  const cmd = `cd ${process.cwd()} && git describe`
   const { error, stdout, stderr } = await exec(cmd, {}).catch(error => { return {error} })
-  return (error||stderr ? 'unknown' : stdout.trim())
+  version = (error||stderr ? 'version error' : stdout.trim())
+
+  debug('sources version is %s', version)
+  return version
 }
