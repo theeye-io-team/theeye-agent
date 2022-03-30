@@ -82,4 +82,5 @@ async function detectAgentVersion () {
   version = (stderr ? 'unknown' : stdout.trim())
 
   debug('sources version is %s', version)
+  return version
 }
