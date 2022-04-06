@@ -8,8 +8,8 @@ WORKDIR ${destDir}
 COPY . ${destDir}
 
 # Locales and base tools
-RUN apt-get update -qqq \
-      && apt-get install -y gcc g++ make jq curl imagemagick locales build-essential ripmime poppler-utils isync rename tzdata mpack mutt git \
+RUN apt update -qqq \
+      && apt install -y --no-install-recommends gcc g++ make jq curl imagemagick locales build-essential ripmime poppler-utils isync rename tzdata mpack mutt git gnupg wget \
       && sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \ 
       && locale-gen en_US.UTF-8
 
