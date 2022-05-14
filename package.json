@@ -31,7 +31,8 @@
   "scripts": {
     "core": "node `pwd`/core/main.js",
     "inspect": "node --inspect-brk `pwd`/core/main.js",
-    "start": "/bin/bash ./run.sh"
+    "start": "/bin/bash ./run.sh",
+    "electron-rebuild":"rm -rf node_modules && npm install && npx electron-rebuild"
   },
   "engine": "node >= 14",
   "os": [
@@ -39,5 +40,8 @@
     "win64",
     "linux"
   ],
-  "devDependencies": {}
+  "devDependencies": {
+    "electron": "^18.2.3",
+    "electron-rebuild": "^3.2.7"
+  }
 }
