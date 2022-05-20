@@ -2,7 +2,7 @@
 const path = require('path')
 const fs = require('fs')
 const os = require('os')
-const debug = require('debug')('eye:agent:app')
+const logger = require('./lib/logger')('eye:agent:app')
 const TheEyeClient = require('./lib/theeye-client')
 const hostnameFn = require('./lib/hostname')
 const Worker = require('./worker')
@@ -22,9 +22,12 @@ function App () {
 
   this.on('config:outdated', () => updateWorkers())
 
-  const connection = appConfig.supervisor || {}
-  connection.hostnameFn = hostnameFn
-  connection.request = appConfig.request
+  const connection = Object.assign( {}, (appConfig.supervisor || {}), {
+    version: process.env.THEEYE_AGENT_VERSION,
+    name: 'theeye-agent',
+    hostnameFn,
+    request: appConfig.request
+  })
 
   const _connection = new TheEyeClient(connection)
   const _workers = []
@@ -40,7 +43,7 @@ function App () {
         const agentFile = path.join(process.cwd(), 'config', '.connection_id')
         fs.writeFileSync(agentFile, cnnid || '')
       } catch (err) {
-        debug(err)
+        logger.error(err)
       }
 
       process.env.THEEYE_AGENT_CONNECTION_ID = cnnid
@@ -92,11 +95,11 @@ function App () {
         _hostResourceId = response.resource_id
         app.connection_id = response.connection_id
 
-        debug(response)
+        logger.log(response)
         next(null)
       },
       failure: function (err) {
-        debug(err)
+        logger.error(err)
         next(err)
       }
     })
@@ -105,8 +108,8 @@ function App () {
   function connectSupervisor (next) {
     _connection.refreshToken(function (error, token) {
       if (error) {
-        debug('unable to get an access token')
-        debug(error)
+        logger.error('unable to get an access token')
+        logger.error(error)
         next(error)
       } else {
         registerAgent(next)
@@ -121,7 +124,7 @@ function App () {
     // attempts++
     connectSupervisor(function (error) {
       if (!error) return nextFn()
-      debug('connection failed. trying again in "%s" seconds', interval / 1000)
+      logger.error('connection failed. trying again in "%s" seconds', interval / 1000)
       setTimeout(function () {
         tryConnectSupervisor(nextFn)
       }, interval)
@@ -145,7 +148,7 @@ function App () {
       listener.stop()
       Object.assign(listener.config, config)
       listener.run()
-      debug('listener reconfigured')
+      logger.log('listener reconfigured')
     }
   }
 
@@ -164,7 +167,7 @@ function App () {
       ping.stop()
       Object.assign(ping.config, config)
       ping.run()
-      debug('ping reconfigured')
+      logger.log('ping reconfigured')
     }
   }
 
@@ -179,10 +182,10 @@ function App () {
       appConfig.workers?.enable === false ||
       process.env.THEEYE_AGENT_WORKERS_DISABLED === 'true'
     ) {
-      return debug('WARNING: Workers disabled')
+      return logger.log('WARNING: Workers disabled')
     }
 
-    debug('intializing workers')
+    logger.log('intializing workers')
     workersConfig.forEach(function (config) {
       const worker = Worker.spawn(app, config, _connection)
       if (worker !== null) {
@@ -203,14 +206,14 @@ function App () {
 
       if (!remoteConfig) {
         const msg = 'no workers configuration available'
-        debug(msg)
+        logger.log(msg)
         result.data.message = msg
         result.state = 'failure'
       } else {
         startWorkers(remoteConfig.workers)
         result.data.message = 'agent monitors updated'
         result.state = 'success'
-        debug('workers configured')
+        logger.log('workers configured')
       }
 
       if (next) {
@@ -220,7 +223,7 @@ function App () {
   }
 
   function updateWorkers () {
-    debug('stopping current resource workers')
+    logger.log('stopping current resource workers')
     _workers.forEach(function (worker, index) {
       worker.stop()
       delete _workers[index]
@@ -229,17 +232,21 @@ function App () {
 
     _workers.splice(0, _workers.length) // destroy workers.
 
-    debug('updating workers configuration')
+    logger.log('updating workers configuration')
     reconfigureWorkers(function (err, result) {
-      if (err) { return debug(err) }
+      if (err) {
+        return logger.error(err)
+      }
       app.emit('config:updated', result)
-      debug('workers configuration updated')
+      logger.log('workers configuration updated')
     })
   }
 
   function configureWorkers (next) {
     _connection.getAgentConfig((err, configs) => {
-      if (err) { return next(err) }
+      if (err) {
+        return next(err)
+      }
       startWorkers(configs.workers)
       startCoreWorkers()
     })

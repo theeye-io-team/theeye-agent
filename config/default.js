@@ -31,7 +31,7 @@ module.exports = {
       only_json_response: true, // server response header application/json is mandatory. ignore response body if not JSON
       gzip: true,
       timeout: 5000, // 5 secs
-      proxy: proxy,
+      proxy,
       tunnel: Boolean(proxy) // tunnel required when using proxy
     }
   },

@@ -1,21 +1,10 @@
-'use strict';
 
-var CLIENT_VERSION = 'v0.9.8' ;
-var CLIENT_NAME = 'Golum' ;
-var CLIENT_USER_AGENT = CLIENT_NAME + '/' + CLIENT_VERSION ;
-
-var os = require('os');
-var fs = require('fs');
-var path = require('path');
-var util = require('util');
-var request = require('request');
-var debug = require('debug');
-
-var logger = {
-  'debug': debug('eye:client:debug'),
-  'error': debug('eye:client:error')
-};
-
+const os = require('os');
+const fs = require('fs');
+const path = require('path');
+const util = require('util');
+const request = require('request');
+const logger = require('../logger')('lib:theeye-client')
 
 module.exports = TheEyeClient;
 
@@ -42,10 +31,14 @@ TheEyeClient.prototype = {
    * @param Object options
    *
    */
-  configure: function(options) {
+  configure: function (options) {
     var connection = this;
 
-    logger.debug('theeye api client version %s/%s', CLIENT_NAME, CLIENT_VERSION);
+    const agent_version = options.version
+    const client_name = (options.name || 'theeye-agent')
+    const userAgent = `${client_name}/${agent_version}`
+
+    logger.debug('theeye api client version %s/%s', client_name, agent_version)
 
     for (var prop in options) {
       connection[prop] = options[prop];
@@ -72,7 +65,7 @@ TheEyeClient.prototype = {
       baseUrl: connection.api_url
     }, options.request)
 
-    defaults.headers = Object.assign({ 'User-Agent': CLIENT_USER_AGENT }, options.request.headers)
+    defaults.headers = Object.assign({ 'User-Agent': userAgent }, options.request.headers)
 
     logger.debug('request options set to %j', defaults)
 
