@@ -1,5 +1,5 @@
 
-const logger = require('../lib/logger')('worker')
+const Logger = require('../lib/logger').create('worker')
 
 const os = require('os')
 const platform = os.platform()

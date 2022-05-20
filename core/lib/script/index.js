@@ -5,7 +5,7 @@ const path = require('path')
 const isDataUrl = require('valid-data-url')
 const exec = require('child_process').exec
 const scriptsConfig = require('config').scripts
-const logger = require('../logger')('lib:script')
+const logger = require('../logger').create('lib:script')
 const mime = require('mime-types')
 
 const DEFAULT_EXECUTION_TIMEOUT = 10 * 60 * 1000

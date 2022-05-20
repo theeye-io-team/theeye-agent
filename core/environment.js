@@ -2,7 +2,7 @@ require('dotenv').config()
 
 const fs = require('fs')
 const config = require('config')
-const logger = require('./lib/logger')('eye::environment')
+const logger = require('./lib/logger').create('eye::environment')
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 const VERSION_CONSTANT = require('./constants/version').VERSION

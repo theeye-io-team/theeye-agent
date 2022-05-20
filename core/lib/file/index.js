@@ -5,7 +5,7 @@ const fs = require('fs')
 const crypto = require('crypto')
 const util = require('util')
 const mkdirp = require('mkdirp')
-const logger = require('../logger')('lib:file')
+const logger = require('../logger').create('lib:file')
 
 function noid () {
   return null

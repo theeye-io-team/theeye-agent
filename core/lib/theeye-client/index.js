@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const request = require('request');
-const logger = require('../logger')('lib:theeye-client')
+const logger = require('../logger').create('lib:theeye-client')
 
 module.exports = TheEyeClient;
 
@@ -50,7 +50,7 @@ TheEyeClient.prototype = {
     connection.client_customer = options.client_customer||process.env.THEEYE_SUPERVISOR_CLIENT_CUSTOMER;
     connection.access_token = options.access_token||null;
 
-    logger.debug('connection properties => %o',connection);
+    logger.debug({ connection })
     if (!connection.api_url) {
       return logger.error('ERROR. Supervisor API URL required');
     }
