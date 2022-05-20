@@ -1,5 +1,5 @@
 
-const debug = require('debug')
+const logger = require('../lib/logger')
 const EventEmitter = require('events').EventEmitter
 const Constants = require('../constants')
 
@@ -16,11 +16,7 @@ const MonitorWorker = function (app, connection, config) {
   this.connection = connection
 
   var part = this.config.type + (this.name ? (':' + this.name) : '');
-  var log = 'eye:agent:worker:' + part;
-  this.debug = {
-    'log': debug(log),
-    'error': debug(log + ':error')
-  }
+  this.debug = logger(`worker:${part}`)
 
   this.initialize.apply(this, arguments);
   return this;

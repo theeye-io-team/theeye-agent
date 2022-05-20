@@ -1,10 +1,5 @@
 
-const debug = require('debug');
-
-const logger = {
-  log: debug('eye:agent:worker'),
-  error: debug('eye:agent:worker:error')
-}
+const logger = require('../lib/logger')('worker')
 
 const os = require('os')
 const platform = os.platform()
