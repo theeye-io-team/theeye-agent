@@ -1,44 +1,90 @@
 
-const debug = require('debug')
-const os = require('os')
+const path = require('path')
+const util = require('util')
+const Debug = require('debug')
+const fs = require('fs')
+const dump = Debug('theeye:lib:logger')
 
-function Logger (name) {
-  const self = {}
+// @TODO if we need more than this we cat give a chance to
+// https://www.npmjs.com/package/winston
 
-  let message = `theeye:%LEVEL%:${name}`
-  if (process.env.THEEYE_NODE_HOSTNAME) {
-    message = `${process.env.THEEYE_NODE_HOSTNAME} ${message}`
+const Logger = {}
+
+Logger.configure = (settings) => {
+  return new Promise((resolve, reject) => {
+    if (!settings?.file) {
+      dump('file not configured')
+      return resolve()
+    }
+    if (settings.file.enabled === false) {
+      dump('file logger disabled')
+      return resolve()
+    }
+
+    const dirname = settings.file.dirname || process.cwd()
+    const basename = settings.file.basename || 'theeye-agent.log'
+    Logger.level = settings.file.level || 'error'
+
+    const filename = path.join(dirname, basename)
+
+    const stream = fs.createWriteStream(filename,{flags: 'a'})
+      .on('error', err => dump(err))
+      .on('close', () => dump('close'))
+      .on('open', () => {
+        dump(`file ${filename} open ok`)
+        Logger.file = stream
+        resolve()
+      })
+  })
+}
+
+Logger.writeFile = (namespace, message) => {
+  if (!Logger.file) { return }
+  const level = Logger.level
+  const time = new Date().toISOString()
+  const json = JSON.stringify({ time, namespace, message }) + '\n'
+
+  Logger.file.write(json)
+}
+
+Logger.levelTemplate = `%MODULE%:%LEVEL%:%NAME%`
+
+Logger.create = (name) => {
+  const logger = { }
+
+  logger.log = createLoggerLevel(name, 'log')
+  logger.error = createLoggerLevel(name, 'error')
+  logger.warn = createLoggerLevel(name, 'warn')
+  logger.data = createLoggerLevel(name, 'data')
+  logger.debug = createLoggerLevel(name, 'debug')
+
+  return logger
+}
+
+const createLoggerLevel = (name, level) => {
+  const namespace = Logger.levelTemplate
+    .replace('%MODULE%', 'theeye')
+    .replace('%LEVEL%', level)
+    .replace('%NAME%', name)
+
+  const debug = Debug(namespace)
+
+  if (Logger.file && levelOrder(Logger.level) >= levelOrder(level)) {
+    return (...args) => {
+      debug(...args)
+      const formattedMessage = util.format(...args)
+      Logger.writeFile(namespace, formattedMessage)
+    }
+  } else {
+    return (...args) => {
+      debug(...args)
+    }
   }
+}
 
-  const ddata  = debug(message.replace('%LEVEL%','data'))
-  const ddebug = debug(message.replace('%LEVEL%','debug'))
-  const dlog   = debug(message.replace('%LEVEL%','log'))
-  const dwarn  = debug(message.replace('%LEVEL%','warn'))
-  const derror = debug(message.replace('%LEVEL%','error'))
-
-  self.log = function flog () {
-    dlog.apply(self, arguments)
-  }
-
-  self.error = function ferror () {
-    derror.apply(self, arguments)
-  }
-
-  self.warn = function fwarn () {
-    dwarn.apply(self, arguments)
-  }
-
-  self.data = function fdata () {
-    ddata.apply(self, arguments)
-  }
-
-  self.debug = function fdebug () {
-    ddebug.apply(self, arguments)
-  }
-
-  self.instance = debug
-
-  return self
+const levelOrder = (level) => {
+  const levels = ['error','warn','log','debug','data','*']
+  return levels.indexOf(level)
 }
 
 module.exports = Logger

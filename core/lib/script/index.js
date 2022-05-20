@@ -161,7 +161,7 @@ Script.prototype.run = function (end) {
 }
 
 Script.prototype.execScript = function (script) {
-  logger.log('running script "%s"', script)
+  logger.debug('running script "%s"', script)
 
   const self = this
   let partials = { stdout: [], stderr: [], log: [] }
