@@ -4,7 +4,19 @@ const proxy = (process.env.https_proxy || process.env.http_proxy)
 const MULTITASKING = process.env.THEEYE_AGENT_MULTITASKING === 'false' ? false : true
 
 module.exports = {
-  server: false,
+  logger: {
+    file: {
+      /**
+       *
+       * basename: 'theeye-agent.log',
+       * dirname: process.cwd()
+       *
+       **/
+      // level: error, warn, log, debug, data, or any added custom level
+      //levels: ['error','log']
+      levels: ['error']
+    }
+  },
   /**
    * the listener is the default worker.
    * this worker provide information and status of the agent to the api
@@ -31,7 +43,7 @@ module.exports = {
       only_json_response: true, // server response header application/json is mandatory. ignore response body if not JSON
       gzip: true,
       timeout: 5000, // 5 secs
-      proxy: proxy,
+      proxy,
       tunnel: Boolean(proxy) // tunnel required when using proxy
     }
   },

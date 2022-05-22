@@ -5,7 +5,7 @@ const fs = require('fs')
 const crypto = require('crypto')
 const util = require('util')
 const mkdirp = require('mkdirp')
-const debug = require('debug')('eye:lib:file')
+const logger = require('../logger').create('lib:file')
 
 function noid () {
   return null
@@ -177,7 +177,7 @@ function File (props) {
   this.checkMd5 = function (next) {
     md5(this.path)
       .then(currmd5 => {
-        debug('checking file md5 "%s" againts "%s"', currmd5, this.md5)
+        logger.log('checking file md5 "%s" againts "%s"', currmd5, this.md5)
         if (currmd5 !== this.md5) {
           var err = new Error('EMD5: file checksum mismatch')
           err.code = 'EMD5'
@@ -189,7 +189,7 @@ function File (props) {
   }
 
   this.checkAccess = function (next) {
-    debug('checking file access %s', this.path);
+    logger.log('checking file access %s', this.path);
     //var accessMode = fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK | fs.constants.F_OK ;
     var accessMode = fs.R_OK | fs.W_OK | fs.X_OK | fs.F_OK ;
     fs.access(this.path, accessMode, function(err){
@@ -254,13 +254,13 @@ function File (props) {
       // if no uid or no gid , just ignore. node needs both to work
       if (uid===null||gid===null) return next()
 
-      debug('setting owner uid: %s, gid: %s', uid, gid)
+      logger.log('setting owner uid: %s, gid: %s', uid, gid)
       fs.chown(path, uid, gid, function (err) {
         if (err) {
-          debug(err)
+          logger.error(err)
           return next(err)
         }
-        debug('owner set')
+        logger.log('owner set')
         return next()
       })
     }
@@ -274,13 +274,13 @@ function File (props) {
 
     function chmod (next) {
       if (!mode||isNaN(mode)) return next()
-      debug('setting mode %s', mode)
+      logger.log('setting mode %s', mode)
       fs.chmod(path, mode, function (err) {
         if (err) {
-          debug(err)
+          logger.error(err)
           return next(err)
         }
-        debug('mode set')
+        logger.log('mode set')
         next()
       })
     }
@@ -309,7 +309,7 @@ function File (props) {
     let cbCalled = false
 
     // keep by default execution mode
-    debug('creating file %s..', this.path);
+    logger.log('creating file %s..', this.path);
 
     var writable = fs.createWriteStream(this.path, { mode:'0755', encoding: 'utf8' })
 

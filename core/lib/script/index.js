@@ -5,7 +5,7 @@ const path = require('path')
 const isDataUrl = require('valid-data-url')
 const exec = require('child_process').exec
 const scriptsConfig = require('config').scripts
-const debug = require('debug')('eye:lib:script')
+const logger = require('../logger').create('lib:script')
 const mime = require('mime-types')
 
 const DEFAULT_EXECUTION_TIMEOUT = 10 * 60 * 1000
@@ -83,8 +83,8 @@ function Script (props) {
         parsed = ''
       }
     } catch (e) {
-      debug('error parsing script arguments')
-      debug('%o', e)
+      logger.error('error parsing script arguments')
+      logger.error('%o', e)
     }
     return parsed
   }
@@ -161,7 +161,7 @@ Script.prototype.run = function (end) {
 }
 
 Script.prototype.execScript = function (script) {
-  debug('running script "%s"', script)
+  logger.debug('running script "%s"', script)
 
   const self = this
   let partials = { stdout: [], stderr: [], log: [] }
@@ -202,16 +202,16 @@ Script.prototype.execScript = function (script) {
   })
 
   child.on('close', function (code, signal) {
-    debug('child emit close with %j', arguments)
+    logger.log('child emit close with %j', arguments)
 
 
     var exec_diff = process.hrtime(execStart)
-    debug('times %j.', exec_diff)
+    logger.log('times %j.', exec_diff)
 
     if (exec_diff[0] === 0) {
-      debug('script end after %s msecs.', exec_diff[1] / 1e6)
+      logger.log('script end after %s msecs.', exec_diff[1] / 1e6)
     } else {
-      debug('script end after %s secs', exec_diff[0])
+      logger.log('script end after %s secs', exec_diff[0])
     }
 
     this.output = new ScriptOutput({
@@ -234,15 +234,15 @@ Script.prototype.execScript = function (script) {
   })
 
   child.on('error', function (err) {
-    debug('child emit error with %j', err)
+    logger.error('child emit error with %j', err)
   })
 
   child.on('disconnect', function () {
-    debug('script emit disconnect')
+    logger.error('script emit disconnect')
   })
 
   child.on('message', function () {
-    debug('child emit message with %j', arguments)
+    logger.log('child emit message with %j', arguments)
   })
 
   return child

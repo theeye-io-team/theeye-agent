@@ -2,7 +2,7 @@ require('dotenv').config()
 
 const fs = require('fs')
 const config = require('config')
-const debug = require('debug')('eye::environment')
+const logger = require('./lib/logger').create('eye::environment')
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 
@@ -10,7 +10,7 @@ require('./lib/extend-error')
 
 module.exports = async () => {
   if (!process.env.NODE_ENV) {
-    debug('NODE_ENV not set')
+    logger.error('NODE_ENV not set')
     process.exit()
   }
 
@@ -19,7 +19,7 @@ module.exports = async () => {
 
   const version = await detectAgentVersion().catch(err => 'version error')
   process.env.THEEYE_AGENT_VERSION = version
-  debug('agent version is %s', process.env.THEEYE_AGENT_VERSION)
+  logger.log('agent version is %s', process.env.THEEYE_AGENT_VERSION)
 }
 
 function createScriptsPath () {
@@ -29,7 +29,7 @@ function createScriptsPath () {
   }
 
   config.scripts.path = scriptsPath
-  debug('scripts path is %s', config.scripts.path)
+  logger.log('scripts path is %s', config.scripts.path)
 
   if (!fs.existsSync(scriptsPath)) {
     fs.mkdirSync(scriptsPath, '0755')
@@ -43,7 +43,7 @@ function createLogsPath () {
 
   if (!config.logs) { config.logs = {} }
   config.logs.path = path 
-  debug('Logs path is %s', config.logs.path)
+  logger.log('Logs path is %s', config.logs.path)
 
   if (!fs.existsSync(path)) {
     fs.mkdirSync(path, '0755')
@@ -54,13 +54,13 @@ function createLogsPath () {
 async function detectAgentVersion () {
   let version = process.env.THEEYE_AGENT_VERSION
   if (version) {
-    debug('environment version is %s', version)
+    logger.log('environment version is %s', version)
     return version
   }
 
   version = config.version
   if (version) {
-    debug('configured version is %s', version)
+    logger.log('configured version is %s', version)
     return version
   }
 
@@ -71,6 +71,6 @@ async function detectAgentVersion () {
   const { error, stdout, stderr } = await exec(cmd, {}).catch(error => { return {error} })
   version = (error||stderr ? 'version error' : stdout.trim())
 
-  debug('sources version is %s', version)
+  logger.log('sources version is %s', version)
   return version
 }
