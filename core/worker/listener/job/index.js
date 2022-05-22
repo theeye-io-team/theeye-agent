@@ -70,6 +70,7 @@ JobFactory.ScriptJob = function (specs, options) {
   var connection = options.connection
 
   this.id = specs.id
+  this.name = specs.name
   this.specs = specs
   this.options = options
 
