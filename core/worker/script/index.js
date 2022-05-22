@@ -130,7 +130,7 @@ module.exports = AbstractWorker.extend({
 
         payload = { state, data }
 
-        self.debug.log('execution result payload is %j', payload)
+        self.debug.data('execution result payload is %j', payload)
 
         return next(null, payload)
       })
