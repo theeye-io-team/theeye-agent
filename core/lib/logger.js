@@ -52,13 +52,11 @@ Logger.levelTemplate = `%MODULE%:%LEVEL%:%NAME%`
 
 Logger.create = (name) => {
   const logger = { }
-
   logger.log = createLoggerLevel(name, 'log')
   logger.error = createLoggerLevel(name, 'error')
   logger.warn = createLoggerLevel(name, 'warn')
   logger.data = createLoggerLevel(name, 'data')
   logger.debug = createLoggerLevel(name, 'debug')
-
   return logger
 }
 
