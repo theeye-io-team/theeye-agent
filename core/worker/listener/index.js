@@ -1,7 +1,4 @@
 
-const fs = require('fs')
-const path = require('path')
-const Script = require('../../lib/script')
 const AbstractWorker = require('../abstract')
 const JobsFactory = require('./job')
 
@@ -13,34 +10,34 @@ const JobsFactory = require('./job')
 module.exports = AbstractWorker.extend({
   initialize () {
     // Set the default configuration
-    const ListenerConfig = (this.app.config.workers?.listener || {multitasking_limit:1})
+    const ListenerConfig = (this.app.config.workers?.listener || { multitasking_limit: 1 })
     if (!this.config.multitasking_limit) {
       this.config.multitasking_limit = (ListenerConfig.multitasking_limit || 1)
     }
 
-    this.running_queue = []
+    this.runningCount = 0
   },
   jobs: {},
   type: 'listener',
   /**
-   * often the resource id is required. 
+   * often the resource id is required.
    * in this case the associated host resource id
    * @param Function (optional) next
    * @return String resource id
    */
-  getId : function(next) {
-    return this.config.resource_id ;
+  getId (next) {
+    return this.config.resource_id
   },
   /**
    * obteins the data that will be sent to the supervisor
    * @param Function next
    * @return null
    */
-  getData : function(next) {
-    return next(null,{
+  getData (next) {
+    return next(null, {
       state: 'success',
-      data: { message : "agent running" }
-    });
+      data: { message: 'agent running' }
+    })
   },
   /**
    * the steps to be performed on each worker cicle.
@@ -49,7 +46,7 @@ module.exports = AbstractWorker.extend({
    */
   keepAlive () {
     try {
-      this.debug.log(`Jobs in progress ${this.running_queue.map(queue => queue.length)}`)
+      this.debug.log(`Jobs in progress ${this.runningCount}`)
       this.executeJobs()
     } catch (err) {
       this.debug.error(err)
@@ -58,29 +55,14 @@ module.exports = AbstractWorker.extend({
     this.rest()
   },
   async executeJobs () {
-    const { multitasking_limit = 1, multitasking = false, task_id } = this.config
-
-    if (this.running_queue[task_id] === undefined) {
-      this.running_queue[task_id] = []
-    }
-
-    const runningJobsQueue = this.running_queue[task_id]
-
-    let limit
-    if (multitasking === false) {
-      limit = (1 - runningJobsQueue.length)
-    } else {
-      limit = (multitasking_limit - runningJobsQueue.length)
-    }
-
+    const limit = this.jobsQueryLimit()
     if (limit <= 0) { return }
 
-    this.debug.log(`Fetching ${limit} jobs MAX`)
     let jobs
-    if (task_id === undefined)  {
+    if (!this.config.task_id) {
       jobs = await this.getJobs()
     } else {
-      jobs = await this.getJobsByTask({ task_id, limit })
+      jobs = await this.getJobsByTask({ limit })
     }
 
     if (!jobs || !Array.isArray(jobs) || jobs.length === 0) {
@@ -88,65 +70,46 @@ module.exports = AbstractWorker.extend({
       return
     }
 
-    for (let job of jobs) {
+    this.debug.log(`${jobs.length} jobs`)
+    for (const job of jobs) {
+      this.debug.log(`Processing job ${job.id}:${job.name}`)
       if (!job || !job.id) {
         this.debug.error('Invalid job received')
+        return
       } else {
-        runningJobsQueue.push(job)
-
-        this
-          .executeJob(job)
-          .catch(err => err)
-          .then(result => {
-            if (result instanceof Error) {
-              this.debug.error(result)
-            }
-
-            // @TODO we need to ensure that the queue is cleaned correctly.
-            let index = 0
-            let found = false
-            while (index < runningJobsQueue.length && !found) {
-              const elem = runningJobsQueue[index]
-              if (elem.id === job.id) {
-                runningJobsQueue.splice(index, 1)
-                found = true
-              }
-              index++
-            }
-
-            this.executeJobs() // continue recursion
-          })
+        this.jobExecutionLoop(job)
       }
     }
   },
-  getJobsByTask (input) {
-    const { task_id = undefined, limit = 1 } = input
-    const url = `/task/${task_id}/job/queue`
-    const query = {
-      hostname: this.connection.hostnameFn(),
-      limit
+  /**
+   * @return {Promise}
+   */
+  async jobExecutionLoop (jobData) {
+    const debug = this.debug
+    this.runningCount++
+
+    let result
+    let job
+    try {
+      job = JobsFactory.create(jobData, this)
+
+      result = await this.getJobOutput(job)
+    } catch (err) {
+      debug.error(`Error executing job ${jobData.id}: ${jobData.name}`)
+      debug.error(err)
+      result = { state: 'error', err, data: { output: err } }
     }
 
-    return new Promise( (resolve, reject) => {
-      this.connection.fetch({
-        route: url,
-        query,
-        failure: reject,
-        success: jobs => {
-          if (Array.isArray(jobs) && jobs.length > 0) {
-            resolve(jobs)
-          } else {
-            resolve()
-          }
-        }
-      })
-    })
+    await this.submitJobResult(job, result)
+
+    this.runningCount--
+    this.executeJobs() // continue recursion
   },
   /**
    * old endpoint
    */
   getJobs () {
-    return new Promise( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this.connection.fetch({
         route: '/:customer/job',
         query: {
@@ -154,7 +117,7 @@ module.exports = AbstractWorker.extend({
         },
         failure: reject,
         success: body => {
-          if (Array.isArray(body.jobs) && body.jobs.length > 0) {
+          if (Array.isArray(body.jobs)) {
             resolve(body.jobs)
           } else {
             resolve()
@@ -163,28 +126,68 @@ module.exports = AbstractWorker.extend({
       })
     })
   },
+  getJobsByTask ({ limit }) {
+    return new Promise((resolve, reject) => {
+      this.debug.log(`Fetching ${limit} jobs`)
+
+      const taskId = this.config.task_id
+      const url = `/task/${taskId}/job/queue`
+      const query = {
+        hostname: this.connection.hostnameFn(),
+        limit
+      }
+
+      this.connection.fetch({
+        route: url,
+        query,
+        failure: reject,
+        success: jobs => {
+          if (Array.isArray(jobs)) {
+            resolve(jobs)
+          } else {
+            resolve()
+          }
+        }
+      })
+    })
+  },
+  jobsQueryLimit () {
+    const { multitasking_limit = 1, multitasking = false } = this.config
+    if (multitasking === false) {
+      return (1 - this.runningCount)
+    } else {
+      return (multitasking_limit - this.runningCount)
+    }
+  },
   /**
    * @return {Promise}
    */
-  executeJob (jobData) {
-    return new Promise((resolve, reject) => {
-      const connection = this.connection
-      const debug = this.debug
-      const options = { connection, app: this.app }
+  getJobOutput (job) {
+    this.debug.log(`obtaining job output ${job.id}:${job.name}`)
 
-      /**
-       *
-       * process job jobData
-       *
-       */
-      const job = JobsFactory.create(jobData, options)
+    return new Promise((resolve, reject) => {
       job.getResults((err, result) => {
-        if (err) { debug.error('%o', err) }
-        const payload = (err || result)
-        connection.submitJobResult(job.id, payload, (err, result) => {
-          if (err) { debug.error('%o', err) }
-          resolve({ payload, result })
-        })
+        if (err) {
+          this.debug.error('%o', err)
+          reject(err)
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+  /**
+   * @return {Promise}
+   */
+  submitJobResult (job, payload) {
+    this.debug.log(`submiting job ${job.id}:${job.name}`)
+
+    return new Promise((resolve, reject) => {
+      this.connection.submitJobResult(job.id, payload, (err, result) => {
+        if (err) {
+          this.debug.error('%o', err)
+        }
+        resolve({ payload, result })
       })
     })
   }
