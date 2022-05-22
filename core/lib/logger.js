@@ -23,7 +23,9 @@ Logger.configure = (settings) => {
 
     const dirname = settings.file.dirname || process.cwd()
     const basename = settings.file.basename || 'theeye-agent.log'
-    Logger.level = settings.file.level || 'error'
+
+    const levels = settings.file.levels || ['error']
+    Logger.levels = levels
 
     const filename = path.join(dirname, basename)
 
@@ -40,7 +42,6 @@ Logger.configure = (settings) => {
 
 Logger.writeFile = (namespace, message) => {
   if (!Logger.file) { return }
-  const level = Logger.level
   const time = new Date().toISOString()
   const json = JSON.stringify({ time, namespace, message }) + '\n'
 
@@ -69,7 +70,9 @@ const createLoggerLevel = (name, level) => {
 
   const debug = Debug(namespace)
 
-  if (Logger.file && levelOrder(Logger.level) >= levelOrder(level)) {
+  if (Logger.file &&
+    (Logger.levels === '*' || Logger.levels.indexOf(level) !== -1)
+  ) {
     return (...args) => {
       debug(...args)
       const formattedMessage = util.format(...args)
@@ -80,11 +83,6 @@ const createLoggerLevel = (name, level) => {
       debug(...args)
     }
   }
-}
-
-const levelOrder = (level) => {
-  const levels = ['error','warn','log','debug','data','*']
-  return levels.indexOf(level)
 }
 
 module.exports = Logger

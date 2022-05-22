@@ -18,3 +18,4 @@ logs
 theeye-agent/
 .env
 scripts/
+theeye-agent.log
