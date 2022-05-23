@@ -25,7 +25,6 @@
     "theeye-ps-aux": "~0.3.4",
     "theeye-ps-node": "github:theeye-io/ps-node",
     "toml": "~3.0.0",
-    "userid": "~1.0.0-beta.9",
     "valid-data-url": "~0.1.6",
     "x2js": "~3.4.3"
   },
