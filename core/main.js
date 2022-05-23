@@ -4,7 +4,7 @@ Logger.configure(config.logger).then(() => {
   const logger = Logger.create('main')
 
   const envset = require('./environment')
-  return envset().then(() => {
+  return envset(config).then(() => {
     process.on('SIGINT', () => {
       logger.error('agent process ends on "SIGINT"')
       process.exit(0)

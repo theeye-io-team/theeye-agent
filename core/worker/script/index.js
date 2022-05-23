@@ -1,22 +1,25 @@
-'use strict'
 
+const path = require('path')
 const Script = require('../../lib/script')
 const AbstractWorker = require('../abstract')
 const join = require('path').join
-const scriptsConfig = require('config').scripts
-const logsConfig = require('config').logs
 
 module.exports = AbstractWorker.extend({
   initialize () {
     //var directory = process.env.THEEYE_AGENT_SCRIPT_PATH
-    let directory = scriptsConfig.path
     let date = new Date()
     let config = this.config.script
 
     let logging_path
-    if (this.config.script.logging === true || logsConfig.global === true) {
-      logging_path = `${logsConfig.path}/script_${config.id}_${config.filename}_${date.toISOString()}.log`
+    if (
+      this.config.logging === true && // enabled by job
+      this.app.config.workers.logs?.enabled !== false // true or undefined
+    ) {
+      const logFilename = `${config.id}_${config.filename}_${date.toISOString()}.log`
+      logging_path = path.join(this.app.config.workers.logs.path, logFilename)
     }
+
+    const directory = this.app.config.scripts.path
 
     this.script = new Script({
       id: config.id,
