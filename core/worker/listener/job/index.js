@@ -7,7 +7,6 @@
  */
 const WorkersFactory = require('../../index')
 const JobFactory = { }
-const logsConfig = require('config').logs
 
 module.exports.create = function (attribs, options) {
   var type = attribs._type
@@ -67,24 +66,18 @@ JobFactory.ScraperJob = function(specs, options) {
 // script job
 //
 JobFactory.ScriptJob = function (specs, options) {
-  var connection = options.connection
+  const connection = options.connection
 
   this.id = specs.id
   this.name = specs.name
   this.specs = specs
   this.options = options
 
-  let logging_path = undefined
-  if (specs.script.execution_logging_enabled === true) {
-    let dirname = (specs.script.execution_logging_dirname || logsConfig.path) 
-    let filename = (specs.script_execution_logging_filename || `script_${config.id}_${config.filename}`)
-    logging_path = `${dirname}/${filename}_${date.toISOString()}.log`
-  }
-
   this.getResults = function (done) {
     // prepare config
     //let event_data = specs.event_data || {}
-    var config = {
+    const config = {
+      logging: (specs.agent_logging || false),
       disabled: false,
       type: 'script',
       script: {
@@ -95,13 +88,12 @@ JobFactory.ScriptJob = function (specs, options) {
         runas: specs.script_runas,
         timeout: specs.timeout,
         // IMPORTANT. use empty string for passing empty vars into diff programming languages.
-        env: Object.assign({}, specs.env),
-        logging_path
+        env: Object.assign({}, specs.env)
       }
     }
 
     // invoke worker
-    var script = WorkersFactory.spawn(options.app, config, connection)
+    const script = WorkersFactory.spawn(options.app, config, connection)
     script.getData(function(err,result){
       return done(null,result);
     })
