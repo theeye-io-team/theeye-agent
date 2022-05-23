@@ -22,6 +22,10 @@ module.exports = {
    * this worker provide information and status of the agent to the api
    */
   workers: {
+    logs: {
+      //enabled: true, // global workers log is enabled by default
+      //path: ( __dirname + '/../logs' )
+    },
     // enable/disable jobs runner
     enable: true,
     // jobs runner settings
@@ -48,9 +52,6 @@ module.exports = {
     }
   },
   version: undefined,
-  logs: {
-    path: ( __dirname + '/../logs' )
-  },
   scripts: {
     path: ( __dirname + '/../downloads' ),
     timeout: 10 * 60 * 1000, // 10 minutes

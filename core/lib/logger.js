@@ -16,6 +16,7 @@ Logger.configure = (settings) => {
       dump('file not configured')
       return resolve()
     }
+
     if (settings.file.enabled === false) {
       dump('file logger disabled')
       return resolve()

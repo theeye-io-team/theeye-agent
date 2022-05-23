@@ -1,31 +1,35 @@
 require('dotenv').config()
 
 const fs = require('fs')
-const config = require('config')
+const path = require('path')
 const logger = require('./lib/logger').create('eye::environment')
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 
 require('./lib/extend-error')
 
-module.exports = async () => {
+module.exports = async (config) => {
   if (!process.env.NODE_ENV) {
     logger.error('NODE_ENV not set')
     process.exit()
   }
 
-  createScriptsPath()
-  createLogsPath()
+  configureScriptsPath(config)
+  configureWorkersLogsPath(config)
 
   const version = await detectAgentVersion().catch(err => 'version error')
   process.env.THEEYE_AGENT_VERSION = version
   logger.log('agent version is %s', process.env.THEEYE_AGENT_VERSION)
 }
 
-function createScriptsPath () {
-  var scriptsPath = (process.env.THEEYE_AGENT_SCRIPT_PATH || config.scripts && config.scripts.path)
+const configureScriptsPath = (config) => {
+  let scriptsPath = (
+    process.env.THEEYE_AGENT_SCRIPT_PATH ||
+    config.scripts?.path
+  )
+
   if (!scriptsPath) {
-    scriptsPath = process.cwd() + '/../downloads'
+    scriptsPath = path.join(process.cwd(), 'downloads')
   }
 
   config.scripts.path = scriptsPath
@@ -37,18 +41,22 @@ function createScriptsPath () {
   return scriptsPath
 }
 
-function createLogsPath () {
-  let path = (process.env.THEEYE_AGENT_LOGS_PATH || config.logs && config.logs.path)
-  if (!path) { path = process.cwd() + '/../logs' }
+const configureWorkersLogsPath = (config) => {
+  const logs = (config.workers?.logs || {})
 
-  if (!config.logs) { config.logs = {} }
-  config.logs.path = path 
-  logger.log('Logs path is %s', config.logs.path)
-
-  if (!fs.existsSync(path)) {
-    fs.mkdirSync(path, '0755')
+  if (!logs.path) {
+    logs.path = path.join(process.cwd(), 'logs')
   }
-  return path
+
+  logger.log('Jobs execution logs path is %s', logs.path)
+
+  if (!fs.existsSync(logs.path)) {
+    logger.log('logs directory created')
+    fs.mkdirSync(logs.path, '0755')
+  }
+
+  config.workers.logs = logs
+  return logs
 }
 
 async function detectAgentVersion () {
