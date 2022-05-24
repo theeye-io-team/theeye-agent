@@ -58,7 +58,9 @@ Es importante asegurarse que todo lo necesario fue generado autómaticamente y n
 2. Descargar la nueva imagen. Con el siguiente comando se obtiene la última versión estable
 
 
+```bash
 docker pull theeye/theeye-agent
+```
 
 
 3. Una vez descargada la imagen se puede detener el agente y volver a lanzar.
@@ -67,13 +69,40 @@ Hay que identificar de que manera fue iniciado el agente antes de proceder.
 
 Si fue iniciado con el comando docker run como figura en el panel de TheEye la siguiente secuencia de comandos debería hacer el trabajo.
 
-* docker stop ${customer_name}
+* Detener el container
 
-* docker rm ${customer_name}
+```bash
+
+docker stop ${customer_name}
+
+```
+
+* Borrar el container. Se encuentra apagado y podrá ser lanzado el nuevo con el mismo nombre sin antes borrar el anterior. Este proceso elimina todos los archivos asociados al container
+
+```bash
+
+docker rm ${customer_name}
+
+```
 
 
 4. Lanzar de nuevo el agente utilizando la linea de instalación que figura en el panel de TheEye
 
+El comando para iniciar el agente suele ser similar al siguiente
+
+```bash
+
+
+docker run --name "mailbot" -e NODE_ENV="production" \
+  -e DEBUG="*eye*err*" \
+  -e THEEYE_SUPERVISOR_CLIENT_ID="6c65585e2bed2c932b3b0413a10e466cbcff0715" \
+  -e THEEYE_SUPERVISOR_CLIENT_SECRET="f487b7bd5ebff8eea4dc18c2444f38cbc804875b" \
+  -e THEEYE_SUPERVISOR_CLIENT_CUSTOMER="mailbot" \
+  -e THEEYE_SUPERVISOR_API_URL="http://localhost:60080" \
+  -e THEEYE_CLIENT_HOSTNAME="mailbot" \
+  -d theeye/theeye-agent
+
+```
 
 
 
