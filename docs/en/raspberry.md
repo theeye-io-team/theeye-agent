@@ -1,6 +1,6 @@
 # Raspberry
 
-[![theeye.io}(/en/images/logo-theeye-theOeye-logo2.png)](https://theeye.io/en/index.html)
+[![theeye.io](/en/images/logo-theeye-theOeye-logo2.png)](https://theeye.io/en/index.html)
 
 To get the theeye agent to work on Raspberry, you need to install node and download the source code from github.
 
@@ -108,15 +108,15 @@ The values indicated below must be extracted from the credentials file and repla
 > THEEYE\_SUPERVISOR\_CLIENT\_CUSTOMER  
 > THEEYE\_SUPERVISOR\_API\_URL
 
-The rest of the values do not need to be modified. For more information see [Installation Manual of the Agent}(/en/)
+The rest of the values do not need to be modified. For more information see [Installation Manual of the Agent](/en/)
 
 ## Service configuration
 
 Once installed, we need to setup a system service which will start the agent every time you turn the Raspberry on and off.
 
-Create the file `/etc/systemd/system/theeye-agent.service`. Copy and paste the contents of the following file [etc\_systemd\_system\_theeye-agent.service}(/en/examples/etc_systemd_system_theeye-agent.service)
+Create the file `/etc/systemd/system/theeye-agent.service`. Copy and paste the contents of the following file [etc\_systemd\_system\_theeye-agent.service](/en/examples/etc_systemd_system_theeye-agent.service)
 
-Create the file `/etc/init.d/theeye-agent` . Copy and paste the contents of the following file [etc\_init.d\_theeye-agent}(/en/examples/etc_init.d_theeye-agent)
+Create the file `/etc/init.d/theeye-agent` . Copy and paste the contents of the following file [etc\_init.d\_theeye-agent](/en/examples/etc_init.d_theeye-agent)
 
 ## Final Step
 
@@ -128,7 +128,7 @@ shutdown -R now
 
 If everything was configured correctly, the agent should start with the Raspberry and you can see the status in the interface.
 
-If the Raspberry does not report we can try the [manual start with debug}(/en/debug/)
+If the Raspberry does not report we can try the [manual start with debug](/en/debug/)
 
 # Common problems
 
