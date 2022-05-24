@@ -43,9 +43,9 @@ El Agente está probado y funcionando en las siguientes distribuiciones de Linux
 4. Aguarde a ser notificado que la instalación terminó
 5. Revise su Dashboard, debería ver un indicador del Agente instalado
 
-[Instalación manual desde el código fuente}(/binary_build.md)
+[Instalación manual desde el código fuente](/binary_build.md)
 
-Si necesta depurar o contribuir con el desarrollo, revise la [guía de debug en Unix}(/debug-unix.md)
+Si necesta depurar o contribuir con el desarrollo, revise la [guía de debug en Unix](/debug-unix.md)
 
 ### Instalador del Agente en Windows
 
@@ -60,7 +60,7 @@ Si necesta depurar o contribuir con el desarrollo, revise la [guía de debug en 
 3. Aguarde a que el instalador complete todas las acciones
 4. Revise su Dashboard, debería ver un indicador del Agente instalado
 
-Si necesta depurar o contribuir con el desarrollo, revise la [guía de debug en Windows}(/debug-windows.md)
+Si necesta depurar o contribuir con el desarrollo, revise la [guía de debug en Windows](/debug-windows.md)
 
 ### Instalador del Agente en Docker 
 
