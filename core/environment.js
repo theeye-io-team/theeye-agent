@@ -77,7 +77,7 @@ async function detectAgentVersion () {
   //
   const cmd = `cd ${process.cwd()} && git describe`
   const { error, stdout, stderr } = await exec(cmd, {}).catch(error => { return {error} })
-  version = (error||stderr ? 'version error' : stdout.trim())
+  version = (error||stderr ? 'version error' : stdout?.trim())
 
   logger.log('sources version is %s', version)
   return version
