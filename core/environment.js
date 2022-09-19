@@ -66,6 +66,6 @@ async function detectAgentVersion () {
   //
   debug('using git describe')
   const cmd = 'cd ' + process.cwd() + ' && git describe'
-  const { stdout, stderr } = await exec(cmd, {})
-  return (stderr ? 'unknown' : stdout.trim())
+  const { error, stdout, stderr } = await exec(cmd, {}).catch(error => { return {error} })
+  return (error||stderr ? 'unknown' : stdout.trim())
 }
