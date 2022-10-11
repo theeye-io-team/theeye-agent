@@ -11,7 +11,7 @@ const ScraperConfig = (AgentConfig.workers?.scraper || {})
 const EventConstants = require('../../constants/events')
 
 function setupRequestObject (config) {
-  let version = process.env.THEEYE_AGENT_VERSION
+  let version = process.env.THEEYE_AGENT_VERSION || ''
   let headers = Object.assign({}, config.headers, {
     'User-Agent': 'TheEyeAgent/' + version.trim()
   })

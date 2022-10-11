@@ -9,7 +9,7 @@ const WorkersFactory = require('../../index')
 const JobFactory = { }
 
 module.exports.create = function (attribs, options) {
-  var type = attribs._type
+  const type = attribs._type
   if (!type) {
     throw new Error('invalid job. no valid type specified')
   }
@@ -62,10 +62,26 @@ JobFactory.ScraperJob = function(specs, options) {
   return this
 }
 
-//
-// script job
-//
-JobFactory.ScriptJob = function (specs, options) {
+const prepareScriptConfig = (specs) => {
+  const cfg = {
+    logging: (specs.agent_logging || false),
+    type: (specs.type || specs._type),
+    script: {
+      id: specs.script.id,
+      filename: specs.script.filename,
+      md5: specs.script.md5,
+      arguments: specs.task_arguments_values,
+      runas: specs.script_runas,
+      timeout: specs.timeout,
+      // IMPORTANT. use empty string for passing empty vars into diff programming languages.
+      env: Object.assign({}, specs.env)
+    }
+  }
+
+  return cfg
+}
+
+function ScriptWorker (specs, options) {
   const connection = options.connection
 
   this.id = specs.id
@@ -76,21 +92,7 @@ JobFactory.ScriptJob = function (specs, options) {
   this.getResults = function (done) {
     // prepare config
     //let event_data = specs.event_data || {}
-    const config = {
-      logging: (specs.agent_logging || false),
-      disabled: false,
-      type: 'script',
-      script: {
-        id: specs.script.id,
-        filename: specs.script.filename,
-        md5: specs.script.md5,
-        arguments: specs.task_arguments_values,
-        runas: specs.script_runas,
-        timeout: specs.timeout,
-        // IMPORTANT. use empty string for passing empty vars into diff programming languages.
-        env: Object.assign({}, specs.env)
-      }
-    }
+    const config = prepareScriptConfig(specs)
 
     // invoke worker
     const script = WorkersFactory.spawn(options.app, config, connection)
@@ -102,9 +104,19 @@ JobFactory.ScriptJob = function (specs, options) {
   return this;
 }
 
+//
+// script job
+//
+JobFactory.ScriptJob = function (specs, options) {
+  return new ScriptWorker(specs, options)
+}
+
+JobFactory.NodejsJob = function (specs, options) {
+  return new ScriptWorker(specs, options)
+}
+
 /**
  *
  * Integration Jobs
  *
  */
-//JobFactory.NgrokIntegrationJob = require('./integrations/ngrok')
