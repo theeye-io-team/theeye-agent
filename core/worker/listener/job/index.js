@@ -19,14 +19,11 @@ module.exports.create = function (attribs, options) {
   return new JobFactory[type](attribs, options)
 }
 
-//
-// agent config update job
-//
-JobFactory.AgentUpdateJob = function(specs, options){
+JobFactory.AgentUpdateJob = function(attribs, options){
   const app = options.app
 
-  this.id = specs.id
-  this.specs = specs
+  this.id = attribs.id
+  this.attribs = attribs
   this.options = options
 
   this.getResults = function (done) {
@@ -39,19 +36,16 @@ JobFactory.AgentUpdateJob = function(specs, options){
   return this
 }
 
-//
-// scraper job
-//
-JobFactory.ScraperJob = function(specs, options) {
+JobFactory.ScraperJob = function(attribs, options) {
   var connection = options.connection
 
-  this.id = specs.id;
-  this.specs = specs
+  this.id = attribs.id;
+  this.attribs = attribs
   this.options = options
 
   this.getResults = function (done) {
     // prepare config
-    var config = Object.assign(specs.task, { type: 'scraper' })
+    var config = Object.assign(attribs.task, { type: 'scraper' })
     // invoke worker
     var scraper = WorkersFactory.spawn(options.app, config, connection)
     scraper.getData(function(err,result){
@@ -62,37 +56,26 @@ JobFactory.ScraperJob = function(specs, options) {
   return this
 }
 
-const prepareScriptConfig = (specs) => {
-  const cfg = {
-    logging: (specs.agent_logging || false),
-    type: (specs.type || specs._type),
-    script: {
-      id: specs.script.id,
-      filename: specs.script.filename,
-      md5: specs.script.md5,
-      arguments: specs.task_arguments_values,
-      runas: specs.script_runas,
-      timeout: specs.timeout,
-      // IMPORTANT. use empty string for passing empty vars into diff programming languages.
-      env: Object.assign({}, specs.env)
-    }
-  }
-
-  return cfg
+JobFactory.ScriptJob = function (attribs, options) {
+  return new ScriptWorker('script', attribs, options)
 }
 
-function ScriptWorker (specs, options) {
+JobFactory.NodejsJob = function (attribs, options) {
+  return new ScriptWorker('nodejs', attribs, options)
+}
+
+function ScriptWorker (worker_type, attribs, options) {
   const connection = options.connection
 
-  this.id = specs.id
-  this.name = specs.name
-  this.specs = specs
+  this.id = attribs.id
+  this.name = attribs.name
+  this.attribs = attribs
   this.options = options
 
   this.getResults = function (done) {
     // prepare config
-    //let event_data = specs.event_data || {}
-    const config = prepareScriptConfig(specs)
+    //let event_data = attribs.event_data || {}
+    const config = prepareScriptConfig(worker_type, attribs)
 
     // invoke worker
     const script = WorkersFactory.spawn(options.app, config, connection)
@@ -104,19 +87,21 @@ function ScriptWorker (specs, options) {
   return this;
 }
 
-//
-// script job
-//
-JobFactory.ScriptJob = function (specs, options) {
-  return new ScriptWorker(specs, options)
-}
+const prepareScriptConfig = (type, attribs) => {
+  const cfg = {
+    type,
+    logging: (attribs.agent_logging || false),
+    script: {
+      id: attribs.script.id,
+      filename: attribs.script.filename,
+      md5: attribs.script.md5,
+      arguments: attribs.task_arguments_values,
+      runas: attribs.script_runas,
+      timeout: attribs.timeout,
+      // IMPORTANT. use empty string for passing empty vars into diff programming languages.
+      env: Object.assign({}, attribs.env)
+    }
+  }
 
-JobFactory.NodejsJob = function (specs, options) {
-  return new ScriptWorker(specs, options)
+  return cfg
 }
-
-/**
- *
- * Integration Jobs
- *
- */

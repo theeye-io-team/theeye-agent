@@ -20,7 +20,7 @@ const Workers = {
   script: require('./script'),
   file: require('./file'),
   ping: require('./ping'),
-  nodejsjob: require('./nodejs'),
+  nodejs: require('./nodejs'),
 }
 
 /**
