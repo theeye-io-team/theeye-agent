@@ -1,6 +1,7 @@
 
 const ScriptWorker = require('../script')
 const { fork } = require('child_process')
+const Errors = require('../../lib/errors')
 
 const path = require('path')
 const boilerplate = path.join(__dirname, 'boilerplate.js')
@@ -68,15 +69,15 @@ module.exports = ScriptWorker.extend({
         console.log('message from child')
         console.log(message)
         if (message.topic === 'error') {
-          data.output = message.err
+          data.output = message.error
         } else if (message.topic === 'output') {
           data.output = message.output
         }
       })
 
       child.send({
-        topic: 'start',
-        mod: this.script.path,
+        topic: 'execute',
+        path: this.script.path,
         args: this.config.script.arguments
       })
     })
