@@ -3,7 +3,7 @@ const fs = require('fs')
 const crypto = require('crypto')
 const path = require('path')
 const isDataUrl = require('valid-data-url')
-const exec = require('child_process').exec
+const spawn = require('child_process').spawn
 const scriptsConfig = require('config').scripts
 const logger = require('../logger').create('lib:script')
 const mime = require('mime-types')
@@ -63,11 +63,12 @@ function Script (props) {
    * @return {String}
    */
   const prepareArguments = (args) => {
-    var parsed
+    const parsed = []
     try {
       if (Array.isArray(args) && args.length>0) {
-        parsed = []
-        args.forEach((arg, idx) => {
+        for (let idx = 0; idx < args.length; idx++) {
+          const arg = args[idx]
+
           if (isDataUrl(arg)) {
             const filename = base64str2file(arg, scriptsConfig.path)
             parsed.push(filename)
@@ -77,15 +78,13 @@ function Script (props) {
           } else {
             parsed.push(arg)
           }
-        })
-        parsed = shellescape(parsed)
-      } else {
-        parsed = ''
+        }
       }
     } catch (e) {
       logger.error('error parsing script arguments')
       logger.error('%o', e)
     }
+
     return parsed
   }
 
@@ -141,30 +140,67 @@ function Script (props) {
 util.inherits(Script, File)
 
 Script.prototype.run = function (end) {
-  var partial = this.path + ' ' + this.args
+  const regex = /%script%/
 
-  var formatted
-  var runas = this.runas
-  var regex = /%script%/
-  // var regex = /['|"]?%script%['|"]?/
+  // separate the interpreter
+  const runasParts = this.runas.split(' ')
+  let command = runasParts[0]
+  let shell = false
 
-  if (runas && regex.test(runas) === true) {
-    formatted = runas.replace(regex, partial)
-    // formatted = runas.replace(regex, '"' + partial + '"')
+  let args = []
+  // old version using exec. exec can execute script using the path
+  if (command === '%script%') {
+    // tell spawn tu use a shell like exec does
+    shell = true
+    command = this.path
+    args = this.args
   } else {
-    formatted = partial
+    const commandArgs = runasParts.slice(1)
+    for (let index = 0; index < commandArgs.length; index++) {
+      const arg = commandArgs[index]
+      // push args in order
+      if (regex.test(arg) === true) {
+        args.push(this.path)
+        args = args.concat(this.args)
+      } else {
+        args.push(arg)
+      }
+    }
   }
 
   this.once('end', end)
-
-  return this.execScript(formatted)
+  return this.spawnScript(command, args, { shell })
 }
 
-Script.prototype.execScript = function (script) {
-  logger.debug('running script "%s"', script)
+//Script.prototype.run = function (end) {
+//  var partial = this.path + ' ' + this.args
+//  var formatted
+//  var runas = this.runas
+//  var regex = /%script%/
+//  // var regex = /['|"]?%script%['|"]?/
+//
+//  if (runas && regex.test(runas) === true) {
+//    formatted = runas.replace(regex, partial)
+//    // formatted = runas.replace(regex, '"' + partial + '"')
+//  } else {
+//    formatted = partial
+//  }
+//
+//  this.once('end', end)
+//
+//  return this.spawnScript(formatted)
+//}
+
+Script.prototype.spawnScript = function (cmd, args, options) {
+  logger.debug('running command "%s" with args "%s"', cmd, args)
 
   const self = this
-  let partials = { stdout: [], stderr: [], log: [] }
+  const partials = {
+    stdout: [],
+    stderr: [],
+    log: []
+  }
+
   let execStart = process.hrtime()
 
   let execTimeout = this.timeout
@@ -175,12 +211,15 @@ Script.prototype.execScript = function (script) {
     )
   }
 
-  let child = exec(script, {
-    env: this.env || {},
-    maxBuffer: scriptsConfig.max_buffer,
-    timeout: execTimeout, // kill
-    encoding: 'utf8'
-  })
+  const child = spawn(
+    cmd,
+    args,
+    Object.assign({
+      //cwd: ,
+      env: this.env || {},
+      timeout: execTimeout, // kill
+    }, options)
+  )
 
   if (this.logging_path) {
     let writeLogStream = fs.createWriteStream(this.logging_path)
