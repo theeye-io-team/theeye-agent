@@ -1,11 +1,14 @@
-- [Instalación](/)
-- [Código fuente](/sources_install.md)
-- [Compilar binarios](/binary_build.md)
-- [Setup](/setup.md)
+- [Configuracion](/setup/config.md)
+- Instalación 
+  - [Codigo Fuente](/setup/sources_install.md)
+  - [Empaquetado/Binario](/setup/binary_build.md)
+  - [Raspberry Pi](/setup/raspberry.md)
+- Servicios en Linux
+  - [Example init.d](/examples/etc_init.d_theeye-agent ":ignore")
+  - [Example systemd](/examples/etc_systemd_system_theeye-agent.service ":ignore")
 - Debug
   - [Unix](/debug-unix.md)
   - [Windows](/debug-windows.md)
-- [Raspberry Pi](/raspberry.md)
-- Servicios en Linux
-  - [Ejemplo init.d](/examples/etc_init.d_theeye-agent ":ignore")
-  - [Ejemplo systemd](/examples/etc_systemd_system_theeye-agent.service ":ignore")
+  - [Docker](/debug-docker.md)
+- [Changelog](/changelog.md)
+- [FAQ](/faq.md)
