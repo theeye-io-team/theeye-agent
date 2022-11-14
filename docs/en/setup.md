@@ -8,5 +8,5 @@ Configuration can be set from environment variables or provided with configurati
 
 Replace the configuation file `theeye-agent-root/config/default.js` or `theeye-agent-root/config/default.json`
 
-if you want to use a config and know what else you can do, use the sample file [config.sample.json](examples/config.sample.js)
+if you want to use a config and know what else you can do, use the sample file [config.sample.json](examples/config.sample.js ':ignore')
 
