@@ -75,7 +75,7 @@ shutdown -R now
 Si todo se configuró correctamente, el Agente debería iniciar con la Raspberry Pi y debería poder visualizar su estado en la interfaz web de TheEye.
 
 If the Raspberry does not report we can try the [manual start with debug](/debug/)
-Si su Agente no reporta a la interfaz, intente [iniciar el agente en modo debug}(/debug-unix)
+Si su Agente no reporta a la interfaz, intente [iniciar el agente en modo debug](/debug-unix)
 
 # Problemas comunes
 
