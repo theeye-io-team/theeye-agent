@@ -1,7 +1,7 @@
 - [Instalación](/)
-- [Código fuente](/sources_install.md)
+<!-- - [Código fuente](/sources_install.md)
 - [Compilar binarios](/binary_build.md)
-- [Setup](/setup.md)
+- [Setup](/setup.md) -->
 - Debug
   - [Unix](/debug-unix.md)
   - [Windows](/debug-windows.md)
