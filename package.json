@@ -10,7 +10,7 @@
     "url": "https://github.com/interactar/theeye-agent.git"
   },
   "dependencies": {
-    "config": "1.25.1",
+    "config": "3.3.8",
     "cson": "~7.20.0",
     "debug": "~4.1.1",
     "dotenv": "^10.0.0",
