@@ -39,7 +39,7 @@ RUN apt update && apt install -y --no-install-recommends \
      && rm -rf /var/lib/apt/lists/*
 
 # base agent build
-RUN apt install -y build-essential \
+RUN apt install -y \
       && npm install -g pkg \
       && cd ${destDir} \
       && ls -l . \
