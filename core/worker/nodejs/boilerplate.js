@@ -1,16 +1,17 @@
 const Errors = require('../../lib/errors')
 const process = require('node:process')
+const logger = require('../../lib/logger').create('theeye:worker:nodejs:boilerplate')
 
 process.on('disconnect', () => {
-  console.log('agent IPC channel disconnected')
+  logger.log('agent IPC channel disconnected')
 })
 
 process.on('beforeExit', (code) => {
-  console.log('Process beforeExit event with code: ', code);
+  logger.log('Process beforeExit event with code: ', code);
 })
 
 process.on('exit', (code) => {
-  console.log('Process exit event with code: ', code);
+  logger.log('Process exit event with code: ', code);
 })
 
 const sendErrorMessage = (error) => {
@@ -19,22 +20,22 @@ const sendErrorMessage = (error) => {
 }
 
 process.on('unhandledRejection', function (reason, p) {
-  console.error(reason, 'Unhandled Rejection at Promise', p)
+  logger.error(reason, 'Unhandled Rejection at Promise', p)
   sendErrorMessage(reason)
 })
 
 process.on('uncaughtException', function (err) {
-  console.error(err, 'Uncaught Exception thrown')
+  logger.error(err, 'Uncaught Exception thrown')
   sendErrorMessage(err)
 })
 
 process.once('SIGINT', function (code) {
-  console.log('SIGINT received')
+  logger.log('SIGINT received')
   sendErrorMessage(new Errors.SIGINTError())
 })
 
 process.once('SIGTERM', function (code) {
-  console.log('SIGTERM received')
+  logger.log('SIGTERM received')
   sendErrorMessage(new Errors.SIGTERMError())
 })
 
@@ -47,7 +48,7 @@ const moduleExecution = async function (options) {
       try {
         context[lckey] = JSON.parse(process.env[key])
       } catch (err) {
-        console.error(`warning: cannot parse ${key} value as JSON`)
+        logger.error(`warning: cannot parse ${key} value as JSON`)
         context[lckey] = process.env[key] // keep untouch
       }
     }
@@ -64,14 +65,14 @@ const moduleExecution = async function (options) {
 
 process.on('message', async (message) => {
   try {
-    console.log('message from parent')
-    console.log(message)
+    logger.log('message from parent')
+    logger.log(message)
 
     if (message.topic === 'execute') {
       const output = await moduleExecution(message)
 
       await new Promise( (resolve, reject) => {
-        process.send({ topic: 'output', output }, (err) => {
+        process.send({ topic: 'completed', output }, (err) => {
           if (err) { reject(err) }
           else { resolve() }
         })

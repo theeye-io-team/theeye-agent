@@ -20,9 +20,9 @@ module.exports = ScriptWorker.extend({
         })
       } else {
         try {
-          const data = await this.moduleExecution()
-          next(null, { state: 'success', data })
+          next(null, await this.moduleExecution())
         } catch (err) {
+          this.debug.error('module execution failred')
           this.debug.error(err)
           next(null, { state: 'failure', data: err })
         }
@@ -34,7 +34,7 @@ module.exports = ScriptWorker.extend({
       const controller = new AbortController()
       const { signal } = controller // abort signal
 
-      let data = { log: '' }
+      let log = '', resultMessage
 
       const child = fork( boilerplate, [], {
         stdio: ['pipe','pipe','pipe','ipc'],
@@ -43,36 +43,48 @@ module.exports = ScriptWorker.extend({
       })
 
       child.on('error', (err) => {
-        console.error('failed to run.')
+        this.debug.error('failed to run.')
         reject(err)
       })
 
       child.stdout.on('data', (out) => {
-        data.log += out
+        log += out
       })
 
       child.stderr.on('data', (err) => {
-        data.log += err
+        log += err
       })
 
       child.on('close', (code) => {
-        console.log(`child process exited with code ${code}`)
-        data.code = code
-        if (code === 0) {
-          resolve(data)
-        } else {
-          reject(data)
+        this.debug.log(`child process exited with code ${code}`)
+
+        let state
+        const data = {
+          log,
+          code,
+          killed: (signal === 'SIGTERM' || child.killed)
         }
+
+        if (!resultMessage) {
+          state = 'failure'
+          data.lastline = data.output = null
+        } else if (resultMessage.topic === 'error') {
+          state = 'failure'
+          data.lastline = JSON.stringify(resultMessage.error)
+          data.output = resultMessage.error
+        } else if (resultMessage.topic === 'completed') {
+          state = (resultMessage.output.state || 'success')
+          data.output = (resultMessage.output.data || resultMessage.output)
+          data.lastline = JSON.stringify(resultMessage.output)
+        }
+
+        resolve({ state, data })
       })
 
       child.on('message', (message) => {
-        console.log('message from child')
-        console.log(message)
-        if (message.topic === 'error') {
-          data.output = message.error
-        } else if (message.topic === 'output') {
-          data.output = message.output
-        }
+        this.debug.log('message from child')
+        this.debug.log(message)
+        resultMessage = message
       })
 
       child.send({
