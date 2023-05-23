@@ -1,13 +1,13 @@
 {
-  "version": "1.5.1",
+  "version": "2.0.0",
   "name": "TheEye-Agent",
   "description": "TheEye Agent - TheEye Client",
-  "author": "Facugon <facugon@interactar.com>",
+  "author": "Facugon <facugon@theeye.io>",
   "license": "MIT",
   "main": "core/main",
   "repository": {
     "type": "git",
-    "url": "https://github.com/interactar/theeye-agent.git"
+    "url": "https://github.com/theeye-io-team/theeye-agent.git"
   },
   "dependencies": {
     "config": "1.25.1",

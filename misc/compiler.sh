@@ -17,10 +17,10 @@ release="${target}/release"
 if [[ "${os}" == 'win' ]]
 then
 	echo "Windows build"
-	node_version="node14-win-x64"
+	node_version="node16-win-x64"
 else
 	echo "Linux build"
-	node_version="node14-linux-x64"
+	node_version="node16-linux-x64"
 fi
 
 echo "current working directory is ${root}"
