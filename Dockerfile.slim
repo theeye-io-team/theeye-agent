@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:16
 MAINTAINER Facundo Gonzalez <facugon@theeye.io>
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -24,7 +24,7 @@ RUN dpkg-reconfigure --frontend noninteractive locales
 RUN npm install -g pkg \
       && cd ${destDir} \
       && ls -l . \
-      && bash ./misc/compiler.sh \
+      && bash ./misc/compiler.sh "linux" "node16"\
       && bash ./misc/packager.sh
 
 CMD ["bin/theeye-agent"]

@@ -9,6 +9,13 @@ command -v pkg >/dev/null 2>&1 || { echo >&2 "pkg is required but it's not insta
 command -v npm >/dev/null 2>&1 || { echo >&2 "npm is required but it's not installed."; echo "failure"; exit 1; }
 
 os="${1}"
+nodeversion="${2}"
+
+if [ ! -z ${nodeversion+x} ];
+then
+  echo "using nodeversion 16"
+  nodeversion="node16"
+fi
 
 root="${PWD}"
 target="bin"
@@ -17,10 +24,10 @@ release="${target}/release"
 if [[ "${os}" == 'win' ]]
 then
 	echo "Windows build"
-	node_version="node16-win-x64"
+	node_version="${nodeversion}-win-x64"
 else
 	echo "Linux build"
-	node_version="node16-linux-x64"
+	node_version="${nodeversion}-linux-x64"
 fi
 
 echo "current working directory is ${root}"

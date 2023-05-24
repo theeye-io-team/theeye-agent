@@ -1,4 +1,13 @@
-FROM node:14
+FROM node:16
+
+#
+# al cambiar la version de node del container hay que cambiar
+# la version de node utilizada en el compilador mas abajo en la llamada
+# 
+# ejemplo 
+#   bash ./misc/compiler.sh "linux" "node16" 
+#
+
 MAINTAINER Javier Ailbirt <jailbirt@gmail.com>
 MAINTAINER Facundo Gonzalez <facugon@theeye.io>
 
@@ -43,7 +52,7 @@ RUN apt install -y \
       && npm install -g pkg \
       && cd ${destDir} \
       && ls -l . \
-      && bash ./misc/compiler.sh \
+      && bash ./misc/compiler.sh "linux" "node16" \
       && bash ./misc/packager.sh
 
 CMD ["bin/theeye-agent"]
