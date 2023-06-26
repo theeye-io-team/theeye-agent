@@ -49,7 +49,7 @@ Logger.writeFile = (namespace, message) => {
   Logger.file.write(json)
 }
 
-Logger.levelTemplate = `%MODULE%:%LEVEL%:%NAME%`
+Logger.levelTemplate = `%TIMESTAMP%:%MODULE%:%LEVEL%:%NAME%`
 
 Logger.create = (name) => {
   const logger = { }
@@ -63,6 +63,7 @@ Logger.create = (name) => {
 
 const createLoggerLevel = (name, level) => {
   const namespace = Logger.levelTemplate
+    .replace('%TIMESTAMP%', new Date().toISOString())
     .replace('%MODULE%', 'theeye')
     .replace('%LEVEL%', level)
     .replace('%NAME%', name)
