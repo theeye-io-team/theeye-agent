@@ -6,14 +6,16 @@ const MULTITASKING = process.env.THEEYE_AGENT_MULTITASKING === 'false' ? false :
 module.exports = {
   logger: {
     file: {
-      /**
-       *
-       * basename: 'theeye-agent.log',
-       * dirname: process.cwd()
-       *
-       **/
+      //
+      // default values.
       // level: error, warn, log, debug, data, or any added custom level
-      //levels: ['error','log']
+      //
+      /**
+       * enabled: true,
+       * basename: 'theeye-agent.log',
+       * dirname: process.cwd(),
+       * levels: ['error','log']
+       **/
       levels: ['error']
     }
   },

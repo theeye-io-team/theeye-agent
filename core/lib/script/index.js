@@ -150,7 +150,7 @@ Script.prototype.run = function (end) {
   let args = []
   // old version using exec. exec can execute script using the path
   if (command === '%script%') {
-    // tell spawn tu use a shell like exec does
+    // use spawn with a shell like exec does
     shell = true
     command = this.path
     args = this.args
@@ -171,25 +171,6 @@ Script.prototype.run = function (end) {
   this.once('end', end)
   return this.spawnScript(command, args, { shell })
 }
-
-//Script.prototype.run = function (end) {
-//  var partial = this.path + ' ' + this.args
-//  var formatted
-//  var runas = this.runas
-//  var regex = /%script%/
-//  // var regex = /['|"]?%script%['|"]?/
-//
-//  if (runas && regex.test(runas) === true) {
-//    formatted = runas.replace(regex, partial)
-//    // formatted = runas.replace(regex, '"' + partial + '"')
-//  } else {
-//    formatted = partial
-//  }
-//
-//  this.once('end', end)
-//
-//  return this.spawnScript(formatted)
-//}
 
 Script.prototype.spawnScript = function (cmd, args, options) {
   logger.debug('running command "%s" with args "%s"', cmd, args)

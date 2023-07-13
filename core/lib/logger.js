@@ -22,10 +22,9 @@ Logger.configure = (settings) => {
       return resolve()
     }
 
-    const dirname = settings.file.dirname || process.cwd()
-    const basename = settings.file.basename || 'theeye-agent.log'
-
-    const levels = settings.file.levels || ['error']
+    const dirname = (settings.file.dirname || process.cwd())
+    const basename = (settings.file.basename || 'theeye-agent.log')
+    const levels = (settings.file.levels || ['error'])
     Logger.levels = levels
 
     const filename = path.join(dirname, basename)
