@@ -1,6 +1,18 @@
-# CHANGELOG
+# Changelog
 
-# force build 1.
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [2.1.0](https://github.com/theeye-io-team/theeye-agent/compare/2.0.1...2.1.0) (2023-10-20)
+
+
+### Features
+
+* added timestamp to debug logger ([07fbc08](https://github.com/theeye-io-team/theeye-agent/commit/07fbc0830dbaf449ae9a68ee6b14a2d3fb426512))
+
+
+### Bug Fixes
+
+* change event => pattern ([625fabe](https://github.com/theeye-io-team/theeye-agent/commit/625fabede3b08734d84cfd4e6f4d3774bb26ad55))
 
 ### 0.10.0-beta - 2017-03-13
 
@@ -141,6 +153,3 @@
 > fix theeye-client version reference to 0.8.2 in package. last required   
 
 > remove annoying dump-debug calls.   
-
-
-
