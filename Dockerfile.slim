@@ -1,4 +1,5 @@
 FROM node:16
+
 MAINTAINER Facundo Gonzalez <facugon@theeye.io>
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -9,9 +10,18 @@ COPY . ${destDir}
 
 # Locales and base tools
 RUN apt update -qqq \
-      && apt install -y --no-install-recommends gcc g++ make jq curl imagemagick locales build-essential ripmime poppler-utils isync rename tzdata mpack mutt git gnupg wget \
-      && sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \ 
-      && locale-gen en_US.UTF-8
+   && apt install -y --no-install-recommends gcc g++ make jq curl imagemagick locales build-essential ripmime poppler-utils isync rename tzdata mpack mutt git gnupg wget \
+   && sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \ 
+   && locale-gen en_US.UTF-8
+
+ARG NODE_ENV
+ENV NODE_ENV $NODE_ENV
+
+ARG APP_VERSION
+ENV THEEYE_AGENT_VERSION $APP_VERSION
+
+RUN echo APP_VERSION is $APP_VERSION \
+    && echo NODE_ENV is $NODE_ENV
 
 # set system-wide locale settings
 ENV LANG en_US.UTF-8
@@ -21,10 +31,24 @@ ENV LC_ALL en_US.UTF-8
 # verify modified configuration
 RUN dpkg-reconfigure --frontend noninteractive locales  
 
+RUN : \
+    && add-apt-repository -y ppa:deadsnakes \
+    && apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        software-properties-common \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        python3.8-venv \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && :
+
+RUN python3.8 -m venv /venv
+ENV PATH=/venv/bin:$PATH
+
 RUN npm install -g pkg \
-      && cd ${destDir} \
-      && ls -l . \
-      && bash ./misc/compiler.sh "linux" "node16"\
-      && bash ./misc/packager.sh
+   && cd ${destDir} \
+   && ls -l . \
+   && bash ./misc/compiler.sh "linux" "node16"\
+   && bash ./misc/packager.sh
 
 CMD ["bin/theeye-agent"]
