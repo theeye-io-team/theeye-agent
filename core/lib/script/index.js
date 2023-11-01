@@ -140,33 +140,9 @@ function Script (props) {
 util.inherits(Script, File)
 
 Script.prototype.run = function (end) {
-  const regex = /%script%/
-
-  // separate the interpreter
-  const runasParts = this.runas.split(' ')
-  let command = runasParts[0]
-  let shell = false
-
-  let args = []
-  // old version using exec. exec can execute script using the path
-  if (command === '%script%') {
-    // use spawn with a shell like exec does
-    shell = true
-    command = this.path
-    args = this.args
-  } else {
-    const commandArgs = runasParts.slice(1)
-    for (let index = 0; index < commandArgs.length; index++) {
-      const arg = commandArgs[index]
-      // push args in order
-      if (regex.test(arg) === true) {
-        args.push(this.path)
-        args = args.concat(this.args)
-      } else {
-        args.push(arg)
-      }
-    }
-  }
+  const command = this.runas.replace('%script%', this.path)
+  const args = this.args
+  const shell = true
 
   this.once('end', end)
   return this.spawnScript(command, args, { shell })
@@ -194,7 +170,7 @@ Script.prototype.spawnScript = function (cmd, args, options) {
 
   const child = spawn(
     cmd,
-    args,
+    shellescape(args),
     Object.assign({
       //cwd: ,
       env: this.env || {},
