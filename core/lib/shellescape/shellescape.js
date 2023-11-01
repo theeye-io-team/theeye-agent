@@ -22,7 +22,7 @@ if (process.platform === 'win32') {
       ret.push(s);
     });
 
-    return ret.join(' ');
+    return ret;
   }
 } else {
   function shellescape(a) {
@@ -39,7 +39,7 @@ if (process.platform === 'win32') {
       ret.push(s);
     });
 
-    return ret.join(' ');
+    return ret;
   }
 }
 
