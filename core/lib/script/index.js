@@ -148,25 +148,6 @@ Script.prototype.run = function (end) {
   return this.spawnScript(command, args, { shell })
 }
 
-//Script.prototype.run = function (end) {
-//  var partial = this.path + ' ' + this.args
-//  var formatted
-//  var runas = this.runas
-//  var regex = /%script%/
-//  // var regex = /['|"]?%script%['|"]?/
-//
-//  if (runas && regex.test(runas) === true) {
-//    formatted = runas.replace(regex, partial)
-//    // formatted = runas.replace(regex, '"' + partial + '"')
-//  } else {
-//    formatted = partial
-//  }
-//
-//  this.once('end', end)
-//
-//  return this.spawnScript(formatted)
-//}
-
 Script.prototype.spawnScript = function (cmd, args, options) {
   logger.debug('running command "%s" with args "%s"', cmd, args)
 
@@ -193,7 +174,7 @@ Script.prototype.spawnScript = function (cmd, args, options) {
     Object.assign({
       //cwd: ,
       env: this.env || {},
-      timeout: execTimeout, // kill
+      timeout: execTimeout, // for killing the job
     }, options)
   )
 
