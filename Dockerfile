@@ -80,6 +80,10 @@ RUN wget https://www.python.org/ftp/python/3.8.0/Python-3.8.0.tar.xz \
     && make -j 4 \
     && make altinstall
 
+RUN python3.8 -m pip install --upgrade pip
+RUN python3.8 -m pip install openai
+RUN python3.8 -m pip install tiktoken
+RUN pip install --upgrade pip
 
 
 RUN python3.8 -m venv /venv
