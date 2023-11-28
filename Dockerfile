@@ -57,16 +57,30 @@ RUN npm install -g pkg \
     && bash ./misc/compiler.sh "linux" "node16" \
     && bash ./misc/packager.sh
 
-RUN : \
-    && apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        software-properties-common \
-    && add-apt-repository -y ppa:deadsnakes \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        python3.8-venv \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && :
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libssl-dev \
+    zlib1g-dev \
+    libncurses5-dev \
+    libncursesw5-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    libgdbm-dev \
+    libdb5.3-dev \
+    libbz2-dev \
+    libexpat1-dev \
+    liblzma-dev \
+    tk-dev \
+    libffi-dev
+
+RUN wget https://www.python.org/ftp/python/3.8.0/Python-3.8.0.tar.xz \
+    && tar -xf Python-3.8.0.tar.xz \
+    && cd Python-3.8.0 \
+    && ./configure --enable-optimizations \
+    && make -j 4 \
+    && make altinstall
+
+
 
 RUN python3.8 -m venv /venv
 ENV PATH=/venv/bin:$PATH
