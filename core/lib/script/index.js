@@ -174,7 +174,7 @@ Script.prototype.spawnScript = function (cmd, args, options) {
     Object.assign({
       //cwd: ,
       env: this.env || {},
-      timeout: execTimeout, // kill
+      timeout: execTimeout, // for killing the job
     }, options)
   )
 
