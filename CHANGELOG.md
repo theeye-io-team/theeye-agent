@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.1](https://github.com/theeye-io-team/theeye-agent/compare/2.1.0...2.1.1) (2023-12-04)
+
+
+### Bug Fixes
+
+* if received an array have to return an array ([0d9cc2e](https://github.com/theeye-io-team/theeye-agent/commit/0d9cc2e6f91add299a41b746d04d716761d769ac))
+* shellscape restored ([7ea2138](https://github.com/theeye-io-team/theeye-agent/commit/7ea213877e6bbbd3c1eb0461890cfd635a6ea3f3))
+
 ## [2.1.0](https://github.com/theeye-io-team/theeye-agent/compare/2.0.1...2.1.0) (2023-10-20)
 
 
