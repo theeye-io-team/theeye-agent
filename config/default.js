@@ -90,6 +90,6 @@ module.exports = {
     tunnel: Boolean(proxy), // tunnel required when using proxy
     json: true,
     gzip: true,
-    timeout: 15000
+    timeout: 60000
   }
 }
