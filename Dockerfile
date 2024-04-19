@@ -31,7 +31,7 @@ ENV LC_ALL=en_US.UTF-8
 
 # puppeteer extras
 RUN apt update && apt install -y --no-install-recommends \
-      wget curl jq imagemagick locales gnupg libxss1 libxtst6 awscli \
+      wget curl jq imagemagick locales gnupg libxss1 libxtst6 awscli vi \
     && sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
     && locale-gen \
      # Install latest chrome dev package, which installs the necessary libs to

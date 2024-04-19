@@ -34,7 +34,7 @@ module.exports = {
     listener: {
       type: 'listener',
       looptime: 10000,
-      multitasking: MULTITASKING, // process only one job at the same time. disable multi jobs processing capability
+      multitasking: MULTITASKING, // process only one job at the time. disable multi jobs processing capability
       multitasking_limit: 10
     },
     // host keep alive settings
@@ -90,6 +90,6 @@ module.exports = {
     tunnel: Boolean(proxy), // tunnel required when using proxy
     json: true,
     gzip: true,
-    timeout: 15000
+    timeout: 60000
   }
 }

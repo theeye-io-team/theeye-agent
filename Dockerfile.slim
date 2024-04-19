@@ -9,7 +9,7 @@ COPY . ${destDir}
 
 # Locales and base tools
 RUN apt update -qqq \
-      && apt install -y --no-install-recommends gcc g++ make jq curl imagemagick locales build-essential ripmime poppler-utils isync rename tzdata mpack mutt git gnupg wget \
+      && apt install -y --no-install-recommends gcc g++ make jq curl imagemagick locales build-essential ripmime poppler-utils isync rename tzdata mpack mutt git gnupg wget vi \
       && sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \ 
       && locale-gen en_US.UTF-8
 
