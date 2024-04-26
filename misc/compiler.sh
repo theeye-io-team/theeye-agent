@@ -13,8 +13,8 @@ nodeversion="${2}"
 
 if [ ! -z ${nodeversion+x} ];
 then
-  echo "using nodeversion 16"
-  nodeversion="node16"
+  echo "using nodeversion 18"
+  nodeversion="node18"
 fi
 
 root="${PWD}"

@@ -1,4 +1,4 @@
-FROM node:16
+FROM node:18
 
 #
 # al cambiar la version de node del container hay que cambiar
@@ -31,7 +31,7 @@ ENV LC_ALL=en_US.UTF-8
 
 # puppeteer extras
 RUN apt update && apt install -y --no-install-recommends \
-      wget curl jq imagemagick locales gnupg libxss1 libxtst6 awscli vi \
+      wget curl jq imagemagick locales gnupg libxss1 libxtst6 awscli \
     && sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
     && locale-gen \
      # Install latest chrome dev package, which installs the necessary libs to
@@ -52,7 +52,7 @@ RUN apt install -y \
       && npm install -g pkg \
       && cd ${destDir} \
       && ls -l . \
-      && bash ./misc/compiler.sh "linux" "node16" \
+      && bash ./misc/compiler.sh "linux" "node18" \
       && bash ./misc/packager.sh
 
 CMD ["bin/theeye-agent"]
