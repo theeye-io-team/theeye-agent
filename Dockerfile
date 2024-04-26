@@ -1,4 +1,4 @@
-FROM node:16
+FROM node:18
 
 #
 # al cambiar la version de node del container hay que cambiar
@@ -52,7 +52,7 @@ RUN apt install -y \
       && npm install -g pkg \
       && cd ${destDir} \
       && ls -l . \
-      && bash ./misc/compiler.sh "linux" "node16" \
+      && bash ./misc/compiler.sh "linux" "node18" \
       && bash ./misc/packager.sh
 
 CMD ["bin/theeye-agent"]
