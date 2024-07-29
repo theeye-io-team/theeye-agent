@@ -1,5 +1,4 @@
 FROM node:18
-
 #
 # al cambiar la version de node del container hay que cambiar
 # la version de node utilizada en el compilador mas abajo en la llamada
@@ -31,7 +30,12 @@ ENV LC_ALL=en_US.UTF-8
 
 # puppeteer extras
 RUN apt update && apt install -y --no-install-recommends \
-      wget curl jq imagemagick locales gnupg libxss1 libxtst6 awscli \
+      wget curl jq imagemagick locales gnupg libxss1 libxtst6 awscli libx11-xcb1 \
+      libxcomposite1 libasound2 libatk1.0-0 libatk-bridge2.0-0 libcairo2 libcups2 \
+      libdbus-1-3 libexpat1 libfontconfig1 libgbm1 libgcc1 libglib2.0-0 libgtk-3-0 \
+      libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 \
+      libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 \
+      libxrandr2 libxrender1 libxss1 libxtst6 \
     && sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
     && locale-gen \
      # Install latest chrome dev package, which installs the necessary libs to
@@ -48,8 +52,7 @@ RUN apt update && apt install -y --no-install-recommends \
      && rm -rf /var/lib/apt/lists/*
 
 # base agent build
-RUN apt install -y \
-      && npm install -g pkg \
+RUN npm install -g pkg \
       && cd ${destDir} \
       && ls -l . \
       && bash ./misc/compiler.sh "linux" "node18" \

@@ -12,7 +12,7 @@
   "dependencies": {
     "config": "1.25.1",
     "cson": "~7.20.0",
-    "debug": "~4.1.1",
+    "debug": "~4.3.0",
     "dotenv": "^10.0.0",
     "hjson": "~3.2.2",
     "ip": "0.3.3",
@@ -22,7 +22,12 @@
     "properties": "~1.2.1",
     "request": "~2.88.0",
     "standard-version": "^9.5.0",
+<<<<<<< Updated upstream
     "theeye-bot-sdk": "^2.6.1",
+||||||| constructed merge base
+=======
+    "theeye-bot-sdk": "~2.6.1",
+>>>>>>> Stashed changes
     "theeye-node-stat": "github:theeye-io/node-stat",
     "theeye-ps-aux": "~0.3.4",
     "theeye-ps-node": "github:theeye-io/ps-node",
