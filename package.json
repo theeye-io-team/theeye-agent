@@ -22,12 +22,7 @@
     "properties": "~1.2.1",
     "request": "~2.88.0",
     "standard-version": "^9.5.0",
-<<<<<<< Updated upstream
-    "theeye-bot-sdk": "^2.6.1",
-||||||| constructed merge base
-=======
     "theeye-bot-sdk": "~2.6.1",
->>>>>>> Stashed changes
     "theeye-node-stat": "github:theeye-io/node-stat",
     "theeye-ps-aux": "~0.3.4",
     "theeye-ps-node": "github:theeye-io/ps-node",
