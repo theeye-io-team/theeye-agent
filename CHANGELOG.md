@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/theeye-io-team/theeye-agent/compare/2.1.1...2.2.0) (2024-08-02)
+
+
+### Features
+
+* Nodejs task execution ([#41](https://github.com/theeye-io-team/theeye-agent/issues/41)) ([ec991b0](https://github.com/theeye-io-team/theeye-agent/commit/ec991b01c37ed82a32301d7d269cbda547aba6bb))
+
+
+### Bug Fixes
+
+* package ([80d7836](https://github.com/theeye-io-team/theeye-agent/commit/80d78364fe2dd51993120899500048de340ff3cc))
+* puppeteer missing dependencies ([be98dbe](https://github.com/theeye-io-team/theeye-agent/commit/be98dbe2450c41f14bfaf1ae589950c9391333b0))
+
 ### [2.1.1](https://github.com/theeye-io-team/theeye-agent/compare/2.1.0...2.1.1) (2023-12-04)
 
 
