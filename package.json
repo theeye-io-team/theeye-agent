@@ -36,7 +36,7 @@
     "start": "/bin/bash ./run.sh",
     "release": "npx standard-version -t ''"
   },
-  "engine": "node >= 14",
+  "engine": "node >= 18",
   "os": [
     "win32",
     "win64",
