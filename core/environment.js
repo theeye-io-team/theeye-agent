@@ -6,8 +6,6 @@ const logger = require('./lib/logger').create('eye::environment')
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 
-require('./lib/extend-error')
-
 module.exports = async (config) => {
   if (!process.env.NODE_ENV) {
     logger.error('NODE_ENV not set')

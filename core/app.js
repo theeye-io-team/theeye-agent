@@ -1,4 +1,3 @@
-
 const path = require('path')
 const fs = require('fs')
 const os = require('os')
@@ -10,6 +9,8 @@ const ListenerWorker = require('./worker/listener')
 const PingWorker = require('./worker/ping')
 const appConfig = require('config')
 const WorkerConstants = require('./constants/worker')
+const WebSocket = require('ws')
+const { url } = require('inspector')
 
 const EventEmitter = require('events').EventEmitter
 
@@ -35,6 +36,11 @@ function App () {
   // let _hostId
   let _hostResourceId
   let _connection_id
+
+  // WebSocket client connection
+  let _websocket = null
+  let _websocketReconnectTimer = null
+  const WEBSOCKET_RECONNECT_DELAY = 5000 // 5 seconds
 
   Object.defineProperty(this, 'connection_id', {
     get: function () { return _connection_id },
@@ -90,12 +96,16 @@ function App () {
         version: process.env.THEEYE_AGENT_VERSION,
         info: machineInfo()
       },
-      success: function (response) {
+      success: async function (response) {
         // _hostId = response.host_id
         _hostResourceId = response.resource_id
         app.connection_id = response.connection_id
 
         logger.log(response)
+        
+        // After successful registration, connect WebSocket
+        await initWebSocketConnection()
+        
         next(null)
       },
       failure: function (err) {
@@ -251,6 +261,114 @@ function App () {
       startCoreWorkers()
     })
   }
+
+  /**
+   * Initialize WebSocket connection to supervisor
+   */
+  const initWebSocketConnection = () => {
+    if (process.env.WEBSOCKET_DISABLED === 'true') {
+      logger.log('WebSocket client is disabled via process.env')
+      return
+    }
+    
+    // Connect directly to the WebSocket server URL from config
+    const serverUrl = appConfig.supervisor.websocket_url
+    connectWebSocket(serverUrl)
+  }
+  
+  /**
+   * Connect to the WebSocket server
+   */
+  const connectWebSocket = (serverUrl) => {
+    // Clear any existing reconnect timer
+    if (_websocketReconnectTimer) {
+      clearTimeout(_websocketReconnectTimer)
+      _websocketReconnectTimer = null
+    }
+    
+    // Close existing connection if any
+    if (_websocket) {
+      try {
+        _websocket.terminate()
+      } catch (err) {
+        logger.error('Error closing existing WebSocket connection:', err)
+      }
+      _websocket = null
+    }
+    
+    try {
+      logger.log(`Connecting to WebSocket server at ${serverUrl}`)
+      _websocket = new WebSocket(serverUrl)
+      
+      _websocket.on('open', () => {
+        logger.log('WebSocket connection established')
+        
+        // Send initial authentication message
+        _websocket.send(JSON.stringify({
+          type: 'auth',
+          connectionId: app.connection_id,
+          hostname: hostnameFn(),
+          version: process.env.THEEYE_AGENT_VERSION
+        }))
+      })
+      
+      _websocket.on('message', (data) => {
+        try {
+          const message = JSON.parse(data)
+          logger.log('Received WebSocket message:', message)
+          
+          // Handle different message types
+          switch (message.type) {
+            case 'welcome':
+              logger.log('Received welcome message from supervisor')
+              break
+            // Add other message type handlers as needed
+            default:
+              logger.log(`Unhandled message type: ${message.type}`)
+          }
+        } catch (err) {
+          logger.error('Error processing WebSocket message:', err)
+        }
+      })
+      
+      _websocket.on('ping', () => {
+        // Automatically responds with pong
+        logger.debug('Received ping from server')
+      })
+      
+      _websocket.on('close', (code, reason) => {
+        logger.log(`WebSocket connection closed: ${code} - ${reason}`)
+        scheduleWebSocketReconnect()
+      })
+      
+      _websocket.on('error', (err) => {
+        logger.error('WebSocket error:', err)
+        // Socket will also emit close event after error
+      })
+    } catch (err) {
+      logger.error('Failed to create WebSocket connection:', err)
+      scheduleWebSocketReconnect()
+    }
+  }
+  
+  /**
+   * Schedule a WebSocket reconnection attempt
+   */
+  const scheduleWebSocketReconnect = () => {
+    if (_websocketReconnectTimer) {
+      clearTimeout(_websocketReconnectTimer)
+    }
+    
+    _websocketReconnectTimer = setTimeout(() => {
+      logger.log('Attempting to reconnect WebSocket...')
+      initWebSocketConnection()
+    }, WEBSOCKET_RECONNECT_DELAY)
+  }
+  
+  // Expose WebSocket for other components to use
+  Object.defineProperty(this, 'websocket', {
+    get: function () { return _websocket }
+  })
 
   this.start = function (next) {
     next || (next = () => {})

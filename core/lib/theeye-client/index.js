@@ -1,9 +1,4 @@
-
-const os = require('os');
-const fs = require('fs');
-const path = require('path');
-const util = require('util');
-const request = require('request');
+const axios = require('axios');
 const logger = require('../logger').create('lib:theeye-client')
 
 module.exports = TheEyeClient;
@@ -57,19 +52,26 @@ TheEyeClient.prototype = {
 
     options.request||(options.request={});
 
-    let defaults = Object.assign({}, {
-      tunnel: false,
+    let defaults = {
+      baseURL: connection.api_url,
       timeout: 5000,
-      json: true,
-      gzip: true,
-      baseUrl: connection.api_url
-    }, options.request)
+      responseType: 'json',
+      headers: {
+        'User-Agent': userAgent
+      }
+    };
+    
+    if (options.request.headers) {
+      defaults.headers = Object.assign(defaults.headers, options.request.headers);
+    }
+    
+    if (options.request.proxy) {
+      defaults.proxy = options.request.proxy;
+    }
 
-    defaults.headers = Object.assign({ 'User-Agent': userAgent }, options.request.headers)
+    logger.debug('axios options set to %j', defaults)
 
-    logger.debug('request options set to %j', defaults)
-
-    connection.request = request.defaults(defaults)
+    connection.axios = axios.create(defaults);
   },
   /**
    *
@@ -90,94 +92,123 @@ TheEyeClient.prototype = {
 
     logger.debug('sending new authentication request');
 
-    this.request.post({
-      'baseUrl' : this.api_url,
-      'url': '/token' ,
-      'auth': {
-        'user' : this.client_id,
-        'pass' : this.client_secret,
-        'sendImmediately' : true
+    this.axios.post('/token', null, {
+      auth: {
+        username: this.client_id,
+        password: this.client_secret
       }
-    }, function(error,httpResponse,token) {
-      if(error) {
-        logger.error('unable to get new Token');
-        return next(error);
-      } else if( httpResponse.statusCode == 200 ){
-        logger.debug('successful token refresh %s', JSON.stringify(token));
-        connection.access_token = token;
-
-        return next(null, token);
+    })
+    .then(response => {
+      if (response.status === 200) {
+        logger.debug('successful token refresh %s', JSON.stringify(response.data));
+        connection.access_token = response.data;
+        return next(null, response.data);
       } else {
-        var message = 'token refresh failed ' + JSON.stringify(token);
-        logger.error(message);
-        return next(new Error(message),null);
+        throw new Error('Unexpected status code: ' + response.status);
       }
+    })
+    .catch(error => {
+      logger.error('unable to get new Token');
+      return next(error);
     });
   },
   /**
    * handle response data and errors
    * @author Facundo
    */
-  processResponse : function(
-    request,
-    error,
-    httpResponse,
-    body,
-    next
-  ){
-    var connection = this;
+  processResponse (requestConfig, error, response, next) {
+    const connection = this;
 
-    var callNext = function(error, body){
-      if(next) next(error, body, httpResponse);
+    // Helper function to call next callback with proper arguments
+    const callNext = function(error, body) {
+      if (next) next(error, body, response);
     }
 
-    if( !error && /20./.test(httpResponse.statusCode) ) {
-      return callNext(null,body);
-    } else if( error ){
-      return callNext(error);
-    } else if( httpResponse ) {
-      if( httpResponse.statusCode == 401 ) {
-
-        // AuthError Unauthorized
-        var msg = 'request authentication error. access denied.';
-        var err = new Error(msg);
-        logger.error(err);
-
-        connection.refreshToken(function(error, token) {
-          if(error) logger.error(error.message);
-          callNext(error, body);
+    // Successful response
+    if (!error && response && response.status >= 200 && response.status < 300) {
+      return callNext(null, response.data);
+    }
+    
+    // Error handling
+    if (error) {
+      // Handle authentication errors with token refresh and retry
+      if (error.response && error.response.status === 401) {
+        logger.error('request authentication error. access denied.');
+        
+        // Refresh token and retry the original request
+        return connection.refreshToken((err, token) => {
+          if (err) {
+            logger.error('token refresh failed: %s', err.message);
+            return callNext(err, error.response ? error.response.data : null);
+          }
+          
+          logger.debug('token refreshed, retrying original request');
+          
+          // Clone the original request config and add the new token
+          const retryConfig = { ...requestConfig };
+          if (!retryConfig.headers) retryConfig.headers = {};
+          retryConfig.headers['Authorization'] = `Bearer ${token}`;
+          
+          // Retry the request with the new token
+          connection.axios(retryConfig)
+            .then(retryResponse => {
+              connection.processResponse(retryConfig, null, retryResponse, next);
+            })
+            .catch(retryError => {
+              logger.error('request retry failed after token refresh');
+              connection.processResponse(retryConfig, retryError, retryError.response, next);
+            });
         });
-
-      } else {
-        var message ;
-
-        if( /40./.test(httpResponse.statusCode) ) {
-
-          message='client error';
-
-        } else if( /50./.test(httpResponse.statusCode) ){
-
-          message='server error';
-
-        } else {
-
-          message='unknown request error';
-
-          logger.error('############ UNKNOWN ERROR ############');
-          logger.error('REQUEST > %s' , JSON.stringify(request) );
-          logger.error('STATUS  > %s' , httpResponse.statusCode );
-          logger.error('ERROR   > %j' , error );
-          logger.error('BODY    > %j' , JSON.stringify(body) );
-          logger.error('#######################################');
-
-        }
-
-        var error = new Error(!body?message:(body.message||body));
-        error.body = body;
-        error.statusCode = httpResponse.statusCode||504;
-        return callNext(error, body);
       }
+      
+      // Handle other errors
+      const statusCode = error.response ? error.response.status : 504;
+      const body = error.response ? error.response.data : null;
+      let message;
+
+      // Categorize errors by status code
+      if (statusCode >= 400 && statusCode < 500) {
+        message = `client error (${statusCode})`;
+      } else if (statusCode >= 500) {
+        message = `server error (${statusCode})`;
+      } else {
+        message = 'unknown request error';
+        
+        // Log detailed information for unknown errors
+        logger.error('############ UNKNOWN ERROR ############');
+        logger.error('REQUEST > %s', JSON.stringify(requestConfig));
+        logger.error('STATUS  > %s', statusCode);
+        logger.error('ERROR   > %s', error.message || 'No error message');
+        logger.error('BODY    > %s', body ? JSON.stringify(body) : 'No body');
+        logger.error('#######################################');
+      }
+
+      // Create a standardized error object
+      const responseError = new Error(body ? (body.message || JSON.stringify(body)) : message);
+      responseError.body = body;
+      responseError.statusCode = statusCode;
+      responseError.originalError = error;
+      
+      return callNext(responseError, body);
     }
+    
+    // Edge case: no error object but non-2xx response
+    if (response && (response.status < 200 || response.status >= 300)) {
+      const statusCode = response.status;
+      const body = response.data;
+      const message = `Unexpected response status: ${statusCode}`;
+      
+      logger.warn(message);
+      
+      const responseError = new Error(body ? (body.message || JSON.stringify(body)) : message);
+      responseError.body = body;
+      responseError.statusCode = statusCode;
+      
+      return callNext(responseError, body);
+    }
+    
+    // Fallback for unexpected cases
+    return callNext(new Error('Unknown error in processResponse'), null);
   },
   /**
    * prepare the request to be sent.
@@ -185,7 +216,7 @@ TheEyeClient.prototype = {
    * @author Facundo
    * @return {Object} Request
    */
-  performRequest : function(options, doneFn){
+  performRequest (options, doneFn) {
     try {
       doneFn||(doneFn=function(){});
       const connection = this
@@ -201,42 +232,79 @@ TheEyeClient.prototype = {
 
       const prepareQueryString = function(options){
         // add customer to the qs if not present elsewhere
-        const qs = options.qs||{};
+        const params = options.params || options.qs || {};
         const uri = options.uri||options.url;
-        const customer = qs.customer || /:customer/.test(uri) !== false;
+        const customer = params.customer || /:customer/.test(uri) !== false;
         if(!customer) {
           if( connection.client_customer ) {
-            qs.customer = connection.client_customer;
+            params.customer = connection.client_customer;
           }
         }
-        return qs;
+        return params;
       }
 
-      options.qs = prepareQueryString(options);
-      options.uri = options.url = prepareUri(options);
+      const axiosConfig = {
+        method: options.method,
+        url: prepareUri(options),
+        params: prepareQueryString(options),
+        data: options.body,
+        responseType: 'json'
+      };
+
+      // Handle formData if present
+      if (options.formData) {
+        const FormData = require('form-data');
+        const formData = new FormData();
+        for (const key in options.formData) {
+          formData.append(key, options.formData[key]);
+        }
+        axiosConfig.data = formData;
+        axiosConfig.headers = formData.getHeaders();
+      }
 
       // set authentication method if not provided
-      if( ! options.auth ) {
-        if( connection.access_token ) {
-          options.auth = { bearer : connection.access_token } ;
+      if (!options.auth) {
+        if (connection.access_token) {
+          axiosConfig.headers = {
+            ...axiosConfig.headers,
+            'Authorization': `Bearer ${connection.access_token}`
+          };
         }
+      } else {
+        axiosConfig.auth = options.auth;
       }
 
       var msg = 'requesting %s';
-      msg += options.qs ? ' qs: %o' : '';
-      logger.debug(msg, options.url, options.qs || '');
+      msg += axiosConfig.params ? ' params: %o' : '';
+      logger.debug(msg, axiosConfig.url, axiosConfig.params || '');
 
-      var requestDoneFn = function(error, httpResponse, body){
-        connection.processResponse(
-          options,
-          error,
-          httpResponse,
-          body,
-          doneFn
-        );
-      }
+      // Create a promise that axios can cancel
+      let request = { 
+        cancel: null, 
+        isAborted: false,
+        abort: function() {
+          this.isAborted = true;
+          if (this.cancel) this.cancel();
+        } 
+      };
+      
+      const cancelToken = axios.CancelToken.source();
+      request.cancel = cancelToken.cancel;
+      axiosConfig.cancelToken = cancelToken.token;
 
-      return connection.request(options, requestDoneFn);
+      connection.axios(axiosConfig)
+        .then(response => {
+          if (!request.isAborted) {
+            connection.processResponse(axiosConfig, null, response, doneFn);
+          }
+        })
+        .catch(error => {
+          if (!request.isAborted) {
+            connection.processResponse(axiosConfig, error, error.response, doneFn);
+          }
+        });
+
+      return request;
     } catch (e) {
       logger.error('request could not be completed');
       logger.error(e);
@@ -410,28 +478,60 @@ TheEyeClient.prototype = {
     });
   },
   scriptDownloadStream : function(scriptId) {
-    return this.performRequest({
+    const axiosConfig = {
       method: 'get',
-      url: '/:customer/script/' + scriptId  + '/download'
-    })
-    .on('response', function(response) {
-      if(response.statusCode != 200) {
-        var error = new Error('get script response error ' + response.statusCode);
-        this.emit('error', error);
-      }
-    });
+      url: `/:customer/script/${scriptId}/download`,
+      responseType: 'stream'
+    };
+    
+    const hostname = this.hostnameFn();
+    const customer = this.client_customer;
+    axiosConfig.url = axiosConfig.url.replace(':hostname', hostname).replace(':customer', customer);
+    
+    if (this.access_token) {
+      axiosConfig.headers = {
+        'Authorization': `Bearer ${this.access_token}`
+      };
+    }
+    
+    return this.axios(axiosConfig)
+      .then(response => {
+        if (response.status !== 200) {
+          throw new Error('get script response error ' + response.status);
+        }
+        return response.data;
+      })
+      .catch(error => {
+        throw error;
+      });
   },
   fileDownloadStream: function(id) {
-    return this.performRequest({
+    const axiosConfig = {
       method: 'GET',
-      url: '/:customer/file/' + id  + '/download'
-    })
-    .on('response', function(response) {
-      if (response.statusCode!=200) {
-        var error = new Error('get file response error ' + response.statusCode);
-        this.emit('error', error);
-      }
-    });
+      url: `/:customer/file/${id}/download`,
+      responseType: 'stream'
+    };
+    
+    const hostname = this.hostnameFn();
+    const customer = this.client_customer;
+    axiosConfig.url = axiosConfig.url.replace(':hostname', hostname).replace(':customer', customer);
+    
+    if (this.access_token) {
+      axiosConfig.headers = {
+        'Authorization': `Bearer ${this.access_token}`
+      };
+    }
+    
+    return this.axios(axiosConfig)
+      .then(response => {
+        if (response.status !== 200) {
+          throw new Error('get file response error ' + response.status);
+        }
+        return response.data;
+      })
+      .catch(error => {
+        throw error;
+      });
   },
   updateResource : function(id,resourceUpdates,next) {
     this.performRequest({
