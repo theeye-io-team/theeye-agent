@@ -83,7 +83,8 @@ module.exports = {
    * THEEYE_SUPERVISOR_CLIENT_CUSTOMER
    */
   supervisor: {
-    api_url: process.env.THEEYE_SUPERVISOR_API_URL || "https://supervisor.theeye.io"
+    api_url: process.env.THEEYE_SUPERVISOR_API_URL || "https://supervisor.theeye.io",
+    websocket_url: 'ws://localhost:60081'
   },
   request: {
     proxy: proxy,

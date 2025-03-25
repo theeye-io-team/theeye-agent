@@ -7,8 +7,8 @@ FROM node:18
 #   bash ./misc/compiler.sh "linux" "node16" 
 #
 
-MAINTAINER Javier Ailbirt <jailbirt@gmail.com>
 MAINTAINER Facundo Gonzalez <facugon@theeye.io>
+MAINTAINER Javier Ailbirt <jailbirt@theeye.io>
 
 ENV destDir=/src/theeye/agent
 RUN mkdir -p ${destDir}

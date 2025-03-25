@@ -1,1 +1,1 @@
-exports.version = ""
+exports.version = "2.2.0"
